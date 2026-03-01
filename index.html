@@ -6,319 +6,288 @@
 <title>Virtual UPS Airlines — Operations</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg:        #0e0b09;
-  --surface:   #161109;
-  --card:      #1c1510;
-  --border:    #2e1f12;
-  --border2:   #3d2b1a;
-  --gold:      #c8920a;
-  --gold-lt:   #e8a800;
-  --gold-dim:  #7a5500;
-  --text:      #d4c4a8;
-  --text-dim:  #7a6a52;
-  --text-mute: #4a3a28;
-  --green:     #2d9e5f;
-  --green-lt:  #35c270;
-  --red:       #c0392b;
-  --red-lt:    #e74c3c;
-  --blue:      #2471a3;
-  --blue-lt:   #3498db;
-  --orange:    #c0610a;
-  --orange-lt: #e67e22;
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0e0b09;--surface:#161109;--card:#1c1510;
+  --border:#2e1f12;--border2:#3d2b1a;
+  --gold:#c8920a;--gold-lt:#e8a800;--gold-dim:#7a5500;
+  --text:#d4c4a8;--text-dim:#7a6a52;--text-mute:#4a3a28;
+  --green:#2d9e5f;--green-lt:#35c270;
+  --red:#c0392b;--red-lt:#e74c3c;
+  --blue:#2471a3;--blue-lt:#3498db;
+  --orange:#c0610a;--orange-lt:#e67e22;
+  --purple:#7d3c98;--purple-lt:#a569bd;
 }
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;line-height:1.5}
 
-html { font-size: 14px; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-weight: 400;
-  min-height: 100vh;
-  line-height: 1.5;
+/* ── ADMIN LOGIN SCREEN ── */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
 }
-
-/* HEADER */
-header {
-  height: 52px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  gap: 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 200;
+#login-screen.hidden{display:none}
+.login-box{
+  background:var(--card);border:1px solid var(--border2);border-radius:6px;
+  padding:2.5rem 2rem;width:340px;text-align:center;
 }
-.logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
-.logo-mark {
-  width: 28px; height: 28px;
-  background: var(--gold);
-  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700; font-size: 0.62rem;
-  color: #1a0e06; letter-spacing: 0.02em; flex-shrink: 0;
+.login-logo{
+  width:48px;height:48px;background:var(--gold);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;
+  color:#1a0e06;margin:0 auto 1.25rem;
 }
-.logo-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 600; font-size: 1rem;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text);
+.login-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:0.25rem}
+.login-sub{font-size:0.72rem;color:var(--text-mute);margin-bottom:1.5rem;letter-spacing:0.05em}
+.login-err{font-size:0.72rem;color:var(--red-lt);margin-bottom:0.75rem;min-height:1rem}
+
+/* ── TICKER ── */
+.ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:28px;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:3rem;animation:tick 35s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-mute);letter-spacing:.04em}
+.t-hi{color:var(--gold)}.t-g{color:var(--green-lt)}.t-r{color:var(--red-lt)}.t-b{color:var(--blue-lt)}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── HEADER ── */
+header{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:#1a0e06;flex-shrink:0}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.logo-name span{color:var(--gold)}
+nav{display:flex;gap:.1rem;margin-left:.5rem}
+.nav-btn{background:none;border:none;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;border-radius:3px;transition:color .15s,background .15s}
+.nav-btn:hover{color:var(--text);background:rgba(200,146,10,.06)}
+.nav-btn.active{color:var(--gold);background:rgba(200,146,10,.1)}
+.nav-btn.admin-btn{color:var(--purple-lt) !important}
+.nav-btn.admin-btn:hover,.nav-btn.admin-btn.active{background:rgba(125,60,152,.15) !important;color:var(--purple-lt) !important}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
+.zulu{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
+.zulu strong{color:var(--gold);font-weight:400}
+.treasury-badge{display:flex;align-items:center;gap:.4rem;background:rgba(200,146,10,.08);border:1px solid var(--border2);border-radius:3px;padding:.25rem .65rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--gold-lt);letter-spacing:.04em}
+.treasury-badge .lbl{color:var(--text-mute);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
+.admin-status{display:flex;align-items:center;gap:.4rem;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--purple-lt);letter-spacing:.08em;cursor:pointer;padding:.25rem .6rem;border-radius:3px;border:1px solid rgba(125,60,152,.3);background:rgba(125,60,152,.08)}
+.admin-status:hover{background:rgba(125,60,152,.15)}
+
+/* ── LAYOUT ── */
+main{padding:1.25rem;max-width:1560px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:.65rem;border-bottom:1px solid var(--border)}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
+.sec-title span{color:var(--gold)}
+.sec-title .admin-span{color:var(--purple-lt)}
+.sec-actions{display:flex;gap:.5rem;align-items:center}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .9rem;border-radius:3px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.btn-primary{background:var(--gold);color:#1a0e06;border-color:var(--gold)}
+.btn-primary:hover{background:var(--gold-lt)}
+.btn-ghost{background:none;color:var(--text-dim);border-color:var(--border2)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text-dim)}
+.btn-danger{background:none;color:var(--red-lt);border-color:rgba(192,57,43,.4)}
+.btn-danger:hover{background:rgba(192,57,43,.1)}
+.btn-purple{background:rgba(125,60,152,.2);color:var(--purple-lt);border-color:rgba(125,60,152,.4)}
+.btn-purple:hover{background:rgba(125,60,152,.35)}
+.btn-sm{padding:.2rem .6rem;font-size:.7rem}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.8rem 1rem}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
+.stat-lbl{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem}
+.stat-sub{font-size:.68rem;margin-top:.2rem}
+.pos{color:var(--green-lt)}.neg{color:var(--red-lt)}.warn{color:var(--orange-lt)}.gld{color:var(--gold-lt)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.55rem .75rem;border-bottom:1px solid rgba(46,31,18,.6);font-family:'Share Tech Mono',monospace;font-size:.75rem;vertical-align:middle}
+tr:hover td{background:rgba(200,146,10,.03)}
+tr:last-child td{border-bottom:none}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .45rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.b-green{background:rgba(45,158,95,.12);color:var(--green-lt);border:1px solid rgba(45,158,95,.3)}
+.b-gold{background:rgba(200,146,10,.12);color:var(--gold-lt);border:1px solid rgba(200,146,10,.3)}
+.b-red{background:rgba(192,57,43,.12);color:var(--red-lt);border:1px solid rgba(192,57,43,.3)}
+.b-blue{background:rgba(36,113,163,.12);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
+.b-orange{background:rgba(192,97,10,.12);color:var(--orange-lt);border:1px solid rgba(192,97,10,.3)}
+.b-gray{background:rgba(74,58,40,.3);color:var(--text-dim);border:1px solid var(--border2)}
+.b-purple{background:rgba(125,60,152,.12);color:var(--purple-lt);border:1px solid rgba(125,60,152,.3)}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-g{background:var(--green-lt)}.dot-r{background:var(--red-lt)}.dot-y{background:var(--gold-lt)}.dot-b{background:var(--blue-lt)}
+
+/* ── PROGRESS ── */
+.bar-wrap{margin-bottom:.65rem}
+.bar-header{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
+.bar-track{height:5px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.bf-gold{background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
+.bf-green{background:linear-gradient(90deg,#1a6e3e,var(--green-lt))}
+.bf-red{background:linear-gradient(90deg,#7a1a10,var(--red-lt))}
+.bf-blue{background:linear-gradient(90deg,#0f3d5e,var(--blue-lt))}
+
+/* ── DISPATCH LAYOUT ── */
+.dispatch-layout{display:grid;grid-template-columns:230px 1fr 220px;gap:1rem}
+.dcol{display:flex;flex-direction:column;gap:.75rem}
+
+/* ── METAR ── */
+.metar-raw{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--blue-lt);background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;line-height:1.7;margin-bottom:.75rem;word-break:break-all}
+.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.wx-cell{background:rgba(0,0,0,.2);border-radius:3px;padding:.4rem .5rem;text-align:center}
+.wx-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--blue-lt);line-height:1}
+.wx-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem}
+
+/* ── CREW ── */
+.crew-layout{display:grid;grid-template-columns:1fr 300px;gap:1rem}
+.crew-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
+.crew-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem;transition:border-color .15s}
+.crew-card:hover{border-color:var(--border2)}
+.crew-card.ai-pilot{border-left:2px solid var(--blue)}
+.crew-card.human-pilot{border-left:2px solid var(--gold-dim)}
+.pilot-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0}
+.av-human{background:rgba(200,146,10,.15);color:var(--gold-lt);border:1px solid var(--border2)}
+.av-ai{background:rgba(36,113,163,.15);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
+.pilot-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;color:var(--text);line-height:1.2}
+.pilot-rank{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}
+.pilot-type-badge{margin-left:auto}
+.pilot-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;padding:.65rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:.65rem;text-align:center}
+.ps-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--text)}
+.ps-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
+.xp-bar-wrap{margin-bottom:.5rem}
+.xp-bar-row{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-mute);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
+.xp-track{height:3px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
+.xp-fill-blue{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--blue-lt))}
+.pilot-actions{display:flex;gap:.4rem}
+
+/* ── ECONOMY ── */
+.eco-layout{display:grid;grid-template-columns:320px 1fr;gap:1rem}
+.ledger-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(46,31,18,.5);font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.ledger-item:last-child{border-bottom:none}
+.li-desc{color:var(--text-dim)}.li-pos{color:var(--green-lt)}.li-neg{color:var(--red-lt)}
+
+/* ── HUBS ── */
+.hubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.hub-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
+.hub-icao{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:.06em;line-height:1}
+.hub-name{font-size:.8rem;color:var(--text-dim);margin-top:.1rem;margin-bottom:.75rem}
+.hub-detail-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);padding:.25rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace}
+.hub-detail-val{color:var(--text)}
+
+/* ── AI LOG ── */
+.ai-activity{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)}
+.ai-line{padding:.28rem 0;border-bottom:1px solid rgba(46,31,18,.3);display:flex;gap:.5rem;align-items:flex-start}
+.ai-line:last-child{border-bottom:none}
+.ai-time{color:var(--text-mute);white-space:nowrap}
+.hi{color:var(--blue-lt)}.earn{color:var(--green-lt)}
+
+/* ── ADMIN PAGE ── */
+.admin-page-wrap{background:rgba(125,60,152,.04);border:1px solid rgba(125,60,152,.2);border-radius:6px;padding:1.5rem;margin-bottom:1rem}
+.admin-warning{display:flex;align-items:center;gap:.75rem;background:rgba(125,60,152,.08);border:1px solid rgba(125,60,152,.25);border-radius:4px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.78rem;color:var(--purple-lt)}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.admin-roster-table td,.admin-roster-table th{padding:.5rem .65rem}
+.roster-actions{display:flex;gap:.35rem}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:5px;width:420px;max-width:95vw;max-height:85vh;overflow-y:auto;transform:translateY(12px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:.1rem .3rem;border-radius:2px}
+.modal-close:hover{color:var(--text);background:var(--border)}
+.modal-body{padding:1.25rem}
+.form-group{margin-bottom:.9rem}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem}
+.form-input,.form-select{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:3px;padding:.45rem .7rem;color:var(--text);font-family:'Barlow',sans-serif;font-size:.82rem;outline:none;transition:border-color .15s}
+.form-input:focus,.form-select:focus{border-color:var(--gold-dim)}
+.form-select option{background:var(--card)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.form-footer{display:flex;gap:.5rem;justify-content:flex-end;padding-top:.75rem;border-top:1px solid var(--border)}
+.form-note{font-size:.7rem;color:var(--text-mute);margin-top:.3rem;line-height:1.5}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-mute)}
+.empty-state .icon{font-size:2rem;margin-bottom:.75rem;opacity:.4}
+.empty-state p{font-size:.8rem;line-height:1.7}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){
+  .dispatch-layout{grid-template-columns:1fr 1fr}
+  .dcol:last-child{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .eco-layout{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .admin-grid{grid-template-columns:1fr}
 }
-.logo-name span { color: var(--gold); }
-
-nav { display: flex; gap: 0.1rem; margin-left: 0.5rem; }
-.nav-btn {
-  background: none; border: none; color: var(--text-dim);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 500; font-size: 0.8rem;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.35rem 0.8rem; cursor: pointer; border-radius: 3px;
-  transition: color 0.15s, background 0.15s;
-}
-.nav-btn:hover { color: var(--text); background: rgba(200,146,10,0.06); }
-.nav-btn.active { color: var(--gold); background: rgba(200,146,10,0.1); }
-
-.header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
-.zulu { font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.06em; }
-.zulu strong { color: var(--gold); font-weight: 400; }
-.treasury-badge {
-  display: flex; align-items: center; gap: 0.4rem;
-  background: rgba(200,146,10,0.08); border: 1px solid var(--border2);
-  border-radius: 3px; padding: 0.25rem 0.65rem;
-  font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; color: var(--gold-lt); letter-spacing: 0.04em;
-}
-.treasury-badge .lbl { color: var(--text-mute); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
-
-/* TICKER */
-.ticker {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  overflow: hidden; height: 28px; display: flex; align-items: center;
-}
-.ticker-inner {
-  display: flex; gap: 3rem;
-  animation: tick 30s linear infinite;
-  white-space: nowrap;
-  font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
-  color: var(--text-mute); letter-spacing: 0.04em;
-}
-.t-hi { color: var(--gold); }
-.t-g  { color: var(--green-lt); }
-.t-r  { color: var(--red-lt); }
-@keyframes tick { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-/* LAYOUT */
-main { padding: 1.25rem; max-width: 1560px; margin: 0 auto; }
-.page { display: none; }
-.page.active { display: block; }
-
-/* SECTION HEADER */
-.sec-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);
-}
-.sec-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
-.sec-title span { color: var(--gold); }
-.sec-actions { display: flex; gap: 0.5rem; align-items: center; }
-
-/* BUTTONS */
-.btn {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.35rem 0.9rem; border-radius: 3px; cursor: pointer;
-  transition: all 0.15s; border: 1px solid transparent;
-}
-.btn-primary { background: var(--gold); color: #1a0e06; border-color: var(--gold); }
-.btn-primary:hover { background: var(--gold-lt); }
-.btn-ghost { background: none; color: var(--text-dim); border-color: var(--border2); }
-.btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
-.btn-danger { background: none; color: var(--red-lt); border-color: rgba(192,57,43,0.4); }
-.btn-danger:hover { background: rgba(192,57,43,0.1); }
-.btn-sm { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
-
-/* CARD */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; }
-.card-title {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 0.8rem;
-  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
-}
-
-/* STATS */
-.stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 0.75rem; margin-bottom: 1rem; }
-.stat { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0.8rem 1rem; }
-.stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1; }
-.stat-lbl { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
-.stat-sub { font-size: 0.68rem; margin-top: 0.2rem; }
-.pos { color: var(--green-lt); } .neg { color: var(--red-lt); } .warn { color: var(--orange-lt); } .gld { color: var(--gold-lt); }
-
-/* TABLE */
-.tbl-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-th {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-dim); text-align: left;
-  padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); white-space: nowrap;
-}
-td { padding: 0.55rem 0.75rem; border-bottom: 1px solid rgba(46,31,18,0.6); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; vertical-align: middle; }
-tr:hover td { background: rgba(200,146,10,0.03); }
-tr:last-child td { border-bottom: none; }
-
-/* BADGES */
-.badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.12rem 0.45rem; border-radius: 2px;
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-  font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
-}
-.b-green  { background: rgba(45,158,95,0.12); color: var(--green-lt); border: 1px solid rgba(45,158,95,0.3); }
-.b-gold   { background: rgba(200,146,10,0.12); color: var(--gold-lt); border: 1px solid rgba(200,146,10,0.3); }
-.b-red    { background: rgba(192,57,43,0.12); color: var(--red-lt); border: 1px solid rgba(192,57,43,0.3); }
-.b-blue   { background: rgba(36,113,163,0.12); color: var(--blue-lt); border: 1px solid rgba(36,113,163,0.3); }
-.b-orange { background: rgba(192,97,10,0.12); color: var(--orange-lt); border: 1px solid rgba(192,97,10,0.3); }
-.b-gray   { background: rgba(74,58,40,0.3); color: var(--text-dim); border: 1px solid var(--border2); }
-.dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.dot-g { background: var(--green-lt); } .dot-r { background: var(--red-lt); }
-.dot-y { background: var(--gold-lt); } .dot-b { background: var(--blue-lt); }
-
-/* PROGRESS */
-.bar-wrap { margin-bottom: 0.65rem; }
-.bar-header { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-bottom: 0.2rem; font-family: 'Share Tech Mono', monospace; }
-.bar-track { height: 5px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
-.bf-gold  { background: linear-gradient(90deg, var(--gold-dim), var(--gold-lt)); }
-.bf-green { background: linear-gradient(90deg, #1a6e3e, var(--green-lt)); }
-.bf-red   { background: linear-gradient(90deg, #7a1a10, var(--red-lt)); }
-.bf-blue  { background: linear-gradient(90deg, #0f3d5e, var(--blue-lt)); }
-
-/* DISPATCH LAYOUT */
-.dispatch-layout { display: grid; grid-template-columns: 230px 1fr 220px; gap: 1rem; }
-.dcol { display: flex; flex-direction: column; gap: 0.75rem; }
-
-/* METAR */
-.metar-raw {
-  font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
-  color: var(--blue-lt); background: rgba(0,0,0,0.3);
-  border: 1px solid var(--border); border-radius: 3px;
-  padding: 0.6rem 0.75rem; line-height: 1.7; margin-bottom: 0.75rem; word-break: break-all;
-}
-.wx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
-.wx-cell { background: rgba(0,0,0,0.2); border-radius: 3px; padding: 0.4rem 0.5rem; text-align: center; }
-.wx-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; color: var(--blue-lt); line-height: 1; }
-.wx-lbl { font-size: 0.58rem; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.15rem; }
-
-/* CREW */
-.crew-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1rem; }
-.crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 0.75rem; }
-.crew-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; transition: border-color 0.15s; }
-.crew-card:hover { border-color: var(--border2); }
-.crew-card.ai-pilot   { border-left: 2px solid var(--blue); }
-.crew-card.human-pilot { border-left: 2px solid var(--gold-dim); }
-
-.pilot-header { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; }
-.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
-.av-human { background: rgba(200,146,10,0.15); color: var(--gold-lt); border: 1px solid var(--border2); }
-.av-ai    { background: rgba(36,113,163,0.15); color: var(--blue-lt); border: 1px solid rgba(36,113,163,0.3); }
-.pilot-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--text); line-height: 1.2; }
-.pilot-rank { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
-.pilot-type-badge { margin-left: auto; }
-.pilot-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; padding: 0.65rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0.65rem; text-align: center; }
-.ps-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text); }
-.ps-lbl { font-size: 0.58rem; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.08em; }
-.xp-bar-wrap { margin-bottom: 0.5rem; }
-.xp-bar-row { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-mute); margin-bottom: 0.2rem; font-family: 'Share Tech Mono', monospace; }
-.xp-track { height: 3px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
-.xp-fill      { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold-dim), var(--gold-lt)); }
-.xp-fill-blue { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--blue), var(--blue-lt)); }
-.pilot-actions { display: flex; gap: 0.4rem; }
-
-/* ECONOMY */
-.eco-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1rem; }
-.ledger-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(46,31,18,0.5); font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; }
-.ledger-item:last-child { border-bottom: none; }
-.li-desc { color: var(--text-dim); } .li-pos { color: var(--green-lt); } .li-neg { color: var(--red-lt); }
-
-/* HUBS */
-.hubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 0.75rem; }
-.hub-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; }
-.hub-icao { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; line-height: 1; }
-.hub-name { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.1rem; margin-bottom: 0.75rem; }
-.hub-detail-row { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); padding: 0.25rem 0; border-bottom: 1px solid rgba(46,31,18,0.4); font-family: 'Share Tech Mono', monospace; }
-.hub-detail-row:last-of-type { border-bottom: none; }
-.hub-detail-val { color: var(--text); }
-
-/* AI LOG */
-.ai-activity { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); }
-.ai-line { padding: 0.28rem 0; border-bottom: 1px solid rgba(46,31,18,0.3); display: flex; gap: 0.5rem; align-items: flex-start; }
-.ai-line:last-child { border-bottom: none; }
-.ai-time { color: var(--text-mute); white-space: nowrap; }
-.hi { color: var(--blue-lt); } .earn { color: var(--green-lt); }
-
-/* MODAL */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--card); border: 1px solid var(--border2); border-radius: 5px; width: 420px; max-width: 95vw; max-height: 85vh; overflow-y: auto; transform: translateY(12px); transition: transform 0.2s; }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
-.modal-close { background: none; border: none; color: var(--text-dim); font-size: 1.1rem; cursor: pointer; padding: 0.1rem 0.3rem; border-radius: 2px; }
-.modal-close:hover { color: var(--text); background: var(--border); }
-.modal-body { padding: 1.25rem; }
-.form-group { margin-bottom: 0.9rem; }
-.form-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
-.form-input, .form-select { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border2); border-radius: 3px; padding: 0.45rem 0.7rem; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 0.82rem; outline: none; transition: border-color 0.15s; }
-.form-input:focus, .form-select:focus { border-color: var(--gold-dim); }
-.form-select option { background: var(--card); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
-.form-footer { display: flex; gap: 0.5rem; justify-content: flex-end; padding-top: 0.75rem; border-top: 1px solid var(--border); }
-
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-/* RESPONSIVE */
-@media (max-width: 1200px) {
-  .dispatch-layout { grid-template-columns: 1fr 1fr; }
-  .dcol:last-child { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .eco-layout { grid-template-columns: 1fr; }
-  .stats-row { grid-template-columns: repeat(3,1fr); }
-}
-@media (max-width: 768px) {
-  .dispatch-layout, .crew-layout { grid-template-columns: 1fr; }
-  .dcol:last-child { grid-column: 1; display: flex; }
-  .stats-row { grid-template-columns: repeat(2,1fr); }
-  header { padding: 0 1rem; gap: 0.75rem; }
-  .nav-btn { padding: 0.3rem 0.5rem; font-size: 0.72rem; }
+@media(max-width:768px){
+  .dispatch-layout,.crew-layout{grid-template-columns:1fr}
+  .dcol:last-child{grid-column:1;display:flex}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  header{padding:0 1rem;gap:.75rem}
+  .nav-btn{padding:.3rem .5rem;font-size:.72rem}
 }
 </style>
 </head>
 <body>
 
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-inner">
-    <span>KSDF — <span class="t-hi">OVC010 4SM -RA IFR</span></span>
-    <span>5Y741 KSDF→EDDK <span class="t-g">ENROUTE</span></span>
-    <span>AI Capt. Chen completed 5Y042 — <span class="t-g">+$31,200</span></span>
-    <span>5Y911 KSDF→KONT <span class="t-r">HAZMAT ACTIVE</span></span>
-    <span>Hot Spare N662UP assigned to 5Y812</span>
-    <span>Weekly profit share distributes <span class="t-hi">Sunday 0000Z</span></span>
-    <span>KSDF — <span class="t-hi">OVC010 4SM -RA IFR</span></span>
-    <span>5Y741 KSDF→EDDK <span class="t-g">ENROUTE</span></span>
-    <span>AI Capt. Chen completed 5Y042 — <span class="t-g">+$31,200</span></span>
-    <span>5Y911 KSDF→KONT <span class="t-r">HAZMAT ACTIVE</span></span>
-    <span>Hot Spare N662UP assigned to 5Y812</span>
-    <span>Weekly profit share distributes <span class="t-hi">Sunday 0000Z</span></span>
+<!-- ══ ADMIN LOGIN SCREEN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">UPS</div>
+    <div class="login-title">Admin Access</div>
+    <div class="login-sub">Virtual UPS Airlines — Operations Portal</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" type="text" id="l-user" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="l-pass" placeholder="••••••••">
+    </div>
+    <div style="display:flex;gap:.5rem;margin-top:.25rem">
+      <button class="btn btn-ghost" style="flex:1" onclick="skipLogin()">View Only</button>
+      <button class="btn btn-primary" style="flex:2" onclick="doLogin()">Sign In</button>
+    </div>
+    <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.6">
+      View Only mode lets anyone browse the site.<br>Admin access is required to manage crew.
+    </div>
   </div>
 </div>
 
-<!-- HEADER -->
+<!-- ══ TICKER ══ -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker-inner">
+    <span>KSDF — <span class="t-hi">VFR 10SM SKC</span></span>
+    <span>AI Chen enroute KSDF→EDDK <span class="t-g">B747-400F</span></span>
+    <span>AI Torres completed 5Y428 <span class="t-g">+$38,400</span></span>
+    <span>VHHH — <span class="t-hi">FEW020 CAVOK</span></span>
+    <span>AI Patel filed 5Y911 KSDF→KONT <span class="t-b">HAZMAT</span></span>
+    <span>Fleet treasury <span class="t-g">$500,000+</span> — operations nominal</span>
+    <span>KSDF — <span class="t-hi">VFR 10SM SKC</span></span>
+    <span>AI Chen enroute KSDF→EDDK <span class="t-g">B747-400F</span></span>
+    <span>AI Torres completed 5Y428 <span class="t-g">+$38,400</span></span>
+    <span>VHHH — <span class="t-hi">FEW020 CAVOK</span></span>
+    <span>AI Patel filed 5Y911 KSDF→KONT <span class="t-b">HAZMAT</span></span>
+    <span>Fleet treasury <span class="t-g">$500,000+</span> — operations nominal</span>
+  </div>
+</div>
+
+<!-- ══ HEADER ══ -->
 <header>
   <a class="logo" href="#">
     <div class="logo-mark">UPS</div>
@@ -329,70 +298,70 @@ tr:last-child td { border-bottom: none; }
     <button class="nav-btn" onclick="goNav(this,'crew')">Crew</button>
     <button class="nav-btn" onclick="goNav(this,'economy')">Economy</button>
     <button class="nav-btn" onclick="goNav(this,'hubs')">Hubs</button>
+    <button class="nav-btn admin-btn" id="admin-nav-btn" onclick="goNav(this,'admin')" style="display:none">⬡ Admin</button>
   </nav>
   <div class="header-right">
     <div class="zulu">ZULU <strong id="zulu">--:--Z</strong></div>
     <div class="treasury-badge">
       <span class="lbl">Treasury</span>
-      <span id="treasury-display">$172,400</span>
+      <span id="treasury-display">$500,000</span>
+    </div>
+    <div class="admin-status" id="admin-status-badge" onclick="logoutAdmin()" style="display:none">
+      ⬡ ADMIN &nbsp;·&nbsp; Logout
     </div>
   </div>
 </header>
 
 <main>
 
-<!-- DISPATCH PAGE -->
+<!-- ══════════ DISPATCH PAGE ══════════ -->
 <div id="page-dispatch" class="page active">
   <div class="sec-header">
     <div class="sec-title">Dispatch <span>Control</span></div>
     <div class="sec-actions">
       <button class="btn btn-ghost btn-sm" onclick="refreshMetar()">↻ METAR</button>
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-dispatch')">+ Dispatch Flight</button>
     </div>
   </div>
 
   <div class="stats-row">
-    <div class="stat"><div class="stat-val" id="s-active">24</div><div class="stat-lbl">Active Flights</div><div class="stat-sub pos">▲ 3 vs last shift</div></div>
-    <div class="stat"><div class="stat-val gld" id="s-ontime">94%</div><div class="stat-lbl">On-Time Rate</div><div class="stat-sub pos">▲ 2.1% this week</div></div>
-    <div class="stat"><div class="stat-val" id="s-crew">7</div><div class="stat-lbl">Crew Online</div><div class="stat-sub" style="color:var(--blue-lt)">4 AI · 3 Human</div></div>
-    <div class="stat"><div class="stat-val warn">2</div><div class="stat-lbl">Hot Spares</div><div class="stat-sub neg">Mech. delays</div></div>
-    <div class="stat"><div class="stat-val pos" id="s-revenue">$84K</div><div class="stat-lbl">Shift Revenue</div><div class="stat-sub pos">AI pilots: +$31K</div></div>
+    <div class="stat"><div class="stat-val" id="s-active">8</div><div class="stat-lbl">Active Flights</div><div class="stat-sub pos">AI fleet operating</div></div>
+    <div class="stat"><div class="stat-val gld">98%</div><div class="stat-lbl">AI On-Time Rate</div><div class="stat-sub pos">Fleet performing well</div></div>
+    <div class="stat"><div class="stat-val" id="s-crew-count">4</div><div class="stat-lbl">Active AI Pilots</div><div class="stat-sub" style="color:var(--blue-lt)">All systems online</div></div>
+    <div class="stat"><div class="stat-val warn">0</div><div class="stat-lbl">Human Crew</div><div class="stat-sub" style="color:var(--text-mute)">Pending enrollment</div></div>
+    <div class="stat"><div class="stat-val pos" id="s-revenue">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI pilots earning</div></div>
   </div>
 
   <div class="dispatch-layout">
     <div class="dcol">
       <div class="card">
         <div class="card-title">KSDF — Worldport WX</div>
-        <div class="metar-raw" id="metar-text">KSDF 011754Z 21012KT 4SM -RA OVC010 BKN025 08/07 A2982 RMK AO2 SLP102</div>
+        <div class="metar-raw" id="metar-text">KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180</div>
         <div class="wx-grid">
-          <div class="wx-cell"><div class="wx-val">1,000</div><div class="wx-lbl">Ceiling ft</div></div>
-          <div class="wx-cell"><div class="wx-val warn">IFR</div><div class="wx-lbl">Flt Category</div></div>
-          <div class="wx-cell"><div class="wx-val">12kt</div><div class="wx-lbl">Wind</div></div>
-          <div class="wx-cell"><div class="wx-val">4SM</div><div class="wx-lbl">Visibility</div></div>
+          <div class="wx-cell"><div class="wx-val">CLR</div><div class="wx-lbl">Ceiling</div></div>
+          <div class="wx-cell"><div class="wx-val pos">VFR</div><div class="wx-lbl">Flt Category</div></div>
+          <div class="wx-cell"><div class="wx-val">8kt</div><div class="wx-lbl">Wind</div></div>
+          <div class="wx-cell"><div class="wx-val">10SM</div><div class="wx-lbl">Visibility</div></div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Hot Spare System</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);">
-          <div><div style="color:var(--red-lt);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:0.85rem;">N784UP</div><div style="color:var(--text-mute);font-size:0.65rem;font-family:'Share Tech Mono',monospace;">B747-400F — Engine 3 vibe</div></div>
-          <span class="badge b-red">Grounded</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;">
-          <div><div style="color:var(--green-lt);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:0.85rem;">N662UP</div><div style="color:var(--text-mute);font-size:0.65rem;font-family:'Share Tech Mono',monospace;">B767-300F — Spare assigned ✓</div></div>
-          <span class="badge b-green">Swapped</span>
-        </div>
-        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:0.5rem">+ Flag Aircraft</button>
       </div>
 
       <div class="card">
         <div class="card-title">Shift Summary</div>
-        <div class="ledger-item"><span class="li-desc">Flights completed</span><span class="li-pos">18</span></div>
-        <div class="ledger-item"><span class="li-desc">Delayed</span><span class="li-neg">2</span></div>
-        <div class="ledger-item"><span class="li-desc">Freight moved</span><span style="color:var(--blue-lt)">1.2M lbs</span></div>
-        <div class="ledger-item"><span class="li-desc">Hazmat active</span><span class="warn">3</span></div>
-        <div class="ledger-item"><span class="li-desc">AI pilot revenue</span><span class="li-pos">+$31,200</span></div>
-        <div class="ledger-item"><span class="li-desc">Human revenue</span><span class="li-pos">+$53,000</span></div>
+        <div class="ledger-item"><span class="li-desc">AI flights completed</span><span class="li-pos" id="sum-flights">0</span></div>
+        <div class="ledger-item"><span class="li-desc">Human flights</span><span style="color:var(--text-mute);font-family:'Share Tech Mono',monospace">0</span></div>
+        <div class="ledger-item"><span class="li-desc">Freight moved</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace" id="sum-freight">0 lbs</span></div>
+        <div class="ledger-item"><span class="li-desc">Hazmat active</span><span class="warn">0</span></div>
+        <div class="ledger-item"><span class="li-desc">AI revenue</span><span class="li-pos" id="sum-ai-rev">$0</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Hub Network</div>
+        <table style="font-size:.72rem">
+          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KSDF</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Louisville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-gold">Global</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">EDDK</td><td style="color:var(--text-dim);padding:.3rem .5rem">Cologne</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">VHHH</td><td style="color:var(--text-dim);padding:.3rem .5rem">Hong Kong</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KONT</td><td style="color:var(--text-dim);padding:.3rem .5rem">Ontario CA</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KHSV</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Huntsville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-green">Feeder</span></td></tr>
+        </table>
       </div>
     </div>
 
@@ -402,36 +371,19 @@ tr:last-child td { border-bottom: none; }
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Pilot</th><th>Status</th><th>ETA (Z)</th><th>Freight lbs</th><th>Load</th></tr></thead>
-            <tbody id="flight-tbody">
-              <tr><td>5Y741</td><td>KSDF→EDDK</td><td>B747-400F</td><td><span class="badge b-blue">AI</span> Chen</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td><td>04:22</td><td>198,400</td><td>87%</td></tr>
-              <tr><td>5Y002</td><td>KSDF→VHHH</td><td>MD-11F</td><td>Capt. Walker</td><td><span class="badge b-gold"><span class="dot dot-y"></span>Boarding</span></td><td>15:10</td><td>142,000</td><td>72%</td></tr>
-              <tr><td>5Y911</td><td>KSDF→KONT</td><td>B767-300F</td><td><span class="badge b-blue">AI</span> Patel</td><td><span class="badge b-orange">⚠ Hazmat</span></td><td>07:44</td><td>88,300</td><td>91%</td></tr>
-              <tr><td>5Y310</td><td>KONT→KSDF</td><td>B757-200F</td><td>F/O Rodriguez</td><td><span class="badge b-blue"><span class="dot dot-b"></span>Arrived</span></td><td>01:58</td><td>67,200</td><td>58%</td></tr>
-              <tr><td>5Y428</td><td>EDDK→KSDF</td><td>B747-400F</td><td><span class="badge b-blue">AI</span> Torres</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td><td>08:30</td><td>201,100</td><td>94%</td></tr>
-              <tr><td>5Y501</td><td>KSDF→KHSV</td><td>C208B</td><td><span class="badge b-blue">AI</span> Kim</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td><td>02:15</td><td>3,400</td><td>100%</td></tr>
-              <tr><td>5Y812</td><td>KSDF→VHHH</td><td>B747-400F</td><td>Capt. Walker</td><td><span class="badge b-red"><span class="dot dot-r"></span>Delayed</span></td><td>TBD</td><td>188,000</td><td>79%</td></tr>
-            </tbody>
+            <tbody id="flight-tbody"></tbody>
           </table>
+        </div>
+        <div id="flight-empty" class="empty-state" style="padding:2rem 1rem">
+          <div class="icon">✈</div>
+          <p>AI pilots are spinning up.<br>Flights will appear here automatically.</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Load Management</div>
-        <div class="bar-wrap">
-          <div class="bar-header"><span>B747-400F N784UP <span style="color:var(--orange-lt)">⚠ HAZMAT bay 3</span></span><span>198,400 / 228,000 lbs — 87%</span></div>
-          <div class="bar-track"><div class="bar-fill bf-gold" style="width:87%"></div></div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-header"><span>MD-11F N526UP</span><span>142,000 / 197,000 lbs — 72%</span></div>
-          <div class="bar-track"><div class="bar-fill bf-green" style="width:72%"></div></div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-header"><span>B767-300F N662UP <span style="color:var(--red-lt)">⚠ Near max</span></span><span>88,300 / 97,000 lbs — 91%</span></div>
-          <div class="bar-track"><div class="bar-fill bf-red" style="width:91%"></div></div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-header"><span>B757-200F N424UP</span><span>67,200 / 115,600 lbs — 58%</span></div>
-          <div class="bar-track"><div class="bar-fill bf-blue" style="width:58%"></div></div>
+        <div id="load-bars">
+          <div style="font-size:.75rem;color:var(--text-mute);text-align:center;padding:.75rem 0">No active freight loads. AI flights will populate this panel.</div>
         </div>
       </div>
     </div>
@@ -440,75 +392,73 @@ tr:last-child td { border-bottom: none; }
       <div class="card">
         <div class="card-title">AI Pilot Activity</div>
         <div class="ai-activity" id="ai-log">
-          <div class="ai-line"><span class="ai-time">01:42Z</span><span><span class="hi">AI Chen</span> departed KSDF on 5Y741</span></div>
-          <div class="ai-line"><span class="ai-time">01:18Z</span><span><span class="hi">AI Torres</span> completed 5Y042 EDDK→KSDF <span class="earn">+$31,200</span></span></div>
-          <div class="ai-line"><span class="ai-time">00:55Z</span><span><span class="hi">AI Kim</span> filed 5Y501 KSDF→KHSV</span></div>
-          <div class="ai-line"><span class="ai-time">00:31Z</span><span><span class="hi">AI Patel</span> completed 5Y310 <span class="earn">+$9,800</span></span></div>
-          <div class="ai-line"><span class="ai-time">00:10Z</span><span><span class="hi">AI Chen</span> auto-scheduled 5Y741</span></div>
+          <div class="ai-line"><span class="ai-time">--:--Z</span><span>Waiting for AI pilots to fly...</span></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Hub Network</div>
-        <table style="font-size:0.72rem;">
-          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:0.3rem 0.5rem;">KSDF</td><td style="border:none;color:var(--text-dim);padding:0.3rem 0.5rem;">Louisville</td><td style="border:none;padding:0.3rem 0.5rem;"><span class="badge b-gold">Global</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:0.3rem 0.5rem;">EDDK</td><td style="color:var(--text-dim);padding:0.3rem 0.5rem;">Cologne</td><td style="padding:0.3rem 0.5rem;"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:0.3rem 0.5rem;">VHHH</td><td style="color:var(--text-dim);padding:0.3rem 0.5rem;">Hong Kong</td><td style="padding:0.3rem 0.5rem;"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:0.3rem 0.5rem;">KONT</td><td style="color:var(--text-dim);padding:0.3rem 0.5rem;">Ontario CA</td><td style="padding:0.3rem 0.5rem;"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:0.3rem 0.5rem;">KHSV</td><td style="border:none;color:var(--text-dim);padding:0.3rem 0.5rem;">Huntsville</td><td style="border:none;padding:0.3rem 0.5rem;"><span class="badge b-green">Feeder</span></td></tr>
-        </table>
+        <div class="card-title">Hot Spare System</div>
+        <div style="font-size:.75rem;color:var(--text-mute);padding:.5rem 0">All aircraft nominal. No spares flagged.</div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:.5rem">+ Flag Aircraft</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- CREW PAGE -->
+<!-- ══════════ CREW PAGE ══════════ -->
 <div id="page-crew" class="page">
   <div class="sec-header">
     <div class="sec-title">Crew <span>Roster</span></div>
     <div class="sec-actions">
-      <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ai')">+ Add AI Pilot</button>
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-human')">+ Add Crew Member</button>
+      <span style="font-size:.72rem;color:var(--text-mute);font-family:'Share Tech Mono',monospace">Crew management via Admin panel</span>
     </div>
   </div>
   <div class="crew-layout">
-    <div id="crew-grid" class="crew-grid"></div>
-    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+    <div>
+      <div id="crew-grid" class="crew-grid"></div>
+      <div id="crew-empty" class="empty-state" style="display:none">
+        <div class="icon">👨‍✈️</div>
+        <p>No crew enrolled yet.<br>Pilots are added by the admin.<br>Check back once the airline is staffed.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
       <div class="card">
         <div class="card-title">Rank Progression</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;">
-          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--green-lt)">Feeder Pilot</span><span style="color:var(--text-mute)">0–249 hrs</span></div>
-          <div style="padding:0 0 0.35rem 0.75rem;font-size:0.65rem;color:var(--text-mute);border-bottom:1px solid var(--border);">C208B · ATR-42 · ATR-72</div>
-          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--blue-lt)">Regional F/O</span><span style="color:var(--text-mute)">250–999 hrs</span></div>
-          <div style="padding:0 0 0.35rem 0.75rem;font-size:0.65rem;color:var(--text-mute);border-bottom:1px solid var(--border);">B757 · B767</div>
-          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--gold-lt)">Global Captain</span><span style="color:var(--text-mute)">1,000+ hrs</span></div>
-          <div style="padding:0 0 0 0.75rem;font-size:0.65rem;color:var(--text-mute);padding-top:0.2rem;">B747 · MD-11 · All types</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem">
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--green-lt)">Feeder Pilot</span><span style="color:var(--text-mute)">0–249 hrs</span></div>
+          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">C208B · ATR-42 · ATR-72</div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--blue-lt)">Regional F/O</span><span style="color:var(--text-mute)">250–999 hrs</span></div>
+          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">B757 · B767</div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold-lt)">Global Captain</span><span style="color:var(--text-mute)">1,000+ hrs</span></div>
+          <div style="padding:0 0 0 .75rem;font-size:.65rem;color:var(--text-mute);padding-top:.2rem">B747 · MD-11 · All types</div>
         </div>
       </div>
       <div class="card">
         <div class="card-title">Jumpseat Board</div>
-        <div id="jumpseat-board" style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;"></div>
+        <div id="jumpseat-board" style="font-family:'Share Tech Mono',monospace;font-size:.72rem">
+          <div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ECONOMY PAGE -->
+<!-- ══════════ ECONOMY PAGE ══════════ -->
 <div id="page-economy" class="page">
   <div class="sec-header">
     <div class="sec-title">Economy <span>& Finance</span></div>
     <div class="sec-actions">
-      <button class="btn btn-primary btn-sm" onclick="distributeProfit()">Distribute Profit Share</button>
+      <button class="btn btn-primary btn-sm" id="profit-share-btn" onclick="distributeProfit()" style="display:none">Distribute Profit Share</button>
     </div>
   </div>
   <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat"><div class="stat-val gld" id="eco-rev">$284,400</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub pos">▲ $18K this week</div></div>
-    <div class="stat"><div class="stat-val neg" id="eco-cost">$112,000</div><div class="stat-lbl">Operating Costs</div><div class="stat-sub neg">Fuel +4%</div></div>
-    <div class="stat"><div class="stat-val pos" id="eco-net">$172,400</div><div class="stat-lbl">Net Profit</div><div class="stat-sub pos">60.5% margin</div></div>
-    <div class="stat"><div class="stat-val gld" id="eco-pool">$12,480</div><div class="stat-lbl">Profit Share Pool</div><div class="stat-sub warn">⏳ Sunday 0000Z</div></div>
+    <div class="stat"><div class="stat-val gld" id="eco-rev">$500,000</div><div class="stat-lbl">Total Treasury</div><div class="stat-sub pos">Starting balance</div></div>
+    <div class="stat"><div class="stat-val neg" id="eco-cost">$0</div><div class="stat-lbl">Operating Costs</div><div class="stat-sub" style="color:var(--text-mute)">This session</div></div>
+    <div class="stat"><div class="stat-val pos" id="eco-net">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI fleet earning</div></div>
+    <div class="stat"><div class="stat-val gld" id="eco-pool">$35,000</div><div class="stat-lbl">Profit Share Pool</div><div class="stat-sub warn">7% of treasury</div></div>
   </div>
   <div class="eco-layout">
-    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+    <div style="display:flex;flex-direction:column;gap:.75rem">
       <div class="card">
         <div class="card-title">Pay Rate Tiers</div>
         <div class="ledger-item"><span class="li-desc">🔴 Next Day Air</span><span class="li-pos">$18.00/lb</span></div>
@@ -517,83 +467,134 @@ tr:last-child td { border-bottom: none; }
         <div class="ledger-item"><span class="li-desc">⚪ Standard Ground</span><span style="color:var(--text-dim);font-family:'Share Tech Mono',monospace">$4.00/lb</span></div>
         <div class="ledger-item"><span class="li-desc">⚠ Hazmat Surcharge</span><span class="warn">+$6.00/lb</span></div>
         <div class="ledger-item"><span class="li-desc">🌙 Night Shift Bonus</span><span class="gld">+15%</span></div>
-        <div class="ledger-item"><span class="li-desc">🤖 AI Pilot Rate</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace">×0.80 of base</span></div>
+        <div class="ledger-item"><span class="li-desc">🤖 AI Pilot Rate</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace">×0.80 base</span></div>
       </div>
       <div class="card">
-        <div class="card-title">Auto Deductions</div>
-        <div class="ledger-item"><span class="li-desc">⛽ Fuel — 5Y741</span><span class="li-neg">-$24,800</span></div>
-        <div class="ledger-item"><span class="li-desc">⛽ Fuel — 5Y002</span><span class="li-neg">-$31,200</span></div>
-        <div class="ledger-item"><span class="li-desc">🛬 Landing EDDK</span><span class="li-neg">-$4,100</span></div>
-        <div class="ledger-item"><span class="li-desc">🛬 Landing VHHH</span><span class="li-neg">-$5,600</span></div>
-        <div class="ledger-item"><span class="li-desc">🔧 Maint. N784UP</span><span class="li-neg">-$18,400</span></div>
-        <div class="ledger-item"><span class="li-desc">🔧 AOG Labour</span><span class="li-neg">-$3,200</span></div>
-        <div class="ledger-item" style="border-top:1px solid var(--border2);margin-top:0.3rem;padding-top:0.6rem;"><span style="color:var(--text-mute);font-family:'Share Tech Mono',monospace">Total deducted</span><span class="li-neg">-$87,300</span></div>
+        <div class="card-title">Operating Cost Schedule</div>
+        <div class="ledger-item"><span class="li-desc">B747 Fuel / flight</span><span class="li-neg">~$24,000</span></div>
+        <div class="ledger-item"><span class="li-desc">MD-11 Fuel / flight</span><span class="li-neg">~$18,000</span></div>
+        <div class="ledger-item"><span class="li-desc">B767 Fuel / flight</span><span class="li-neg">~$12,000</span></div>
+        <div class="ledger-item"><span class="li-desc">B757 Fuel / flight</span><span class="li-neg">~$9,000</span></div>
+        <div class="ledger-item"><span class="li-desc">Int'l Landing Fee</span><span class="li-neg">~$3,000–6,000</span></div>
+        <div class="ledger-item"><span class="li-desc">Maintenance / mo.</span><span class="li-neg">~$5,000–20,000</span></div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+    <div style="display:flex;flex-direction:column;gap:.75rem">
       <div class="card">
-        <div class="card-title">Crew Earnings — Current Cycle</div>
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Pilot</th><th>Type</th><th>Flights</th><th>Hours</th><th>Gross Pay</th><th>Share</th></tr></thead>
-          <tbody id="earnings-tbody"></tbody>
-        </table></div>
+        <div class="card-title">Crew Earnings</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Pilot</th><th>Type</th><th>Flights</th><th>Hours</th><th>Gross Pay</th><th>Share</th></tr></thead>
+            <tbody id="earnings-tbody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No crew enrolled. AI pilots earn into the treasury.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">Transaction Ledger</div>
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Time (Z)</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
-          <tbody id="ledger-tbody">
-            <tr><td>01:42</td><td>5Y741 Fuel purchase</td><td class="li-neg">-$24,800</td><td>$172,400</td></tr>
-            <tr><td>01:18</td><td>5Y042 Revenue — AI Torres</td><td class="li-pos">+$31,200</td><td>$197,200</td></tr>
-            <tr><td>00:55</td><td>Landing fee EDDK</td><td class="li-neg">-$4,100</td><td>$166,000</td></tr>
-            <tr><td>00:31</td><td>5Y310 Revenue — AI Patel</td><td class="li-pos">+$9,800</td><td>$170,100</td></tr>
-            <tr><td>00:10</td><td>Maintenance N784UP</td><td class="li-neg">-$18,400</td><td>$160,300</td></tr>
-          </tbody>
-        </table></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Time (Z)</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
+            <tbody id="ledger-tbody">
+              <tr><td>--:--</td><td>Starting treasury</td><td class="li-pos">+$500,000</td><td>$500,000</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- HUBS PAGE -->
+<!-- ══════════ HUBS PAGE ══════════ -->
 <div id="page-hubs" class="page">
   <div class="sec-header">
     <div class="sec-title">Hub <span>Network</span></div>
     <div class="sec-actions">
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-hub')">+ Add Hub</button>
+      <button class="btn btn-primary btn-sm" id="add-hub-btn" onclick="openModal('modal-add-hub')" style="display:none">+ Add Hub</button>
     </div>
   </div>
   <div id="hubs-grid" class="hubs-grid"></div>
 </div>
 
-</main>
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-page-wrap">
+    <div class="admin-warning">
+      <span style="font-size:1rem">⬡</span>
+      <span><strong>Admin Panel</strong> — Only visible to you. Changes here affect what the public-facing site displays to your crew.</span>
+    </div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="modal-dispatch">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Dispatch Flight</div><button class="modal-close" onclick="closeModal('modal-dispatch')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Flight Number</label><input class="form-input" placeholder="5Y741" id="d-fn"></div>
-        <div class="form-group"><label class="form-label">Aircraft</label><select class="form-select" id="d-ac"><option>B747-400F</option><option>MD-11F</option><option>B767-300F</option><option>B757-200F</option><option>C208B Caravan</option><option>ATR-72F</option></select></div>
+    <div class="sec-header" style="border-bottom:1px solid rgba(125,60,152,.2)">
+      <div class="sec-title"><span class="admin-span">Crew</span> Management</div>
+      <div class="sec-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ai')">+ Add AI Pilot</button>
+        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-human')">+ Add Crew Member</button>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Origin (ICAO)</label><input class="form-input" placeholder="KSDF" id="d-or" style="text-transform:uppercase"></div>
-        <div class="form-group"><label class="form-label">Destination (ICAO)</label><input class="form-input" placeholder="EDDK" id="d-dst" style="text-transform:uppercase"></div>
+    </div>
+
+    <div class="admin-grid" style="margin-bottom:1.5rem">
+      <div class="card">
+        <div class="card-title">Human Crew Roster</div>
+        <div class="tbl-wrap">
+          <table class="admin-roster-table">
+            <thead><tr><th>Name</th><th>Rank</th><th>Base</th><th>Hours</th><th>Actions</th></tr></thead>
+            <tbody id="admin-human-tbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew yet. Add members above.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Pilot</label><select class="form-select" id="d-pilot"></select></div>
-        <div class="form-group"><label class="form-label">Service Type</label><select class="form-select" id="d-svc"><option value="18">Next Day Air — $18/lb</option><option value="12">2nd Day Air — $12/lb</option><option value="8.5">3-Day Select — $8.50/lb</option><option value="4">Standard Ground — $4/lb</option></select></div>
+      <div class="card">
+        <div class="card-title">AI Pilot Roster</div>
+        <div class="tbl-wrap">
+          <table class="admin-roster-table">
+            <thead><tr><th>Name</th><th>Rank</th><th>Route</th><th>Flights</th><th>Actions</th></tr></thead>
+            <tbody id="admin-ai-tbody"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Freight (lbs)</label><input class="form-input" type="number" placeholder="150000" id="d-freight"></div>
-        <div class="form-group"><label class="form-label">Hazmat</label><select class="form-select" id="d-hz"><option value="0">None</option><option value="6">Class 1 (+$6/lb)</option><option value="6">Class 2 (+$6/lb)</option><option value="6">Class 3 (+$6/lb)</option></select></div>
+    </div>
+
+    <div class="sec-header" style="border-bottom:1px solid rgba(125,60,152,.2)">
+      <div class="sec-title"><span class="admin-span">Hub</span> Management</div>
+      <div class="sec-actions">
+        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-hub')">+ Add Hub</button>
       </div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-dispatch')">Cancel</button><button class="btn btn-primary" onclick="dispatchFlight()">Dispatch</button></div>
+    </div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>ICAO</th><th>Name</th><th>Type</th><th>Aircraft</th><th>Actions</th></tr></thead>
+          <tbody id="admin-hub-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec-header" style="border-bottom:1px solid rgba(125,60,152,.2)">
+      <div class="sec-title"><span class="admin-span">Treasury</span> Controls</div>
+    </div>
+    <div class="card">
+      <div class="form-row" style="align-items:flex-end">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Adjust Treasury ($)</label>
+          <input class="form-input" type="number" id="treasury-adj" placeholder="e.g. 50000">
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-primary btn-sm" onclick="adjustTreasury(1)">+ Add Funds</button>
+          <button class="btn btn-danger btn-sm" onclick="adjustTreasury(-1)">− Deduct</button>
+        </div>
+      </div>
+      <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$500,000</strong></div>
     </div>
   </div>
 </div>
 
+</main>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Add Human -->
 <div class="modal-overlay" id="modal-add-human">
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Add Crew Member</div><button class="modal-close" onclick="closeModal('modal-add-human')">✕</button></div>
@@ -603,20 +604,22 @@ tr:last-child td { border-bottom: none; }
         <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Walker" id="h-last"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
-        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
+        <div class="form-group"><label class="form-label">Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
+        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option><option>KHSV</option></select></div>
       </div>
       <div class="form-group"><label class="form-label">Starting Hours (transfers)</label><input class="form-input" type="number" placeholder="0" id="h-hours" value="0"></div>
+      <p class="form-note">This pilot will appear on the public Crew page immediately after adding.</p>
       <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-human')">Cancel</button><button class="btn btn-primary" onclick="addHuman()">Add Member</button></div>
     </div>
   </div>
 </div>
 
+<!-- Add AI -->
 <div class="modal-overlay" id="modal-add-ai">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Deploy AI Pilot</div><button class="modal-close" onclick="closeModal('modal-add-ai')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">Add AI Pilot</div><button class="modal-close" onclick="closeModal('modal-add-ai')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6;">AI pilots fly routes automatically every simulation cycle, earning revenue at 80% of the standard rate. They build hours and rank up just like human crew.</p>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">AI pilots fly autonomously every cycle, earn at 80% base rate, and rank up over time.</p>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Callsign</label><input class="form-input" placeholder="Martinez" id="ai-name"></div>
         <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="ai-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
@@ -625,12 +628,13 @@ tr:last-child td { border-bottom: none; }
         <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="ai-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
         <div class="form-group"><label class="form-label">Route Preference</label><select class="form-select" id="ai-route"><option value="longhaul">Long Haul</option><option value="domestic">Domestic</option><option value="feeder">Feeder</option><option value="any">Any</option></select></div>
       </div>
-      <div class="form-group"><label class="form-label">Flights Per Cycle</label><select class="form-select" id="ai-freq"><option value="1">1 flight</option><option value="2" selected>2 flights</option><option value="3">3 flights</option></select></div>
+      <div class="form-group"><label class="form-label">Flights Per Cycle</label><select class="form-select" id="ai-freq"><option value="1">1 per cycle</option><option value="2" selected>2 per cycle</option><option value="3">3 per cycle</option></select></div>
       <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-ai')">Cancel</button><button class="btn btn-primary" onclick="addAI()">Deploy</button></div>
     </div>
   </div>
 </div>
 
+<!-- Add Hub -->
 <div class="modal-overlay" id="modal-add-hub">
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Add Hub / Base</div><button class="modal-close" onclick="closeModal('modal-add-hub')">✕</button></div>
@@ -647,30 +651,86 @@ tr:last-child td { border-bottom: none; }
 </div>
 
 <script>
-// ── STATE ────────────────────────────────────────────
+// ══════════════════════════════════════════
+//  ADMIN CREDENTIALS — change these!
+// ══════════════════════════════════════════
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'ups5yops';   // ← Change this password!
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
 const S = {
-  treasury: 172400,
-  nextId: 8,
+  isAdmin: false,
+  treasury: 500000,
+  sessionRevenue: 0,
+  totalFlights: 0,
+  totalFreight: 0,
+  nextId: 10,
   pilots: [
-    { id:1, type:'human', first:'James', last:'Walker',    rank:'Global Captain', base:'KSDF', hours:1842, flights:312, ontime:97, earned:48000, xp:95 },
-    { id:2, type:'human', first:'Maria', last:'Rodriguez', rank:'Regional F/O',   base:'KSDF', hours:614,  flights:104, ontime:94, earned:17200, xp:61 },
-    { id:3, type:'human', first:'Tom',   last:'Kowalski',  rank:'Feeder Pilot',   base:'KONT', hours:124,  flights:34,  ontime:88, earned:3200,  xp:24 },
-    { id:4, type:'ai', name:'AI Chen',   rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:2241, flights:401, ontime:98, earned:55000, xp:100 },
-    { id:5, type:'ai', name:'AI Patel',  rank:'Regional F/O',   base:'EDDK', route:'domestic', freq:2, hours:580,  flights:96,  ontime:96, earned:16000, xp:58  },
-    { id:6, type:'ai', name:'AI Torres', rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:1910, flights:344, ontime:99, earned:51000, xp:100 },
-    { id:7, type:'ai', name:'AI Kim',    rank:'Feeder Pilot',   base:'KSDF', route:'feeder',   freq:1, hours:88,   flights:22,  ontime:91, earned:1800,  xp:18  },
+    { id:1, type:'ai', name:'AI Chen',   rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:2241, flights:401, ontime:98, earned:55000, xp:100 },
+    { id:2, type:'ai', name:'AI Patel',  rank:'Regional F/O',   base:'EDDK', route:'domestic', freq:2, hours:580,  flights:96,  ontime:96, earned:16000, xp:58  },
+    { id:3, type:'ai', name:'AI Torres', rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:1910, flights:344, ontime:99, earned:51000, xp:100 },
+    { id:4, type:'ai', name:'AI Kim',    rank:'Feeder Pilot',   base:'KSDF', route:'feeder',   freq:1, hours:88,   flights:22,  ontime:91, earned:1800,  xp:18  },
   ],
   hubs: [
-    { icao:'KSDF', name:'Louisville Intl — Worldport', type:'Global',    aircraft:'B747-400F, MD-11F, B767-300F', ramp:78, active:14 },
-    { icao:'EDDK', name:'Cologne/Bonn Airport',         type:'Regional',  aircraft:'B757-200F, B767-300F',         ramp:52, active:6  },
-    { icao:'VHHH', name:'Hong Kong International',      type:'Regional',  aircraft:'B747-400F, MD-11F',            ramp:65, active:4  },
-    { icao:'KONT', name:'Ontario International',         type:'Regional',  aircraft:'B757-200F, B767-300F',         ramp:41, active:3  },
-    { icao:'KHSV', name:'Huntsville International',      type:'Feeder',   aircraft:'C208B Caravan, ATR-42',         ramp:30, active:2  },
-    { icao:'KLEX', name:'Bluegrass Airport',             type:'Feeder',   aircraft:'C208B Caravan',                 ramp:20, active:1  },
-  ]
+    { icao:'KSDF', name:'Louisville Intl — Worldport', type:'Global',   aircraft:'B747-400F, MD-11F, B767-300F', ramp:78, active:14 },
+    { icao:'EDDK', name:'Cologne/Bonn Airport',         type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:52, active:6  },
+    { icao:'VHHH', name:'Hong Kong International',      type:'Regional', aircraft:'B747-400F, MD-11F',            ramp:65, active:4  },
+    { icao:'KONT', name:'Ontario International',        type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:41, active:3  },
+    { icao:'KHSV', name:'Huntsville International',     type:'Feeder',   aircraft:'C208B Caravan, ATR-42',        ramp:30, active:2  },
+    { icao:'KLEX', name:'Bluegrass Airport',            type:'Feeder',   aircraft:'C208B Caravan',                ramp:20, active:1  },
+  ],
+  activeFlights: [],
+  loadBars: {}
 };
 
-// ── CLOCK ───────────────────────────────────────────
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+document.getElementById('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('l-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    S.isAdmin = true;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-nav-btn').style.display = '';
+    document.getElementById('admin-status-badge').style.display = '';
+    document.getElementById('add-hub-btn').style.display = '';
+    document.getElementById('profit-share-btn').style.display = '';
+    updateAdminTreasuryVal();
+  } else {
+    document.getElementById('login-err').textContent = 'Invalid credentials.';
+    document.getElementById('l-pass').value = '';
+  }
+}
+
+function skipLogin() {
+  S.isAdmin = false;
+  document.getElementById('login-screen').classList.add('hidden');
+}
+
+function logoutAdmin() {
+  S.isAdmin = false;
+  document.getElementById('admin-nav-btn').style.display = 'none';
+  document.getElementById('admin-status-badge').style.display = 'none';
+  document.getElementById('add-hub-btn').style.display = 'none';
+  document.getElementById('profit-share-btn').style.display = 'none';
+  // Go back to dispatch if on admin page
+  if (document.getElementById('page-admin').classList.contains('active')) {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelector('.nav-btn').classList.add('active');
+    document.getElementById('page-dispatch').classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════
 function tick() {
   const n = new Date();
   const pad = x => String(x).padStart(2,'0');
@@ -678,13 +738,38 @@ function tick() {
 }
 tick(); setInterval(tick, 10000);
 
-// ── TREASURY ────────────────────────────────────────
+// ══════════════════════════════════════════
+//  TREASURY
+// ══════════════════════════════════════════
 function refreshTreasury() {
-  document.getElementById('treasury-display').textContent = '$' + S.treasury.toLocaleString();
+  const fmt = '$' + S.treasury.toLocaleString();
+  document.getElementById('treasury-display').textContent = fmt;
+  document.getElementById('eco-rev').textContent = fmt;
+  document.getElementById('eco-net').textContent = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('eco-pool').textContent = '$' + Math.round(S.treasury * 0.07).toLocaleString();
+  document.getElementById('s-revenue').textContent = '$' + S.sessionRevenue.toLocaleString();
+  updateAdminTreasuryVal();
 }
 
-// ── NAV ─────────────────────────────────────────────
+function updateAdminTreasuryVal() {
+  const el = document.getElementById('admin-treasury-val');
+  if (el) el.textContent = '$' + S.treasury.toLocaleString();
+}
+
+function adjustTreasury(sign) {
+  const amt = parseInt(document.getElementById('treasury-adj').value);
+  if (!amt || isNaN(amt)) return alert('Enter a valid amount.');
+  S.treasury += sign * Math.abs(amt);
+  refreshTreasury();
+  document.getElementById('treasury-adj').value = '';
+  addLedgerRow(sign > 0 ? 'Admin: Funds added' : 'Admin: Funds deducted', sign * Math.abs(amt));
+}
+
+// ══════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════
 function goNav(btn, page) {
+  if (page === 'admin' && !S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
@@ -692,42 +777,50 @@ function goNav(btn, page) {
   if (page === 'crew')    renderCrew();
   if (page === 'economy') renderEconomy();
   if (page === 'hubs')    renderHubs();
+  if (page === 'admin')   renderAdmin();
 }
 
-// ── MODALS ──────────────────────────────────────────
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
 function openModal(id) {
-  if (id === 'modal-dispatch') populatePilotSelect();
   document.getElementById(id).classList.add('open');
 }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
 document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); });
 });
 
-// ── CREW RENDER ─────────────────────────────────────
+// ══════════════════════════════════════════
+//  CREW RENDER (public)
+// ══════════════════════════════════════════
 function rankColor(r) {
-  return r === 'Global Captain' ? 'var(--gold-lt)' : r === 'Regional F/O' ? 'var(--blue-lt)' : 'var(--green-lt)';
+  return r==='Global Captain' ? 'var(--gold-lt)' : r==='Regional F/O' ? 'var(--blue-lt)' : 'var(--green-lt)';
 }
 function rankNext(r) {
-  return r === 'Global Captain' ? 'Max Rank' : r === 'Regional F/O' ? '→ Captain' : '→ Regional';
+  return r==='Global Captain' ? 'Max Rank' : r==='Regional F/O' ? '→ Captain' : '→ Regional';
 }
 
 function renderCrew() {
-  document.getElementById('crew-grid').innerHTML = S.pilots.map(p => {
-    const isAI = p.type === 'ai';
+  const grid = document.getElementById('crew-grid');
+  const empty = document.getElementById('crew-empty');
+  if (!S.pilots.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = S.pilots.map(p => {
+    const isAI = p.type==='ai';
     const name = isAI ? p.name : `${p.first} ${p.last}`;
-    const init = isAI ? 'AI' : (p.first[0] + p.last[0]);
+    const init = isAI ? 'AI' : (p.first[0]+p.last[0]);
     return `
-    <div class="crew-card ${isAI ? 'ai-pilot' : 'human-pilot'}">
+    <div class="crew-card ${isAI?'ai-pilot':'human-pilot'}">
       <div class="pilot-header">
-        <div class="avatar ${isAI ? 'av-ai' : 'av-human'}">${init}</div>
+        <div class="avatar ${isAI?'av-ai':'av-human'}">${init}</div>
         <div>
           <div class="pilot-name">${name}</div>
           <div class="pilot-rank" style="color:${rankColor(p.rank)}">${p.rank}</div>
         </div>
-        <div class="pilot-type-badge">
-          ${isAI ? '<span class="badge b-blue">AI</span>' : '<span class="badge b-gray">Human</span>'}
-        </div>
+        <div class="pilot-type-badge">${isAI?'<span class="badge b-blue">AI</span>':'<span class="badge b-gray">Human</span>'}</div>
       </div>
       <div class="pilot-stats">
         <div><div class="ps-val">${p.hours.toLocaleString()}</div><div class="ps-lbl">Hours</div></div>
@@ -736,248 +829,349 @@ function renderCrew() {
       </div>
       <div class="xp-bar-wrap">
         <div class="xp-bar-row"><span>${p.rank}</span><span>${p.xp}% — ${rankNext(p.rank)}</span></div>
-        <div class="xp-track"><div class="${isAI ? 'xp-fill-blue' : 'xp-fill'}" style="width:${p.xp}%"></div></div>
+        <div class="xp-track"><div class="${isAI?'xp-fill-blue':'xp-fill'}" style="width:${p.xp}%"></div></div>
       </div>
-      <div class="pilot-actions">
-        ${isAI
-          ? `<button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly Now</button>`
-          : `<button class="btn btn-ghost btn-sm" onclick="openModal('modal-dispatch')">Dispatch</button>`}
-        <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
-      </div>
+      ${isAI ? `<div class="pilot-actions"><button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly Now</button></div>` : ''}
     </div>`;
   }).join('');
 
-  // Jumpseat board
-  const routes = [['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF'],['EDDK','KSDF']];
-  document.getElementById('jumpseat-board').innerHTML = S.pilots.slice(0,4).map((p,i) => {
-    const name = p.type === 'ai' ? p.name : `${p.first} ${p.last}`;
-    const r = routes[i % routes.length];
-    const seats = p.type === 'ai'
-      ? `<span style="color:var(--green-lt)">1 seat</span>`
-      : `<span style="color:var(--red-lt)">Full</span>`;
-    return `<div class="ledger-item"><span class="li-desc">${name}</span><span style="color:var(--text-dim)">${r[0]}→${r[1]}</span>${seats}</div>`;
-  }).join('');
+  // Jumpseat
+  const flying = S.pilots.filter(p=>p.type==='ai').slice(0,3);
+  const routes = [['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF']];
+  const jsb = document.getElementById('jumpseat-board');
+  if (flying.length) {
+    jsb.innerHTML = flying.map((p,i) => {
+      const r = routes[i%routes.length];
+      return `<div class="ledger-item"><span class="li-desc">${p.name}</span><span style="color:var(--text-dim)">${r[0]}→${r[1]}</span><span style="color:var(--green-lt)">1 seat</span></div>`;
+    }).join('');
+  }
 }
 
-// ── ECONOMY RENDER ───────────────────────────────────
+// ══════════════════════════════════════════
+//  ECONOMY RENDER
+// ══════════════════════════════════════════
 function renderEconomy() {
-  const totalEarned = S.pilots.reduce((a,p) => a+p.earned, 0) || 1;
-  const pool = Math.round(S.treasury * 0.07);
-  document.getElementById('eco-net').textContent  = '$' + S.treasury.toLocaleString();
-  document.getElementById('eco-pool').textContent = '$' + pool.toLocaleString();
-  document.getElementById('earnings-tbody').innerHTML = S.pilots.map(p => {
-    const name = p.type === 'ai' ? p.name : `${p.first} ${p.last}`;
-    const type = p.type === 'ai' ? '<span class="badge b-blue">AI</span>' : '<span class="badge b-gray">Human</span>';
-    const share = Math.round((p.earned / totalEarned) * pool);
-    return `<tr><td>${name}</td><td>${type}</td><td>${p.flights}</td><td>${p.hours.toLocaleString()}</td><td class="li-pos">$${p.earned.toLocaleString()}</td><td class="li-pos">+$${share.toLocaleString()}</td></tr>`;
-  }).join('');
+  const humanPilots = S.pilots.filter(p=>p.type==='human');
+  const totalEarned = humanPilots.reduce((a,p)=>a+p.earned,0)||1;
+  const pool = Math.round(S.treasury*0.07);
+
+  if (humanPilots.length) {
+    document.getElementById('earnings-tbody').innerHTML = humanPilots.map(p => {
+      const share = Math.round((p.earned/totalEarned)*pool);
+      return `<tr><td>${p.first} ${p.last}</td><td><span class="badge b-gray">Human</span></td><td>${p.flights}</td><td>${p.hours.toLocaleString()}</td><td class="li-pos">$${p.earned.toLocaleString()}</td><td class="li-pos">+$${share.toLocaleString()}</td></tr>`;
+    }).join('');
+  } else {
+    document.getElementById('earnings-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew enrolled. AI earnings go to the treasury.</td></tr>`;
+  }
 }
 
-// ── HUBS RENDER ──────────────────────────────────────
+// ══════════════════════════════════════════
+//  HUBS RENDER
+// ══════════════════════════════════════════
 function renderHubs() {
-  const cls = { Global:'b-gold', Regional:'b-blue', Feeder:'b-green' };
-  const bf  = { Global:'bf-gold', Regional:'bf-blue', Feeder:'bf-green' };
-  document.getElementById('hubs-grid').innerHTML = S.hubs.map(h => `
+  const cls={Global:'b-gold',Regional:'b-blue',Feeder:'b-green'};
+  const bf={Global:'bf-gold',Regional:'bf-blue',Feeder:'bf-green'};
+  document.getElementById('hubs-grid').innerHTML = S.hubs.map(h=>`
     <div class="hub-card">
       <div class="hub-icao">${h.icao}</div>
       <div class="hub-name">${h.name}</div>
       <div class="hub-detail-row"><span>Type</span><span class="hub-detail-val"><span class="badge ${cls[h.type]}">${h.type}</span></span></div>
-      <div class="hub-detail-row"><span>Aircraft</span><span class="hub-detail-val" style="font-size:0.65rem;text-align:right;max-width:150px">${h.aircraft}</span></div>
+      <div class="hub-detail-row"><span>Aircraft</span><span class="hub-detail-val" style="font-size:.65rem;text-align:right;max-width:150px">${h.aircraft}</span></div>
       <div class="hub-detail-row"><span>Active Flights</span><span class="hub-detail-val pos">${h.active}</span></div>
       <div class="hub-detail-row" style="border:none"><span>Ramp Cap.</span><span class="hub-detail-val">${h.ramp}%</span></div>
-      <div class="bar-wrap" style="margin-top:0.5rem;margin-bottom:0">
+      <div class="bar-wrap" style="margin-top:.5rem;margin-bottom:0">
         <div class="bar-track"><div class="bar-fill ${h.ramp>80?'bf-red':bf[h.type]}" style="width:${h.ramp}%"></div></div>
       </div>
     </div>`).join('');
 }
 
-// ── PILOT SELECT ────────────────────────────────────
-function populatePilotSelect() {
-  document.getElementById('d-pilot').innerHTML = S.pilots.map(p => {
-    const name = p.type === 'ai' ? p.name : `${p.first} ${p.last}`;
-    return `<option value="${p.id}">${name} (${p.rank})</option>`;
-  }).join('');
+// ══════════════════════════════════════════
+//  ADMIN RENDER
+// ══════════════════════════════════════════
+function renderAdmin() {
+  // Human roster
+  const humans = S.pilots.filter(p=>p.type==='human');
+  document.getElementById('admin-human-tbody').innerHTML = humans.length
+    ? humans.map(p=>`<tr>
+        <td>${p.first} ${p.last}</td>
+        <td><span class="badge ${p.rank==='Global Captain'?'b-gold':p.rank==='Regional F/O'?'b-blue':'b-green'}">${p.rank}</span></td>
+        <td>${p.base}</td><td>${p.hours}</td>
+        <td class="roster-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editHours(${p.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr>`;
+
+  // AI roster
+  document.getElementById('admin-ai-tbody').innerHTML = S.pilots.filter(p=>p.type==='ai').map(p=>`<tr>
+    <td>${p.name}</td>
+    <td><span class="badge b-blue">${p.rank.split(' ')[0]}</span></td>
+    <td>${p.route}</td><td>${p.flights}</td>
+    <td class="roster-actions">
+      <button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly</button>
+      <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
+    </td>
+  </tr>`).join('');
+
+  // Hub roster
+  document.getElementById('admin-hub-tbody').innerHTML = S.hubs.map((h,i)=>`<tr>
+    <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold)">${h.icao}</td>
+    <td>${h.name}</td>
+    <td><span class="badge ${h.type==='Global'?'b-gold':h.type==='Regional'?'b-blue':'b-green'}">${h.type}</span></td>
+    <td style="font-size:.68rem;color:var(--text-dim)">${h.aircraft}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeHub(${i})">Remove</button></td>
+  </tr>`).join('');
+
+  updateAdminTreasuryVal();
 }
 
-// ── DISPATCH ────────────────────────────────────────
-function dispatchFlight() {
-  const fn      = document.getElementById('d-fn').value      || '5YXXX';
-  const origin  = (document.getElementById('d-or').value     || 'KSDF').toUpperCase();
-  const dest    = (document.getElementById('d-dst').value    || 'EDDK').toUpperCase();
-  const ac      = document.getElementById('d-ac').value;
-  const pilotId = parseInt(document.getElementById('d-pilot').value);
-  const freight = parseInt(document.getElementById('d-freight').value) || 100000;
-  const rate    = parseFloat(document.getElementById('d-svc').value);
-  const haz     = parseFloat(document.getElementById('d-hz').value) || 0;
-  const pilot   = S.pilots.find(p => p.id === pilotId);
-  const pname   = pilot ? (pilot.type==='ai' ? pilot.name : `${pilot.first} ${pilot.last}`) : 'Unknown';
-  const isAI    = pilot && pilot.type === 'ai';
-  const finalRate = (rate + haz) * (isAI ? 0.8 : 1);
-  const revenue = Math.round(freight * finalRate);
-
-  // Add row to flight board
-  const tr = document.createElement('tr');
-  const pCell = isAI ? `<span class="badge b-blue">AI</span> ${pname.replace('AI ','')}` : pname;
-  const now = new Date();
-  const eta = `${String(now.getUTCHours()+Math.floor(Math.random()*6+2)%24).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
-  tr.innerHTML = `<td>${fn}</td><td>${origin}→${dest}</td><td>${ac}</td><td>${pCell}</td><td><span class="badge b-gold"><span class="dot dot-y"></span>Boarding</span></td><td>${eta}</td><td>${freight.toLocaleString()}</td><td>${Math.round(freight/228000*100)}%</td>`;
-  document.getElementById('flight-tbody').prepend(tr);
-
-  // Revenue
-  S.treasury += revenue;
-  refreshTreasury();
-  if (pilot) { pilot.flights++; pilot.earned += revenue; pilot.xp = Math.min(100, pilot.xp+2); }
-  if (isAI) addAILog(pname, fn, origin, dest, revenue);
-
-  // Ledger
-  addLedgerRow(fn + ' Revenue — ' + pname, revenue);
-
-  closeModal('modal-dispatch');
-  ['d-fn','d-or','d-dst','d-freight'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
-}
-
-// ── ADD HUMAN ───────────────────────────────────────
+// ══════════════════════════════════════════
+//  ADD / REMOVE CREW
+// ══════════════════════════════════════════
 function addHuman() {
   const first = document.getElementById('h-first').value.trim();
   const last  = document.getElementById('h-last').value.trim();
-  if (!first || !last) { alert('Please enter first and last name.'); return; }
+  if (!first||!last) { alert('Enter first and last name.'); return; }
   S.pilots.push({
-    id: S.nextId++, type:'human', first, last,
-    rank:  document.getElementById('h-rank').value,
-    base:  document.getElementById('h-base').value,
-    hours: parseInt(document.getElementById('h-hours').value)||0,
+    id:S.nextId++, type:'human', first, last,
+    rank:document.getElementById('h-rank').value,
+    base:document.getElementById('h-base').value,
+    hours:parseInt(document.getElementById('h-hours').value)||0,
     flights:0, ontime:100, earned:0, xp:0
   });
-  document.getElementById('h-first').value = '';
-  document.getElementById('h-last').value  = '';
-  document.getElementById('h-hours').value = '0';
+  ['h-first','h-last'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('h-hours').value='0';
   closeModal('modal-add-human');
-  document.getElementById('s-crew').textContent = S.pilots.length;
+  document.getElementById('s-crew-count').textContent = S.pilots.filter(p=>p.type==='ai').length;
+  renderAdmin();
 }
 
-// ── ADD AI ──────────────────────────────────────────
 function addAI() {
-  const rawName = document.getElementById('ai-name').value.trim();
-  if (!rawName) { alert('Please enter a callsign.'); return; }
-  const name = rawName.startsWith('AI ') ? rawName : 'AI ' + rawName;
+  const raw = document.getElementById('ai-name').value.trim();
+  if (!raw) { alert('Enter a callsign.'); return; }
+  const name = raw.startsWith('AI ')?raw:'AI '+raw;
   S.pilots.push({
-    id: S.nextId++, type:'ai', name,
-    rank:  document.getElementById('ai-rank').value,
-    base:  document.getElementById('ai-base').value,
-    route: document.getElementById('ai-route').value,
-    freq:  parseInt(document.getElementById('ai-freq').value),
+    id:S.nextId++, type:'ai', name,
+    rank:document.getElementById('ai-rank').value,
+    base:document.getElementById('ai-base').value,
+    route:document.getElementById('ai-route').value,
+    freq:parseInt(document.getElementById('ai-freq').value),
     hours:0, flights:0, ontime:100, earned:0, xp:0
   });
-  document.getElementById('ai-name').value = '';
+  document.getElementById('ai-name').value='';
   closeModal('modal-add-ai');
-  document.getElementById('s-crew').textContent = S.pilots.length;
-  addAILog(name, '—', '—', '—', 0, 'deployed and ready');
+  document.getElementById('s-crew-count').textContent = S.pilots.filter(p=>p.type==='ai').length;
+  renderAdmin();
 }
 
-// ── REMOVE PILOT ────────────────────────────────────
 function removePilot(id) {
-  if (!confirm('Remove this crew member from the roster?')) return;
-  S.pilots = S.pilots.filter(p => p.id !== id);
-  document.getElementById('s-crew').textContent = S.pilots.length;
-  renderCrew();
+  if (!confirm('Remove this crew member?')) return;
+  S.pilots = S.pilots.filter(p=>p.id!==id);
+  document.getElementById('s-crew-count').textContent = S.pilots.filter(p=>p.type==='ai').length;
+  renderAdmin();
 }
 
-// ── ADD HUB ─────────────────────────────────────────
+function editHours(id) {
+  const p = S.pilots.find(x=>x.id===id);
+  if (!p) return;
+  const val = prompt(`Edit hours for ${p.first} ${p.last} (current: ${p.hours}):`, p.hours);
+  if (val !== null && !isNaN(parseInt(val))) { p.hours = parseInt(val); renderAdmin(); }
+}
+
+// ══════════════════════════════════════════
+//  ADD / REMOVE HUB
+// ══════════════════════════════════════════
 function addHub() {
   const icao = document.getElementById('hub-icao').value.trim().toUpperCase();
   const name = document.getElementById('hub-name').value.trim();
-  if (!icao || !name) { alert('ICAO and name required.'); return; }
-  S.hubs.push({ icao, name, type: document.getElementById('hub-type').value, aircraft: document.getElementById('hub-ac').value || 'TBD', ramp:0, active:0 });
-  ['hub-icao','hub-name','hub-ac'].forEach(id => { document.getElementById(id).value=''; });
+  if (!icao||!name) { alert('ICAO and name required.'); return; }
+  S.hubs.push({ icao, name, type:document.getElementById('hub-type').value, aircraft:document.getElementById('hub-ac').value||'TBD', ramp:0, active:0 });
+  ['hub-icao','hub-name','hub-ac'].forEach(id=>{document.getElementById(id).value='';});
   closeModal('modal-add-hub');
   renderHubs();
+  renderAdmin();
 }
 
-// ── TRIGGER AI FLIGHT ───────────────────────────────
+function removeHub(i) {
+  if (!confirm('Remove this hub?')) return;
+  S.hubs.splice(i,1);
+  renderHubs();
+  renderAdmin();
+}
+
+// ══════════════════════════════════════════
+//  FLIGHT BOARD
+// ══════════════════════════════════════════
+function addFlightRow(fn, origin, dest, ac, pilotName, isAI, freight) {
+  const tbody = document.getElementById('flight-tbody');
+  const empty = document.getElementById('flight-empty');
+  empty.style.display = 'none';
+  const pCell = isAI ? `<span class="badge b-blue">AI</span> ${pilotName.replace('AI ','')}` : pilotName;
+  const now = new Date();
+  const eta = `${String((now.getUTCHours()+Math.floor(Math.random()*7)+2)%24).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${fn}</td><td>${origin}→${dest}</td><td>${ac}</td><td>${pCell}</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td><td>${eta}</td><td>${freight.toLocaleString()}</td><td>${Math.round(freight/210000*100)}%</td>`;
+  tbody.prepend(tr);
+  while(tbody.children.length > 12) tbody.removeChild(tbody.lastChild);
+  S.totalFlights++;
+  document.getElementById('s-active').textContent = Math.min(tbody.children.length, 12);
+  document.getElementById('sum-flights').textContent = S.totalFlights;
+  updateLoadBars(ac, freight);
+}
+
+function updateLoadBars(ac, freight) {
+  S.loadBars[ac] = (S.loadBars[ac]||0) + freight;
+  const maxMap = {'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3000,'ATR-72F':15000};
+  const maxW = maxMap[ac]||200000;
+  const pct = Math.min(99, Math.round(S.loadBars[ac]/maxW*100));
+  const container = document.getElementById('load-bars');
+  let existing = document.getElementById('lb-'+ac.replace(/[^a-z0-9]/gi,''));
+  if (!existing) {
+    const div = document.createElement('div');
+    div.className='bar-wrap';
+    div.id='lb-'+ac.replace(/[^a-z0-9]/gi,'');
+    div.innerHTML=`<div class="bar-header"><span>${ac}</span><span id="lbv-${ac.replace(/[^a-z0-9]/gi,'')}">${S.loadBars[ac].toLocaleString()} lbs — ${pct}%</span></div><div class="bar-track"><div class="bar-fill bf-gold" id="lbf-${ac.replace(/[^a-z0-9]/gi,'')}" style="width:${pct}%"></div></div>`;
+    const placeholder = container.querySelector('div[style*="color:var(--text-mute)"]');
+    if (placeholder) container.innerHTML='';
+    container.appendChild(div);
+  } else {
+    const key=ac.replace(/[^a-z0-9]/gi,'');
+    const vEl=document.getElementById('lbv-'+key), fEl=document.getElementById('lbf-'+key);
+    if(vEl) vEl.textContent=`${S.loadBars[ac].toLocaleString()} lbs — ${pct}%`;
+    if(fEl){ fEl.style.width=pct+'%'; fEl.className='bar-fill '+(pct>85?'bf-red':pct>65?'bf-gold':'bf-green'); }
+  }
+}
+
+// ══════════════════════════════════════════
+//  AI FLIGHT ENGINE
+// ══════════════════════════════════════════
+const routeMap = {
+  longhaul: [['KSDF','EDDK','B747-400F'],['KSDF','VHHH','MD-11F'],['EDDK','VHHH','B747-400F'],['VHHH','KSDF','MD-11F'],['KSDF','EDDK','MD-11F']],
+  domestic:  [['KSDF','KONT','B757-200F'],['KONT','KSDF','B757-200F'],['KSDF','KLEX','B767-300F'],['EDDK','KSDF','B767-300F']],
+  feeder:    [['KSDF','KHSV','C208B Caravan'],['KSDF','KLEX','C208B Caravan'],['KHSV','KSDF','ATR-72F']],
+  any:       [['KSDF','EDDK','B747-400F'],['KSDF','KONT','B757-200F'],['KSDF','KHSV','C208B Caravan']]
+};
+
 function triggerAI(id) {
-  const p = S.pilots.find(x => x.id===id);
+  const p = S.pilots.find(x=>x.id===id);
   if (!p) return;
-  const routeMap = {
-    longhaul: [['KSDF','EDDK'],['KSDF','VHHH'],['EDDK','VHHH']],
-    domestic:  [['KSDF','KONT'],['KONT','KSDF'],['KSDF','KLEX']],
-    feeder:    [['KSDF','KHSV'],['KSDF','KLEX'],['KHSV','KSDF']],
-    any:       [['KSDF','EDDK'],['KSDF','KONT'],['KSDF','KHSV']]
-  };
-  const pool = routeMap[p.route] || routeMap.any;
-  const [origin,dest] = pool[Math.floor(Math.random()*pool.length)];
-  const freight = Math.floor(Math.random()*120000)+40000;
+  const pool = routeMap[p.route]||routeMap.any;
+  const [origin,dest,ac] = pool[Math.floor(Math.random()*pool.length)];
+  const freightMap = {'B747-400F':[80000,210000],'MD-11F':[60000,190000],'B767-300F':[40000,95000],'B757-200F':[30000,112000],'C208B Caravan':[1000,3200],'ATR-72F':[5000,15000]};
+  const [fmin,fmax] = freightMap[ac]||[50000,150000];
+  const freight = Math.floor(Math.random()*(fmax-fmin)+fmin);
   const baseRate = p.rank==='Global Captain' ? 12 : p.rank==='Regional F/O' ? 8.5 : 4;
   const revenue  = Math.round(freight * baseRate * 0.80);
   const fn = '5Y' + (Math.floor(Math.random()*900)+100);
 
-  p.flights++; p.hours += Math.round(Math.random()*8+2);
-  p.earned += revenue; p.xp = Math.min(100, p.xp + Math.floor(Math.random()*3)+1);
+  p.flights++;
+  p.hours += Math.round(Math.random()*8+2);
+  p.earned += revenue;
+  p.xp = Math.min(100, p.xp + Math.floor(Math.random()*3)+1);
+  checkRankUp(p);
+
   S.treasury += revenue;
+  S.sessionRevenue += revenue;
+  S.totalFreight += freight;
+
   refreshTreasury();
+  document.getElementById('sum-ai-rev').textContent = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+
+  addFlightRow(fn, origin, dest, ac, p.name, true, freight);
   addAILog(p.name, fn, origin, dest, revenue);
   addLedgerRow(fn + ' Revenue — ' + p.name, revenue);
-  if (document.getElementById('page-crew').classList.contains('active')) renderCrew();
 }
 
-// ── AI AUTO-CYCLE ────────────────────────────────────
-setInterval(() => {
-  S.pilots.filter(p => p.type==='ai').forEach(p => {
-    if (Math.random() < 0.35) triggerAI(p.id);
-  });
-}, 60000);
+function checkRankUp(p) {
+  if (p.type!=='ai') return;
+  const old = p.rank;
+  if (p.hours >= 1000 && p.rank !== 'Global Captain') { p.rank='Global Captain'; p.xp=10; }
+  else if (p.hours >= 250 && p.rank === 'Feeder Pilot') { p.rank='Regional F/O'; p.xp=5; }
+  if (p.rank !== old) {
+    addAILog(p.name, '—', '—', '—', 0, `promoted to <span style="color:var(--gold-lt)">${p.rank}</span> 🎖`);
+  }
+}
 
-// ── AI LOG ──────────────────────────────────────────
+// Auto-cycle every 55 seconds
+setInterval(() => {
+  S.pilots.filter(p=>p.type==='ai').forEach(p => {
+    for (let i=0;i<p.freq;i++) {
+      if (Math.random()<0.4) triggerAI(p.id);
+    }
+  });
+}, 55000);
+
+// ══════════════════════════════════════════
+//  LOGGING
+// ══════════════════════════════════════════
 function addAILog(name, fn, origin, dest, revenue, customMsg) {
   const log = document.getElementById('ai-log');
   if (!log) return;
   const now = new Date();
   const t = `${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
   const msg = customMsg || `completed ${fn} ${origin}→${dest} <span class="earn">+$${revenue.toLocaleString()}</span>`;
-  const div = document.createElement('div');
-  div.className = 'ai-line';
-  div.innerHTML = `<span class="ai-time">${t}</span><span><span class="hi">${name}</span> ${msg}</span>`;
+  // Remove placeholder if present
+  if (log.children.length===1 && log.children[0].querySelector('.ai-time')?.textContent==='--:--Z') log.innerHTML='';
+  const div=document.createElement('div');
+  div.className='ai-line';
+  div.innerHTML=`<span class="ai-time">${t}</span><span><span class="hi">${name}</span> ${msg}</span>`;
   log.prepend(div);
-  while (log.children.length > 8) log.removeChild(log.lastChild);
+  while(log.children.length>8) log.removeChild(log.lastChild);
 }
 
-// ── LEDGER ──────────────────────────────────────────
 function addLedgerRow(desc, amount) {
-  const tbody = document.getElementById('ledger-tbody');
-  if (!tbody) return;
-  const now = new Date();
-  const t = `${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${t}</td><td>${desc}</td><td class="li-pos">+$${amount.toLocaleString()}</td><td>$${S.treasury.toLocaleString()}</td>`;
+  const tbody=document.getElementById('ledger-tbody');
+  if(!tbody) return;
+  const now=new Date();
+  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
+  const isPos = amount >= 0;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${t}</td><td>${desc}</td><td class="${isPos?'li-pos':'li-neg'}">${isPos?'+':'-'}$${Math.abs(amount).toLocaleString()}</td><td>$${S.treasury.toLocaleString()}</td>`;
   tbody.prepend(tr);
-  while (tbody.children.length > 10) tbody.removeChild(tbody.lastChild);
+  while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
 }
 
-// ── PROFIT SHARE ────────────────────────────────────
+// ══════════════════════════════════════════
+//  PROFIT SHARE
+// ══════════════════════════════════════════
 function distributeProfit() {
-  const pool = Math.round(S.treasury * 0.07);
-  const total = S.pilots.reduce((a,p) => a+p.earned, 0) || 1;
-  S.pilots.forEach(p => { p.earned += Math.round((p.earned/total)*pool); });
+  const pool = Math.round(S.treasury*0.07);
+  const humans = S.pilots.filter(p=>p.type==='human');
+  if (!humans.length) { alert('No human crew to distribute to yet. Add crew members first.'); return; }
+  const totalH = humans.reduce((a,p)=>a+Math.max(p.hours,1),0);
+  humans.forEach(p=>{
+    const share = Math.round((Math.max(p.hours,1)/totalH)*pool);
+    p.earned += share;
+  });
   S.treasury -= pool;
   refreshTreasury();
-  alert(`Profit share of $${pool.toLocaleString()} distributed across ${S.pilots.length} crew members.`);
+  addLedgerRow('Profit share distributed', -pool);
+  alert(`$${pool.toLocaleString()} distributed across ${humans.length} crew member${humans.length!==1?'s':''}.`);
   renderEconomy();
 }
 
-// ── METAR ────────────────────────────────────────────
-const metarPool = [
-  'KSDF 011754Z 21012KT 4SM -RA OVC010 BKN025 08/07 A2982 RMK AO2',
-  'KSDF 012054Z 22008KT 6SM FEW015 BKN030 09/06 A2985 RMK AO2',
+// ══════════════════════════════════════════
+//  METAR
+// ══════════════════════════════════════════
+const metarPool=[
+  'KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180',
+  'KSDF 012054Z 22012KT 6SM FEW018 BKN040 09/06 A2985 RMK AO2',
   'KSDF 012354Z 19015G22KT 3SM -TSRA OVC008 07/06 A2978 RMK AO2',
-  'KSDF 020054Z 20010KT 10SM SCT025 BKN060 10/05 A2990 RMK AO2',
+  'KSDF 020054Z 21010KT 10SM SCT025 BKN060 11/05 A2990 RMK AO2',
 ];
-let metarIdx = 0;
-function refreshMetar() {
-  metarIdx = (metarIdx+1) % metarPool.length;
-  document.getElementById('metar-text').textContent = metarPool[metarIdx];
+let metarIdx=0;
+function refreshMetar(){
+  metarIdx=(metarIdx+1)%metarPool.length;
+  document.getElementById('metar-text').textContent=metarPool[metarIdx];
 }
 
-// ── INIT ─────────────────────────────────────────────
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
 refreshTreasury();
+renderHubs();
 </script>
 </body>
 </html>
