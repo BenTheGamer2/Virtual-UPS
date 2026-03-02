@@ -3,91 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <title>Virtual UPS Airlines</title>
+
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#14110f;
-  color:#f5d58c;
-}
-header{
-  background:#2b1d12;
-  padding:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-nav a{
-  color:#f5d58c;
-  margin-right:15px;
-  text-decoration:none;
-  font-weight:bold;
-}
-.card{
-  background:#1f1712;
-  padding:15px;
-  margin:15px;
-  border:1px solid #5c4323;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-td,th{
-  padding:8px;
-  border-bottom:1px solid #5c4323;
-}
-.progress{
-  height:8px;
-  background:#333;
-}
-.progress-bar{
-  height:8px;
-  background:#b38b2d;
-}
-.stock-up{color:#33cc66;}
-.stock-dn{color:#ff4444;}
-button{
-  background:#b38b2d;
-  border:none;
-  padding:8px;
-  cursor:pointer;
-}
+body{margin:0;font-family:Arial;background:#1b140f;color:#f2e6d8}
+nav{background:#2a1d15;padding:15px;display:flex;gap:20px}
+nav a{color:#d4af37;text-decoration:none;font-weight:bold;cursor:pointer}
+.section{display:none;padding:20px}
+.active{display:block}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border:1px solid #3a2a20;padding:8px;text-align:center}
+th{background:#2a1d15}
+.badge{padding:4px 8px;border-radius:4px}
+.b-blue{background:#1e3a5f}
+#stockbar{background:#000;padding:8px;font-size:14px}
 </style>
 </head>
+
 <body>
 
-<header>
-<div>
-<strong>Virtual UPS Airlines</strong>
-</div>
+<div id="stockbar">Loading stocks...</div>
+
 <nav>
-<a href="#">Dispatch</a>
-<a href="#">Fleet</a>
-<a href="#">Economy</a>
-<a href="#">Hubs</a>
-<a href="#">Leadership</a>
+<a onclick="show('dispatch')">Dispatch</a>
+<a onclick="show('crew')">Crew</a>
+<a onclick="show('leadership')">Leadership</a>
+<a onclick="show('news')">News</a>
+<a onclick="show('fleet')">Fleet</a>
+<a onclick="show('economy')">Economy</a>
+<a onclick="show('hubs')">Hubs</a>
 <a href="admin.html">Admin</a>
 </nav>
-<div>
-Zulu: <span id="zulu"></span>
-</div>
-</header>
 
-<div class="card">
-<h3>Treasury</h3>
-<div id="treasury"></div>
-</div>
+<div id="dispatch" class="section active">
+<h2>Active Flights</h2>
+<h3>Treasury: <span id="treasury-display"></span></h3>
 
-<div class="card">
-<h3>Live Market</h3>
-UPS: <span id="ups"></span><br>
-FDX: <span id="fdx"></span><br>
-VUPS: <span id="vups"></span>
-</div>
-
-<div class="card">
-<h3>Active AI Flights</h3>
 <table>
 <thead>
 <tr>
@@ -96,204 +46,204 @@ VUPS: <span id="vups"></span>
 <th>Aircraft</th>
 <th>Pilot</th>
 <th>Progress</th>
-<th>ETA (Z)</th>
+<th>ETA</th>
 <th>Revenue</th>
 <th>Fatigue</th>
 </tr>
 </thead>
-<tbody id="flights"></tbody>
+<tbody id="flight-tbody"></tbody>
 </table>
 </div>
 
+<div id="crew" class="section"><h2>Crew Ops</h2></div>
+<div id="leadership" class="section">
+<h2>Leadership</h2>
+CEO: David Abney (Retiring)<br>
+Incoming CEO: Ben Hoffman
+</div>
+<div id="news" class="section"><h2>Company News</h2></div>
+<div id="fleet" class="section"><h2>Fleet</h2></div>
+<div id="economy" class="section"><h2>Economy</h2></div>
+<div id="hubs" class="section"><h2>Hubs</h2></div>
+
 <script>
 
-/* ================= CORE DATA ================= */
+/* ================= NAV ================= */
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
+/* ================= TREASURY ================= */
 let treasury = localStorage.getItem("vups_treasury")
-  ? parseFloat(localStorage.getItem("vups_treasury"))
-  : 5900000000;
+ ? parseFloat(localStorage.getItem("vups_treasury"))
+ : 5900000000;
 
-let maintenanceFund = 0;
+document.getElementById("treasury-display")
+.innerText="$"+treasury.toLocaleString();
 
-const hubs = {
-  KSDF:{lat:38.17,lon:-85.73,weight:3},
-  EDDK:{lat:50.86,lon:7.14,weight:2},
-  VHHH:{lat:22.30,lon:113.91,weight:2},
-  KONT:{lat:34.05,lon:-117.60,weight:2},
-  KHSV:{lat:34.63,lon:-86.77,weight:1}
+/* ================= HUBS ================= */
+const hubs={
+KSDF:{lat:38.17,lon:-85.73,weight:4},
+EDDK:{lat:50.86,lon:7.14,weight:2},
+VHHH:{lat:22.30,lon:113.91,weight:2},
+KONT:{lat:34.05,lon:-117.60,weight:2},
+KHSV:{lat:34.63,lon:-86.77,weight:1}
 };
 
-let pilots = JSON.parse(localStorage.getItem("vups_pilots")) || [
-  {name:"Chen",fatigue:0},
-  {name:"Martinez",fatigue:0},
-  {name:"Singh",fatigue:0},
-  {name:"Rossi",fatigue:0}
+/* ================= PILOTS ================= */
+let pilots=JSON.parse(localStorage.getItem("vups_pilots"))||[
+{name:"AI Chen",fatigue:0},
+{name:"AI Martinez",fatigue:0},
+{name:"AI Singh",fatigue:0},
+{name:"AI Rossi",fatigue:0}
 ];
 
-let flights = JSON.parse(localStorage.getItem("vups_flights")) || [];
+let flights=JSON.parse(localStorage.getItem("vups_flights"))||[];
 
-/* ================= UTIL ================= */
-
-function saveState(){
-  localStorage.setItem("vups_treasury",treasury);
-  localStorage.setItem("vups_pilots",JSON.stringify(pilots));
-  localStorage.setItem("vups_flights",JSON.stringify(flights));
-}
-
-function updateTreasury(){
-  document.getElementById("treasury").innerText =
-    "$"+treasury.toLocaleString();
-}
-
+/* ================= DISTANCE ================= */
 function hav(a,b){
-  const R=3440;
-  const toRad=x=>x*Math.PI/180;
-  const dLat=toRad(b.lat-a.lat);
-  const dLon=toRad(b.lon-a.lon);
-  const lat1=toRad(a.lat);
-  const lat2=toRad(b.lat);
-  const aCalc=Math.sin(dLat/2)**2+
-    Math.sin(dLon/2)**2*Math.cos(lat1)*Math.cos(lat2);
-  const c=2*Math.atan2(Math.sqrt(aCalc),Math.sqrt(1-aCalc));
-  return R*c;
+const R=3440;
+const toRad=x=>x*Math.PI/180;
+const dLat=toRad(b.lat-a.lat);
+const dLon=toRad(b.lon-a.lon);
+const lat1=toRad(a.lat);
+const lat2=toRad(b.lat);
+const aCalc=Math.sin(dLat/2)**2+
+Math.sin(dLon/2)**2*Math.cos(lat1)*Math.cos(lat2);
+const c=2*Math.atan2(Math.sqrt(aCalc),Math.sqrt(1-aCalc));
+return R*c;
 }
 
-function pickHub(){
-  let total=0;
-  Object.values(hubs).forEach(h=>total+=h.weight);
-  let r=Math.random()*total;
-  for(let k in hubs){
-    r-=hubs[k].weight;
-    if(r<=0) return k;
-  }
+function weightedHub(){
+let total=0;
+Object.values(hubs).forEach(h=>total+=h.weight);
+let r=Math.random()*total;
+for(let k in hubs){
+r-=hubs[k].weight;
+if(r<=0)return k;
+}
 }
 
-function newFlight(pilot){
-  let from=pickHub();
-  let to=pickHub();
-  while(to===from) to=pickHub();
+/* ================= DISPATCH ================= */
+function dispatch(pilot){
+let from=weightedHub();
+let to=weightedHub();
+while(to===from)to=weightedHub();
 
-  const dist=hav(hubs[from],hubs[to]);
-  const hours=(dist/480)+0.7;
+const dist=hav(hubs[from],hubs[to]);
+const hours=(dist/480)+0.7;
 
-  let aircraft="B757F";
-  if(dist>2500) aircraft="B767F";
-  if(dist>4500) aircraft="B747-8F";
+let aircraft="B757F";
+if(dist>2500)aircraft="B767F";
+if(dist>4500)aircraft="B747-8F";
 
-  let delay=0;
-  if(Math.random()<0.15) delay=0.5;
+let delay=0;
+if(Math.random()<0.15)delay=0.5;
 
-  const revenue=Math.floor(Math.random()*200000)+80000;
+let revenue=Math.floor(Math.random()*180000)+60000;
 
-  flights.push({
-    id:"5Y"+Math.floor(Math.random()*900+100),
-    pilot:pilot.name,
-    from,to,
-    aircraft,
-    start:Date.now(),
-    duration:(hours+delay)*3600000,
-    revenue
-  });
+flights.push({
+id:"5Y"+Math.floor(Math.random()*900+100),
+pilot:pilot.name,
+from,to,aircraft,
+start:Date.now(),
+duration:(hours+delay)*3600000,
+revenue
+});
 }
 
 /* ================= ENGINE ================= */
-
 function engine(){
-  const now=Date.now();
-  flights=flights.filter(f=>{
-    const pct=(now-f.start)/f.duration;
+const now=Date.now();
 
-    if(pct>=1){
-      treasury+=f.revenue*0.45;
-      maintenanceFund+=f.revenue*0.05;
+flights=flights.filter(f=>{
+let pct=(now-f.start)/f.duration;
+if(pct>=1){
+treasury+=f.revenue*0.45;
+pilots.find(p=>p.name===f.pilot).fatigue+=8;
+dispatch(pilots.find(p=>p.name===f.pilot));
+return false;
+}
+return true;
+});
 
-      let p=pilots.find(x=>x.name===f.pilot);
-      p.fatigue+=10;
+pilots.forEach(p=>{
+if(!flights.find(f=>f.pilot===p.name)){
+dispatch(p);
+}
+if(p.fatigue>0)p.fatigue-=0.02;
+});
 
-      newFlight(p);
-      return false;
-    }
-    return true;
-  });
-
-  pilots.forEach(p=>{
-    if(!flights.find(f=>f.pilot===p.name)){
-      newFlight(p);
-    }
-    if(p.fatigue>0) p.fatigue-=0.02;
-  });
-
-  renderFlights();
-  saveState();
+updateBoard();
+save();
 }
 
-function renderFlights(){
-  const tb=document.getElementById("flights");
-  tb.innerHTML="";
-  const now=Date.now();
+function updateBoard(){
+const tbody=document.getElementById("flight-tbody");
+tbody.innerHTML="";
+const now=Date.now();
 
-  flights.forEach(f=>{
-    const pct=Math.min(1,(now-f.start)/f.duration);
-    const eta=new Date(f.start+f.duration)
-      .toUTCString().split(" ")[4];
+flights.forEach(f=>{
+let pct=Math.min(1,(now-f.start)/f.duration);
+let eta=new Date(f.start+f.duration)
+.toUTCString().split(" ")[4];
 
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${f.id}</td>
-      <td>${f.from}→${f.to}</td>
-      <td>${f.aircraft}</td>
-      <td>${f.pilot}</td>
-      <td>
-        <div class="progress">
-          <div class="progress-bar" style="width:${pct*100}%"></div>
-        </div>
-        ${(pct*100).toFixed(1)}%
-      </td>
-      <td>${eta}</td>
-      <td>$${f.revenue.toLocaleString()}</td>
-      <td>${pilots.find(p=>p.name===f.pilot).fatigue.toFixed(1)}%</td>
-    `;
-    tb.appendChild(tr);
-  });
+let tr=document.createElement("tr");
+tr.innerHTML=`
+<td>${f.id}</td>
+<td>${f.from}→${f.to}</td>
+<td>${f.aircraft}</td>
+<td>${f.pilot}</td>
+<td>${(pct*100).toFixed(1)}%</td>
+<td>${eta}Z</td>
+<td>${f.revenue.toLocaleString()}</td>
+<td>${pilots.find(p=>p.name===f.pilot).fatigue.toFixed(1)}%</td>
+`;
+tbody.appendChild(tr);
+});
+
+document.getElementById("treasury-display")
+.innerText="$"+treasury.toLocaleString();
+}
+
+function save(){
+localStorage.setItem("vups_treasury",treasury);
+localStorage.setItem("vups_pilots",JSON.stringify(pilots));
+localStorage.setItem("vups_flights",JSON.stringify(flights));
 }
 
 /* ================= STOCK ================= */
-
-async function stock(){
-  let key=localStorage.getItem("finnhub");
-  if(!key){
-    key=prompt("Enter Finnhub API key");
-    localStorage.setItem("finnhub",key);
-  }
-
-  async function get(sym){
-    const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${key}`);
-    return r.json();
-  }
-
-  const ups=await get("UPS");
-  const fdx=await get("FDX");
-
-  const vups=ups.c*1.15;
-
-  document.getElementById("ups").innerText="$"+ups.c.toFixed(2);
-  document.getElementById("fdx").innerText="$"+fdx.c.toFixed(2);
-  document.getElementById("vups").innerText="$"+vups.toFixed(2);
+function setupFinnhub(){
+if(!localStorage.getItem("finnhub")){
+let key=prompt("Enter your free Finnhub API key:");
+localStorage.setItem("finnhub",key);
+}
 }
 
-/* ================= CLOCK ================= */
+async function updateStocks(){
+const key=localStorage.getItem("finnhub");
+if(!key)return;
 
-setInterval(()=>{
-  document.getElementById("zulu").innerText=
-    new Date().toUTCString().split(" ")[4];
-},1000);
+try{
+const ups=await fetch(`https://finnhub.io/api/v1/quote?symbol=UPS&token=${key}`).then(r=>r.json());
+const fdx=await fetch(`https://finnhub.io/api/v1/quote?symbol=FDX&token=${key}`).then(r=>r.json());
+let vups=(ups.c*1.15).toFixed(2);
 
+document.getElementById("stockbar").innerText=
+`UPS $${ups.c} | FDX $${fdx.c} | VUPS $${vups}`;
+}catch{
+document.getElementById("stockbar").innerText="Stock API error";
+}
+}
+
+setupFinnhub();
+updateStocks();
+setInterval(updateStocks,60000);
+
+/* ================= START ================= */
 setInterval(engine,60000);
-setInterval(stock,60000);
-
-updateTreasury();
 engine();
-stock();
 
 </script>
 </body>
