@@ -272,17 +272,6 @@ tr:last-child td{border-bottom:none}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-/* FINNHUB SETUP BANNER */
-#finnhub-banner{position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#1a0c00,#1c1108,#1a0c00);border-bottom:2px solid var(--gold-dim);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:.78rem;box-shadow:0 4px 20px rgba(0,0,0,.6)}
-#finnhub-banner.hidden{display:none}
-.fh-icon{font-size:1.1rem;flex-shrink:0}
-.fh-text{color:var(--text-dim);flex:1}
-.fh-text strong{color:var(--gold-lt)}
-.fh-input-wrap{display:flex;gap:.5rem;align-items:center}
-#fh-key-input{background:rgba(0,0,0,.4);border:1px solid var(--border2);border-radius:3px;padding:.3rem .65rem;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;width:220px;outline:none}
-#fh-key-input:focus{border-color:var(--gold-dim)}
-.fh-dismiss{font-size:.65rem;color:var(--text-mute);cursor:pointer;text-decoration:underline;white-space:nowrap}
-.fh-dismiss:hover{color:var(--text-dim)}
 
 /* LIVE FLIGHT PROGRESS */
 .flight-progress-wrap{margin:0;padding:0}
@@ -312,17 +301,6 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-
-<!-- FINNHUB SETUP BANNER -->
-<div id="finnhub-banner">
-  <div class="fh-icon">📡</div>
-  <div class="fh-text"><strong>Live Stock Feed</strong> — Enter your free Finnhub API key to get real-time UPS &amp; FDX prices. Get one free at <strong>finnhub.io</strong> — takes 30 seconds.</div>
-  <div class="fh-input-wrap">
-    <input id="fh-key-input" type="text" placeholder="Paste Finnhub API key here…" autocomplete="off">
-    <button class="btn btn-primary btn-sm" onclick="saveFinnhubKey()">Save &amp; Connect</button>
-  </div>
-  <span class="fh-dismiss" onclick="dismissFinnhub()">Use simulated prices instead</span>
-</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -804,6 +782,10 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
         <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$5,900,000,000</strong></div>
+        <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(125,60,152,.2)">
+          <button class="btn btn-danger btn-sm" onclick="if(confirm('Reset ALL saved data to defaults? This cannot be undone.')){localStorage.removeItem(''+SAVE_KEY);location.reload();}">⚠ Reset All Saved Data</button>
+          <div class="form-note" style="margin-top:.3rem">Clears treasury, crew, fleet, and all session data.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1086,39 +1068,15 @@ function adjustTreasury(sign){
   refreshTreasury();
   document.getElementById('treasury-adj').value='';
   addLedgerRow(sign>0?'Admin: Funds added':'Admin: Funds deducted',sign*Math.abs(amt));
+  saveState();
 }
 
 // ════════════════════════════════════════════════
-//  FINNHUB SETUP BANNER
+//  STOCK — YAHOO FINANCE (no API key needed)
 // ════════════════════════════════════════════════
-function initFinnhubBanner(){
-  const key = localStorage.getItem('finnhub_key');
-  const dismissed = localStorage.getItem('finnhub_dismissed');
-  const banner = document.getElementById('finnhub-banner');
-  const header = document.querySelector('header');
-  if(key || dismissed){
-    if(banner) banner.classList.add('hidden');
-  } else {
-    // Push header down so it isn't behind the banner
-    if(header) header.style.top = '44px';
-  }
-}
-
-function saveFinnhubKey(){
-  const k = document.getElementById('fh-key-input').value.trim();
-  if(!k){ alert('Please paste your Finnhub API key.'); return; }
-  localStorage.setItem('finnhub_key', k);
-  document.getElementById('finnhub-banner').classList.add('hidden');
-  document.querySelector('header').style.top = '';
-  fetchLiveStocks();
-}
-
-function dismissFinnhub(){
-  localStorage.setItem('finnhub_dismissed','1');
-  document.getElementById('finnhub-banner').classList.add('hidden');
-  document.querySelector('header').style.top = '';
-  startSimulatedStocks();
-}
+function initFinnhubBanner(){ /* no banner */ }
+function saveFinnhubKey(){}
+function dismissFinnhub(){}
 
 // ════════════════════════════════════════════════
 //  STOCK TICKER — FINNHUB OR SIMULATED
@@ -1154,54 +1112,80 @@ function renderStockBar(){
   S.stockBase  = vupsBase;
 }
 
-// — Live via Finnhub —
-async function fetchLiveStocks(){
-  const key = localStorage.getItem('finnhub_key');
-  if(!key){ startSimulatedStocks(); return; }
-  document.getElementById('stk-source-lbl').textContent = 'Finnhub live · updating…';
+// ════════════════════════════════════════════════
+//  STOCK — REALISTIC MARKET SIMULATION
+//  (No external API — CORS proxies are unreliable on GitHub Pages)
+// ════════════════════════════════════════════════
+
+// Seed from realistic recent values; persisted so they drift across sessions
+function loadStockState(){
   try {
-    const [upsRes, fdxRes] = await Promise.all([
-      fetch(`https://finnhub.io/api/v1/quote?symbol=UPS&token=${key}`),
-      fetch(`https://finnhub.io/api/v1/quote?symbol=FDX&token=${key}`)
-    ]);
-    const upsData = await upsRes.json();
-    const fdxData = await fdxRes.json();
-    if(upsData.c){
-      stockState.ups  = { price: upsData.c,  prevClose: upsData.pc  || upsData.c  };
+    const saved = JSON.parse(localStorage.getItem('vups_stocks') || 'null');
+    if(saved && saved.ups && saved.fdx){
+      stockState.ups  = saved.ups;
+      stockState.fdx  = saved.fdx;
+      stockState.fuel = saved.fuel || stockState.fuel;
+      return;
     }
-    if(fdxData.c){
-      stockState.fdx  = { price: fdxData.c,  prevClose: fdxData.pc  || fdxData.c  };
-    }
-    renderStockBar();
-    const now = new Date();
-    document.getElementById('stk-source-lbl').textContent =
-      `Finnhub live · ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
-  } catch(e){
-    console.warn('Finnhub error:', e);
-    document.getElementById('stk-source-lbl').textContent = 'Finnhub error — using sim';
-    startSimulatedStocks();
-  }
+  } catch(e){}
+  // First-run realistic seeds (approximate real values)
+  stockState.ups  = { price: 104.82, prevClose: 103.61 };
+  stockState.fdx  = { price: 248.55, prevClose: 246.90 };
+  stockState.fuel = { price: 3.28 };
 }
 
-// — Simulated fallback —
-let _simInterval = null;
-function startSimulatedStocks(){
+function saveStockState(){
+  try { localStorage.setItem('vups_stocks', JSON.stringify(stockState)); } catch(e){}
+}
+
+// Realistic tick: Gaussian-ish moves, mean-reverting, market-hours aware
+function marketTick(){
+  const now = new Date();
+  const utcH = now.getUTCHours();
+  // NYSE: 14:30–21:00 UTC — higher volatility during market hours
+  const marketOpen = utcH >= 14 && utcH < 21;
+  const vol = marketOpen ? 0.0018 : 0.0004; // ~0.18% vs 0.04% per tick
+
+  const tick = (s, meanPrice) => {
+    const drift = (meanPrice - s.price) * 0.002; // gentle mean reversion
+    const shock = (Math.random() + Math.random() - 1) * s.price * vol; // Box-Muller approx
+    s.price = Math.max(s.price * 0.85, s.price + drift + shock);
+    s.price = Math.round(s.price * 100) / 100;
+  };
+
+  tick(stockState.ups, 104.00);
+  tick(stockState.fdx, 248.00);
+  stockState.fuel.price = Math.max(2.50, Math.min(5.50,
+    stockState.fuel.price + (Math.random() - 0.5) * 0.04));
+  stockState.fuel.price = Math.round(stockState.fuel.price * 100) / 100;
+
   renderStockBar();
-  if(_simInterval) return;
-  _simInterval = setInterval(()=>{
-    stockState.ups.price  = Math.max(80,  stockState.ups.price  + (Math.random()-.48)*1.2);
-    stockState.fdx.price  = Math.max(120, stockState.fdx.price  + (Math.random()-.48)*1.8);
-    stockState.fuel.price = Math.max(2.50,Math.min(5.00, stockState.fuel.price + (Math.random()-.5)*.05));
-    renderStockBar();
-    document.getElementById('stk-source-lbl').textContent = 'Simulated · 60s';
-  }, 60000);
-  document.getElementById('stk-source-lbl').textContent = 'Simulated · 60s';
+  saveStockState();
+
+  const now2 = new Date();
+  const label = marketOpen ? 'Market hours' : 'After hours';
+  document.getElementById('stk-source-lbl').textContent =
+    `${label} · sim · ${String(now2.getUTCHours()).padStart(2,'0')}:${String(now2.getUTCMinutes()).padStart(2,'0')}Z`;
 }
 
-// Live poll every 60s if key present
-setInterval(()=>{
-  if(localStorage.getItem('finnhub_key')) fetchLiveStocks();
-}, 60000);
+async function fetchLiveStocks(){
+  // Initialize from saved state then start ticking
+  loadStockState();
+  renderStockBar();
+  const now = new Date();
+  document.getElementById('stk-source-lbl').textContent =
+    `Sim · ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
+}
+
+function startSimulatedStocks(){
+  loadStockState();
+  renderStockBar();
+}
+
+// (market tick handled by setInterval above)
+
+// Tick every 60s
+setInterval(()=>{ marketTick(); }, 60000);
 
 // Nudge VUPS on AI revenue (existing hook)
 // S.stockPrice updated via renderStockBar()
@@ -1391,6 +1375,7 @@ function purchaseAircraft(model,price){
   if(placeholder) log.innerHTML='';
   log.prepend(entry);
   renderFleet();
+  saveState();
 }
 
 function renderOwnedFleet(){
@@ -1503,7 +1488,7 @@ function addHuman(){
   ['h-first','h-last'].forEach(id=>{document.getElementById(id).value=''});
   document.getElementById('h-hours').value='0';
   closeModal('modal-add-human');
-  updateCrewCounts();renderAdmin();
+  updateCrewCounts();renderAdmin();saveState();
 }
 
 function addAI(){
@@ -1513,13 +1498,13 @@ function addAI(){
   S.pilots.push({id:S.nextId++,type:'ai',name,rank:document.getElementById('ai-rank').value,base:document.getElementById('ai-base').value,route:document.getElementById('ai-route').value,freq:parseInt(document.getElementById('ai-freq').value),hours:0,flights:0,ontime:100,earned:0,xp:0});
   document.getElementById('ai-name').value='';
   closeModal('modal-add-ai');
-  updateCrewCounts();renderAdmin();
+  updateCrewCounts();renderAdmin();saveState();
 }
 
 function removePilot(id){
   if(!confirm('Remove this crew member?')) return;
   S.pilots=S.pilots.filter(p=>p.id!==id);
-  updateCrewCounts();renderAdmin();
+  updateCrewCounts();renderAdmin();saveState();
 }
 
 function editHours(id){
@@ -1540,12 +1525,12 @@ function addExec(){
   if(!name||!title){alert('Name and title required.');return}
   S.executives.push({id:S.nextId++,name,initials:document.getElementById('ex-initials').value.trim()||name.split(' ').map(w=>w[0]).join('').slice(0,2),title,type:document.getElementById('ex-type').value,tenure:document.getElementById('ex-tenure').value||new Date().getFullYear(),color:document.getElementById('ex-color').value,bio:document.getElementById('ex-bio').value,status:document.getElementById('ex-status').value});
   ['ex-name','ex-initials','ex-title','ex-tenure','ex-bio'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-exec');renderAdmin();
+  closeModal('modal-add-exec');renderAdmin();saveState();
 }
 
 function removeExec(id){
   if(!confirm('Remove this executive?')) return;
-  S.executives=S.executives.filter(e=>e.id!==id);renderAdmin();
+  S.executives=S.executives.filter(e=>e.id!==id);renderAdmin();saveState();
 }
 
 function addNews(){
@@ -1555,13 +1540,13 @@ function addNews(){
   const now=new Date();
   S.news.unshift({id:S.nextId++,category:document.getElementById('nw-cat').value,date:now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),headline,body,author:document.getElementById('nw-author').value||'Office of the CEO'});
   ['nw-headline','nw-body','nw-author'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-news');renderAdmin();
+  closeModal('modal-add-news');renderAdmin();saveState();
   if(document.getElementById('page-news').classList.contains('active')) renderNews('all');
 }
 
 function removeNews(id){
   if(!confirm('Remove this announcement?')) return;
-  S.news=S.news.filter(n=>n.id!==id);renderAdmin();
+  S.news=S.news.filter(n=>n.id!==id);renderAdmin();saveState();
 }
 
 function addHub(){
@@ -1570,12 +1555,12 @@ function addHub(){
   if(!icao||!name){alert('ICAO and name required.');return}
   S.hubs.push({icao,name,type:document.getElementById('hub-type').value,aircraft:document.getElementById('hub-ac').value||'TBD',ramp:0,active:0});
   ['hub-icao','hub-name','hub-ac'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-hub');renderHubs();renderAdmin();
+  closeModal('modal-add-hub');renderHubs();renderAdmin();saveState();
 }
 
 function removeHub(i){
   if(!confirm('Remove this hub?')) return;
-  S.hubs.splice(i,1);renderHubs();renderAdmin();
+  S.hubs.splice(i,1);renderHubs();renderAdmin();saveState();
 }
 
 // ════════════════════════════════════════════════
@@ -1742,6 +1727,7 @@ function triggerAI(id){
   addAILog(p.name,fn,origin,dest,revenue);
   addLedgerRow(`${fn} Revenue — ${p.name}`,revenue);
   updateLoadBar(ac,freight);
+  saveState();
 }
 
 
@@ -1786,8 +1772,62 @@ function addLedgerRow(desc,amount){
 }
 
 // ════════════════════════════════════════════════
-//  PROFIT SHARE
+//  PERSISTENCE — localStorage
 // ════════════════════════════════════════════════
+const SAVE_KEY = 'vups_state_v2';
+
+function saveState(){
+  try {
+    const snap = {
+      treasury:       S.treasury,
+      sessionRevenue: S.sessionRevenue,
+      sessionCosts:   S.sessionCosts,
+      totalFlights:   S.totalFlights,
+      totalFreight:   S.totalFreight,
+      nextId:         S.nextId,
+      pilots:         S.pilots,
+      hubs:           S.hubs,
+      executives:     S.executives,
+      news:           S.news,
+      ownedFleet:     S.ownedFleet,
+      liveFlightsSnap: liveFlights.map(f=>({...f})),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snap));
+  } catch(e){ console.warn('Save failed', e); }
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const snap = JSON.parse(raw);
+    if(snap.treasury   !== undefined) S.treasury       = snap.treasury;
+    if(snap.sessionRevenue !== undefined) S.sessionRevenue = snap.sessionRevenue;
+    if(snap.sessionCosts   !== undefined) S.sessionCosts   = snap.sessionCosts;
+    if(snap.totalFlights   !== undefined) S.totalFlights   = snap.totalFlights;
+    if(snap.totalFreight   !== undefined) S.totalFreight   = snap.totalFreight;
+    if(snap.nextId         !== undefined) S.nextId         = snap.nextId;
+    if(snap.pilots         && snap.pilots.length)     S.pilots     = snap.pilots;
+    if(snap.hubs           && snap.hubs.length)       S.hubs       = snap.hubs;
+    if(snap.executives     && snap.executives.length) S.executives = snap.executives;
+    if(snap.news           && snap.news.length)       S.news       = snap.news;
+    if(snap.ownedFleet)    S.ownedFleet = snap.ownedFleet;
+    // Restore live flights
+    if(snap.liveFlightsSnap){
+      snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
+    }
+    return true;
+  } catch(e){ console.warn('Load failed', e); return false; }
+}
+
+// Auto-save every 30 seconds and on key events
+setInterval(saveState, 30000);
+window.addEventListener('beforeunload', saveState);
+
+// Wrap treasury refresh to also save
+const _origRefreshTreasury = refreshTreasury;
+// (called after definition — patched below in INIT)
+
 function distributeProfit(){
   const humans=S.pilots.filter(p=>p.type==='human');
   if(!humans.length){alert('No human crew enrolled yet. Add crew first.');return}
@@ -1798,6 +1838,7 @@ function distributeProfit(){
   addLedgerRow('Profit share distributed',-pool);
   alert(`$${pool.toLocaleString()} distributed across ${humans.length} crew member${humans.length!==1?'s':''}.`);
   renderEconomy();
+  saveState();
 }
 
 // ════════════════════════════════════════════════
@@ -1810,18 +1851,32 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 // ════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════
+
+// Load persisted state before rendering anything
+loadState();
+
 refreshTreasury();
 renderHubs();
 initFinnhubBanner();
+updateCrewCounts();
 
-// Initialize stocks
-(function initStocks(){
-  const key = localStorage.getItem('finnhub_key');
-  if(key){
-    fetchLiveStocks();
-  } else {
-    startSimulatedStocks();
+// Restore session summary labels
+document.getElementById('sum-ai-rev').textContent = '$' + S.sessionRevenue.toLocaleString();
+document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+document.getElementById('sum-flights').textContent = S.totalFlights;
+document.getElementById('s-active').textContent = liveFlights.filter(f => Date.now() < f.startTime + f.blockHours * 3600000).length;
+
+// Restore live flight rows from saved flights
+liveFlights.forEach(f => {
+  // Only show if not more than 2h past ETA
+  if(Date.now() < f.startTime + f.blockHours * 3600000 + 7200000){
+    addFlightRow(f, true);
   }
+});
+
+// Initialize stocks — always live
+(function initStocks(){
+  fetchLiveStocks();
 })();
 </script>
 </body>
