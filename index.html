@@ -1,1601 +1,300 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virtual UPS Airlines — Operations</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>Virtual UPS Airlines</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0e0b09;--surface:#161109;--card:#1c1510;
-  --border:#2e1f12;--border2:#3d2b1a;
-  --gold:#c8920a;--gold-lt:#e8a800;--gold-dim:#7a5500;
-  --text:#d4c4a8;--text-dim:#7a6a52;--text-mute:#4a3a28;
-  --green:#2d9e5f;--green-lt:#35c270;
-  --red:#c0392b;--red-lt:#e74c3c;
-  --blue:#2471a3;--blue-lt:#3498db;
-  --orange:#c0610a;--orange-lt:#e67e22;
-  --purple:#7d3c98;--purple-lt:#a569bd;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#14110f;
+  color:#f5d58c;
 }
-html{font-size:14px}
-body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;line-height:1.5}
-
-/* LOGIN */
-#login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
-#login-screen.hidden{display:none}
-.login-box{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:2.5rem 2rem;width:340px;text-align:center}
-.login-logo{width:48px;height:48px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:#1a0e06;margin:0 auto 1.25rem}
-.login-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.25rem}
-.login-sub{font-size:.72rem;color:var(--text-mute);margin-bottom:1.5rem;letter-spacing:.05em}
-.login-err{font-size:.72rem;color:var(--red-lt);margin-bottom:.75rem;min-height:1rem}
-
-/* TICKER */
-.ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:28px;display:flex;align-items:center}
-.ticker-inner{display:flex;gap:3rem;animation:tick 40s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-mute)}
-.t-hi{color:var(--gold)}.t-g{color:var(--green-lt)}.t-r{color:var(--red-lt)}.t-b{color:var(--blue-lt)}
-@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-
-/* STOCK TICKER BAR */
-.stock-bar{background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);padding:.3rem 1.5rem;display:flex;align-items:center;gap:1.5rem;overflow-x:auto}
-.stock-item{display:flex;align-items:center;gap:.5rem;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.72rem}
-.stock-sym{color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.06em}
-.stock-price{color:var(--text)}
-.stock-chg.up{color:var(--green-lt)}.stock-chg.dn{color:var(--red-lt)}
-.stock-divider{color:var(--text-mute);font-size:.7rem}
-
-/* HEADER */
-header{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem;position:sticky;top:0;z-index:200}
-.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
-.logo-mark{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:#1a0e06;flex-shrink:0}
-.logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
-.logo-name span{color:var(--gold)}
-nav{display:flex;gap:.1rem;margin-left:.5rem}
-.nav-btn{background:none;border:none;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;border-radius:3px;transition:color .15s,background .15s}
-.nav-btn:hover{color:var(--text);background:rgba(200,146,10,.06)}
-.nav-btn.active{color:var(--gold);background:rgba(200,146,10,.1)}
-.admin-only-nav{color:var(--purple-lt) !important}
-.admin-only-nav.active,.admin-only-nav:hover{background:rgba(125,60,152,.15) !important;color:var(--purple-lt) !important}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:.85rem}
-.zulu{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
-.zulu strong{color:var(--gold);font-weight:400}
-.treasury-badge{display:flex;align-items:center;gap:.4rem;background:rgba(200,146,10,.08);border:1px solid var(--border2);border-radius:3px;padding:.25rem .65rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--gold-lt);letter-spacing:.04em}
-.treasury-badge .lbl{color:var(--text-mute);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
-.admin-logout-btn{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--purple-lt);letter-spacing:.08em;cursor:pointer;padding:.25rem .6rem;border-radius:3px;border:1px solid rgba(125,60,152,.3);background:rgba(125,60,152,.08)}
-.admin-logout-btn:hover{background:rgba(125,60,152,.2)}
-
-/* LAYOUT */
-main{padding:1.25rem;max-width:1600px;margin:0 auto}
-.page{display:none}.page.active{display:block}
-.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:.65rem;border-bottom:1px solid var(--border)}
-.sec-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
-.sec-title span{color:var(--gold)}
-.sec-title .adm{color:var(--purple-lt)}
-.sec-actions{display:flex;gap:.5rem;align-items:center}
-
-/* BUTTONS */
-.btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .9rem;border-radius:3px;cursor:pointer;transition:all .15s;border:1px solid transparent}
-.btn-primary{background:var(--gold);color:#1a0e06;border-color:var(--gold)}.btn-primary:hover{background:var(--gold-lt)}
-.btn-ghost{background:none;color:var(--text-dim);border-color:var(--border2)}.btn-ghost:hover{color:var(--text);border-color:var(--text-dim)}
-.btn-danger{background:none;color:var(--red-lt);border-color:rgba(192,57,43,.4)}.btn-danger:hover{background:rgba(192,57,43,.1)}
-.btn-purple{background:rgba(125,60,152,.2);color:var(--purple-lt);border-color:rgba(125,60,152,.4)}.btn-purple:hover{background:rgba(125,60,152,.35)}
-.btn-blue{background:rgba(36,113,163,.15);color:var(--blue-lt);border-color:rgba(36,113,163,.35)}.btn-blue:hover{background:rgba(36,113,163,.28)}
-.btn-sm{padding:.2rem .6rem;font-size:.7rem}
-
-/* CARD */
-.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
-.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.8rem 1rem}
-.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
-.stat-lbl{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem}
-.stat-sub{font-size:.68rem;margin-top:.2rem}
-.pos{color:var(--green-lt)}.neg{color:var(--red-lt)}.warn{color:var(--orange-lt)}.gld{color:var(--gold-lt)}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:.55rem .75rem;border-bottom:1px solid rgba(46,31,18,.6);font-family:'Share Tech Mono',monospace;font-size:.75rem;vertical-align:middle}
-tr:hover td{background:rgba(200,146,10,.03)}
-tr:last-child td{border-bottom:none}
-
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .45rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-.b-green{background:rgba(45,158,95,.12);color:var(--green-lt);border:1px solid rgba(45,158,95,.3)}
-.b-gold{background:rgba(200,146,10,.12);color:var(--gold-lt);border:1px solid rgba(200,146,10,.3)}
-.b-red{background:rgba(192,57,43,.12);color:var(--red-lt);border:1px solid rgba(192,57,43,.3)}
-.b-blue{background:rgba(36,113,163,.12);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
-.b-orange{background:rgba(192,97,10,.12);color:var(--orange-lt);border:1px solid rgba(192,97,10,.3)}
-.b-gray{background:rgba(74,58,40,.3);color:var(--text-dim);border:1px solid var(--border2)}
-.b-purple{background:rgba(125,60,152,.12);color:var(--purple-lt);border:1px solid rgba(125,60,152,.3)}
-.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
-.dot-g{background:var(--green-lt)}.dot-r{background:var(--red-lt)}.dot-y{background:var(--gold-lt)}.dot-b{background:var(--blue-lt)}
-
-/* BARS */
-.bar-wrap{margin-bottom:.65rem}
-.bar-header{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
-.bar-track{height:5px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
-.bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
-.bf-gold{background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
-.bf-green{background:linear-gradient(90deg,#1a6e3e,var(--green-lt))}
-.bf-red{background:linear-gradient(90deg,#7a1a10,var(--red-lt))}
-.bf-blue{background:linear-gradient(90deg,#0f3d5e,var(--blue-lt))}
-
-/* DISPATCH LAYOUT */
-.dispatch-layout{display:grid;grid-template-columns:230px 1fr 220px;gap:1rem}
-.dcol{display:flex;flex-direction:column;gap:.75rem}
-.metar-raw{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--blue-lt);background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;line-height:1.7;margin-bottom:.75rem;word-break:break-all}
-.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
-.wx-cell{background:rgba(0,0,0,.2);border-radius:3px;padding:.4rem .5rem;text-align:center}
-.wx-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--blue-lt);line-height:1}
-.wx-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem}
-
-/* CREW */
-.crew-layout{display:grid;grid-template-columns:1fr 300px;gap:1rem}
-.crew-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
-.crew-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem;transition:border-color .15s}
-.crew-card:hover{border-color:var(--border2)}
-.crew-card.ai-pilot{border-left:2px solid var(--blue)}
-.crew-card.human-pilot{border-left:2px solid var(--gold-dim)}
-.pilot-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem}
-.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0}
-.av-human{background:rgba(200,146,10,.15);color:var(--gold-lt);border:1px solid var(--border2)}
-.av-ai{background:rgba(36,113,163,.15);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
-.pilot-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;color:var(--text);line-height:1.2}
-.pilot-rank{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}
-.pilot-type-badge{margin-left:auto}
-.pilot-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;padding:.65rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:.65rem;text-align:center}
-.ps-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--text)}
-.ps-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
-.xp-bar-wrap{margin-bottom:.5rem}
-.xp-bar-row{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-mute);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
-.xp-track{height:3px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
-.xp-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
-.xp-fill-blue{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--blue-lt))}
-.pilot-actions{display:flex;gap:.4rem}
-
-/* ECONOMY */
-.eco-layout{display:grid;grid-template-columns:320px 1fr;gap:1rem}
-.ledger-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(46,31,18,.5);font-family:'Share Tech Mono',monospace;font-size:.72rem}
-.ledger-item:last-child{border-bottom:none}
-.li-desc{color:var(--text-dim)}.li-pos{color:var(--green-lt)}.li-neg{color:var(--red-lt)}
-
-/* HUBS */
-.hubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
-.hub-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
-.hub-icao{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:.06em;line-height:1}
-.hub-name{font-size:.8rem;color:var(--text-dim);margin-top:.1rem;margin-bottom:.75rem}
-.hub-detail-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);padding:.25rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace}
-.hub-detail-val{color:var(--text)}
-
-/* AI LOG */
-.ai-activity{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)}
-.ai-line{padding:.28rem 0;border-bottom:1px solid rgba(46,31,18,.3);display:flex;gap:.5rem;align-items:flex-start}
-.ai-line:last-child{border-bottom:none}
-.ai-time{color:var(--text-mute);white-space:nowrap}
-.hi{color:var(--blue-lt)}.earn{color:var(--green-lt)}
-
-/* ── LEADERSHIP / C-SUITE ── */
-.leadership-layout{display:grid;grid-template-columns:1fr 340px;gap:1rem}
-.csuite-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;margin-bottom:1rem}
-.exec-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem;position:relative;overflow:hidden;transition:border-color .2s}
-.exec-card:hover{border-color:var(--border2)}
-.exec-card.ceo-card{border-color:rgba(200,146,10,.4);background:linear-gradient(135deg,rgba(200,146,10,.04) 0%,var(--card) 60%)}
-.exec-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.75rem;border:2px solid var(--border2)}
-.exec-av-gold{background:rgba(200,146,10,.15);color:var(--gold-lt);border-color:rgba(200,146,10,.4)}
-.exec-av-blue{background:rgba(36,113,163,.15);color:var(--blue-lt);border-color:rgba(36,113,163,.35)}
-.exec-av-green{background:rgba(45,158,95,.15);color:var(--green-lt);border-color:rgba(45,158,95,.3)}
-.exec-av-purple{background:rgba(125,60,152,.15);color:var(--purple-lt);border-color:rgba(125,60,152,.3)}
-.exec-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.2}
-.exec-title{font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem;margin-bottom:.6rem}
-.exec-bio{font-size:.75rem;color:var(--text-dim);line-height:1.6}
-.exec-tenure{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute);margin-top:.5rem}
-.retiring-banner{background:rgba(200,146,10,.08);border:1px solid rgba(200,146,10,.25);border-radius:3px;padding:.4rem .65rem;font-size:.7rem;color:var(--gold-lt);margin-top:.6rem;font-family:'Share Tech Mono',monospace}
-
-/* ── NEWS FEED ── */
-.news-feed{display:flex;flex-direction:column;gap:.75rem}
-.news-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem;transition:border-color .2s}
-.news-card:hover{border-color:var(--border2)}
-.news-card.breaking{border-left:3px solid var(--gold)}
-.news-card.retirement{border-left:3px solid var(--purple-lt)}
-.news-card.operational{border-left:3px solid var(--blue-lt)}
-.news-card.financial{border-left:3px solid var(--green-lt)}
-.news-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.5rem}
-.news-category{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
-.news-date{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);white-space:nowrap}
-.news-headline{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);line-height:1.3;margin-bottom:.4rem}
-.news-body{font-size:.78rem;color:var(--text-dim);line-height:1.7}
-.news-author{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)}
-
-/* ── FLEET ACQUISITION ── */
-.fleet-layout{display:grid;grid-template-columns:1fr 280px;gap:1rem}
-.fleet-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
-.aircraft-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem;transition:border-color .2s;cursor:default}
-.aircraft-card:hover{border-color:var(--border2)}
-.aircraft-card.owned{border-left:3px solid var(--green)}
-.ac-model{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);margin-bottom:.2rem}
-.ac-type{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem}
-.ac-specs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-bottom:.75rem}
-.ac-spec{background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem}
-.ac-spec-val{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:600;color:var(--text)}
-.ac-spec-lbl{font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
-.ac-price{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.6rem}
-.ac-owned-count{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);margin-bottom:.5rem}
-
-/* ── QUARTERLY REPORT ── */
-.report-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.report-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem}
-.report-stat-big{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:700;line-height:1;margin-bottom:.25rem}
-.report-label{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
-.report-change{font-size:.72rem;margin-top:.2rem}
-.qtr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
-.qtr-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.8rem}
-.qtr-period{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;color:var(--gold);letter-spacing:.08em;margin-bottom:.4rem}
-
-/* ── ADMIN PAGE ── */
-.admin-wrap{background:rgba(125,60,152,.03);border:1px solid rgba(125,60,152,.15);border-radius:6px;padding:1.25rem;margin-bottom:1rem}
-.admin-warn{display:flex;align-items:center;gap:.75rem;background:rgba(125,60,152,.08);border:1px solid rgba(125,60,152,.2);border-radius:4px;padding:.65rem 1rem;margin-bottom:1.25rem;font-size:.78rem;color:var(--purple-lt)}
-.admin-section{margin-bottom:1.5rem}
-.admin-section-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--purple-lt);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid rgba(125,60,152,.2);display:flex;align-items:center;justify-content:space-between}
-.admin-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:5px;width:460px;max-width:95vw;max-height:88vh;overflow-y:auto;transform:translateY(12px);transition:transform .2s}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
-.modal-close{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:.1rem .3rem;border-radius:2px}
-.modal-close:hover{color:var(--text);background:var(--border)}
-.modal-body{padding:1.25rem}
-.form-group{margin-bottom:.9rem}
-.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem}
-.form-input,.form-select,.form-textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:3px;padding:.45rem .7rem;color:var(--text);font-family:'Barlow',sans-serif;font-size:.82rem;outline:none;transition:border-color .15s}
-.form-textarea{resize:vertical;min-height:80px;line-height:1.6}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold-dim)}
-.form-select option{background:var(--card)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
-.form-footer{display:flex;gap:.5rem;justify-content:flex-end;padding-top:.75rem;border-top:1px solid var(--border)}
-.form-note{font-size:.7rem;color:var(--text-mute);margin-top:.3rem;line-height:1.5}
-
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-mute)}
-.empty-state .icon{font-size:2rem;margin-bottom:.75rem;opacity:.4}
-.empty-state p{font-size:.8rem;line-height:1.7}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-
-/* RESPONSIVE */
-@media(max-width:1200px){
-  .dispatch-layout{grid-template-columns:1fr 1fr}
-  .dcol:last-child{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-  .eco-layout,.leadership-layout,.fleet-layout{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:repeat(3,1fr)}
-  .report-layout{grid-template-columns:1fr 1fr}
-  .admin-grid-2{grid-template-columns:1fr}
+header{
+  background:#2b1d12;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-@media(max-width:768px){
-  .dispatch-layout,.crew-layout{grid-template-columns:1fr}
-  .dcol:last-child{grid-column:1;display:flex}
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .qtr-grid{grid-template-columns:repeat(2,1fr)}
-  header{padding:0 .75rem;gap:.5rem}
-  .nav-btn{padding:.3rem .45rem;font-size:.7rem}
-  .report-layout{grid-template-columns:1fr}
+nav a{
+  color:#f5d58c;
+  margin-right:15px;
+  text-decoration:none;
+  font-weight:bold;
+}
+.card{
+  background:#1f1712;
+  padding:15px;
+  margin:15px;
+  border:1px solid #5c4323;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+td,th{
+  padding:8px;
+  border-bottom:1px solid #5c4323;
+}
+.progress{
+  height:8px;
+  background:#333;
+}
+.progress-bar{
+  height:8px;
+  background:#b38b2d;
+}
+.stock-up{color:#33cc66;}
+.stock-dn{color:#ff4444;}
+button{
+  background:#b38b2d;
+  border:none;
+  padding:8px;
+  cursor:pointer;
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">UPS</div>
-    <div class="login-title">Operations Portal</div>
-    <div class="login-sub">Virtual UPS Airlines</div>
-    <div class="login-err" id="login-err"></div>
-    <div class="form-group">
-      <label class="form-label">Username</label>
-      <input class="form-input" type="text" id="l-user" placeholder="admin" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input class="form-input" type="password" id="l-pass" placeholder="••••••••">
-    </div>
-    <div style="display:flex;gap:.5rem;margin-top:.25rem">
-      <button class="btn btn-ghost" style="flex:1" onclick="skipLogin()">View Only</button>
-      <button class="btn btn-primary" style="flex:2" onclick="doLogin()">Sign In</button>
-    </div>
-    <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.7">View Only — anyone can browse.<br>Admin — full management access.</div>
-  </div>
-</div>
-
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-inner">
-    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
-    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
-    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
-    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
-    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
-    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
-    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
-    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
-    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
-    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
-    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
-    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
-  </div>
-</div>
-
-<!-- STOCK BAR -->
-<div class="stock-bar">
-  <div class="stock-item">
-    <span class="stock-sym">VUPS</span>
-    <span class="stock-price" id="stk-vups">$142.80</span>
-    <span class="stock-chg up" id="stk-vups-chg">▲ +1.22 (+0.86%)</span>
-  </div>
-  <span class="stock-divider">|</span>
-  <div class="stock-item">
-    <span class="stock-sym">UPS</span>
-    <span class="stock-price">$142.80</span>
-    <span class="stock-chg dn">▼ -0.42 (-0.29%)</span>
-  </div>
-  <span class="stock-divider">|</span>
-  <div class="stock-item">
-    <span class="stock-sym">FDX</span>
-    <span class="stock-price">$228.15</span>
-    <span class="stock-chg dn">▼ -1.18 (-0.51%)</span>
-  </div>
-  <span class="stock-divider">|</span>
-  <div class="stock-item">
-    <span class="stock-sym">Fuel/gal</span>
-    <span class="stock-price">$3.28</span>
-    <span class="stock-chg up">▲ +0.04</span>
-  </div>
-  <span class="stock-divider">|</span>
-  <div class="stock-item" style="margin-left:auto">
-    <span style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute)">Market Sim — updates every 30s</span>
-  </div>
-</div>
-
-<!-- HEADER -->
 <header>
-  <a class="logo" href="#">
-    <div class="logo-mark">UPS</div>
-    <div class="logo-name">Virtual <span>UPS</span> Airlines</div>
-  </a>
-  <nav>
-    <button class="nav-btn active"     onclick="goNav(this,'dispatch')">Dispatch</button>
-    <button class="nav-btn"            onclick="goNav(this,'crew')">Crew</button>
-    <button class="nav-btn"            onclick="goNav(this,'leadership')">Leadership</button>
-    <button class="nav-btn"            onclick="goNav(this,'news')">News</button>
-    <button class="nav-btn"            onclick="goNav(this,'fleet')">Fleet</button>
-    <button class="nav-btn"            onclick="goNav(this,'economy')">Economy</button>
-    <button class="nav-btn"            onclick="goNav(this,'hubs')">Hubs</button>
-    <button class="nav-btn admin-only-nav" id="admin-nav-btn" onclick="goNav(this,'admin')" style="display:none">⬡ Admin</button>
-  </nav>
-  <div class="header-right">
-    <div class="zulu">ZULU <strong id="zulu">--:--Z</strong></div>
-    <div class="treasury-badge">
-      <span class="lbl">Treasury</span>
-      <span id="treasury-display">$5,900,000,000</span>
-    </div>
-    <div class="admin-logout-btn" id="admin-badge" onclick="logoutAdmin()" style="display:none">⬡ ADMIN · Logout</div>
-  </div>
+<div>
+<strong>Virtual UPS Airlines</strong>
+</div>
+<nav>
+<a href="#">Dispatch</a>
+<a href="#">Fleet</a>
+<a href="#">Economy</a>
+<a href="#">Hubs</a>
+<a href="#">Leadership</a>
+<a href="admin.html">Admin</a>
+</nav>
+<div>
+Zulu: <span id="zulu"></span>
+</div>
 </header>
 
-<main>
-
-<!-- ═══════════ DISPATCH ═══════════ -->
-<div id="page-dispatch" class="page active">
-  <div class="sec-header">
-    <div class="sec-title">Dispatch <span>Control</span></div>
-    <div class="sec-actions">
-      <button class="btn btn-ghost btn-sm" onclick="refreshMetar()">↻ METAR</button>
-    </div>
-  </div>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active Flights</div><div class="stat-sub pos">AI fleet live</div></div>
-    <div class="stat"><div class="stat-val gld">98%</div><div class="stat-lbl">AI On-Time</div><div class="stat-sub pos">Fleet nominal</div></div>
-    <div class="stat"><div class="stat-val" id="s-crew-count">4</div><div class="stat-lbl">AI Pilots Active</div><div class="stat-sub" style="color:var(--blue-lt)">All online</div></div>
-    <div class="stat"><div class="stat-val warn" id="s-human-count">0</div><div class="stat-lbl">Human Crew</div><div class="stat-sub" style="color:var(--text-mute)">Pending enrollment</div></div>
-    <div class="stat"><div class="stat-val pos" id="s-revenue">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI earning</div></div>
-  </div>
-  <div class="dispatch-layout">
-    <div class="dcol">
-      <div class="card">
-        <div class="card-title">KSDF — Worldport WX</div>
-        <div class="metar-raw" id="metar-text">KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180</div>
-        <div class="wx-grid">
-          <div class="wx-cell"><div class="wx-val">CLR</div><div class="wx-lbl">Ceiling</div></div>
-          <div class="wx-cell"><div class="wx-val pos">VFR</div><div class="wx-lbl">Flt Cat</div></div>
-          <div class="wx-cell"><div class="wx-val">8kt</div><div class="wx-lbl">Wind</div></div>
-          <div class="wx-cell"><div class="wx-val">10SM</div><div class="wx-lbl">Visibility</div></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Shift Summary</div>
-        <div class="ledger-item"><span class="li-desc">AI flights completed</span><span class="li-pos" id="sum-flights">0</span></div>
-        <div class="ledger-item"><span class="li-desc">Human flights</span><span style="color:var(--text-mute);font-family:'Share Tech Mono',monospace">0</span></div>
-        <div class="ledger-item"><span class="li-desc">Freight moved</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace" id="sum-freight">0 lbs</span></div>
-        <div class="ledger-item"><span class="li-desc">AI revenue</span><span class="li-pos" id="sum-ai-rev">$0</span></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Hub Network</div>
-        <table style="font-size:.72rem">
-          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KSDF</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Louisville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-gold">Global</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">EDDK</td><td style="color:var(--text-dim);padding:.3rem .5rem">Cologne</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">VHHH</td><td style="color:var(--text-dim);padding:.3rem .5rem">Hong Kong</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KONT</td><td style="color:var(--text-dim);padding:.3rem .5rem">Ontario CA</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
-          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KHSV</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Huntsville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-green">Feeder</span></td></tr>
-        </table>
-      </div>
-    </div>
-    <div class="dcol">
-      <div class="card">
-        <div class="card-title">Active Flight Board</div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Pilot</th><th>Status</th><th>ETA (Z)</th><th>Freight lbs</th><th>Load</th></tr></thead>
-          <tbody id="flight-tbody"></tbody></table>
-        </div>
-        <div id="flight-empty" class="empty-state" style="padding:1.5rem 1rem">
-          <div class="icon">✈</div><p>AI pilots spinning up. Flights appear here automatically.</p>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Load Management</div>
-        <div id="load-bars"><div style="font-size:.75rem;color:var(--text-mute);text-align:center;padding:.5rem 0">No active loads yet.</div></div>
-      </div>
-    </div>
-    <div class="dcol">
-      <div class="card">
-        <div class="card-title">AI Pilot Activity</div>
-        <div class="ai-activity" id="ai-log">
-          <div class="ai-line"><span class="ai-time">--:--Z</span><span>Waiting for AI flights...</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Hot Spare System</div>
-        <div style="font-size:.75rem;color:var(--text-mute);padding:.5rem 0">All aircraft nominal.</div>
-        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:.5rem">+ Flag Aircraft</button>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<h3>Treasury</h3>
+<div id="treasury"></div>
 </div>
 
-<!-- ═══════════ CREW ═══════════ -->
-<div id="page-crew" class="page">
-  <div class="sec-header">
-    <div class="sec-title">Crew <span>Roster</span></div>
-    <div class="sec-actions"><span style="font-size:.72rem;color:var(--text-mute);font-family:'Share Tech Mono',monospace">Managed via Admin panel</span></div>
-  </div>
-  <div class="crew-layout">
-    <div>
-      <div id="crew-grid" class="crew-grid"></div>
-      <div id="crew-empty" class="empty-state">
-        <div class="icon">👨‍✈️</div>
-        <p>No human crew enrolled yet.<br>Pilots are added by the admin.<br>Check back once the airline is staffed.</p>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:.75rem">
-      <div class="card">
-        <div class="card-title">Rank Progression</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem">
-          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--green-lt)">Feeder Pilot</span><span style="color:var(--text-mute)">0–249 hrs</span></div>
-          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">C208B · ATR-42 · ATR-72</div>
-          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--blue-lt)">Regional F/O</span><span style="color:var(--text-mute)">250–999 hrs</span></div>
-          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">B757 · B767</div>
-          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold-lt)">Global Captain</span><span style="color:var(--text-mute)">1,000+ hrs</span></div>
-          <div style="padding:.2rem 0 0 .75rem;font-size:.65rem;color:var(--text-mute)">B747 · MD-11 · All types</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Jumpseat Board</div>
-        <div id="jumpseat-board"><div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div></div>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<h3>Live Market</h3>
+UPS: <span id="ups"></span><br>
+FDX: <span id="fdx"></span><br>
+VUPS: <span id="vups"></span>
 </div>
 
-<!-- ═══════════ LEADERSHIP ═══════════ -->
-<div id="page-leadership" class="page">
-  <div class="sec-header">
-    <div class="sec-title">C-Suite <span>Leadership</span></div>
-    <div class="sec-actions" id="leadership-actions"></div>
-  </div>
-
-  <!-- Retirement announcement banner -->
-  <div style="background:linear-gradient(135deg,rgba(200,146,10,.08),rgba(125,60,152,.06));border:1px solid rgba(200,146,10,.3);border-radius:5px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem">
-    <div style="font-size:1.5rem">🏆</div>
-    <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--gold-lt);letter-spacing:.05em">CEO TRANSITION ANNOUNCEMENT</div>
-      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">After 12 years of service, our founding CEO is stepping down. A successor has been named. The handoff takes effect <strong style="color:var(--text)">Q1 2025</strong>. Full statement on the <a href="#" onclick="goNav(document.querySelector('[onclick*=news]'),'news');return false" style="color:var(--gold);text-decoration:none">News page</a>.</div>
-    </div>
-  </div>
-
-  <div id="csuite-grid" class="csuite-grid"></div>
-
-  <div class="sec-header" style="margin-top:.5rem">
-    <div class="sec-title">Board of <span>Directors</span></div>
-  </div>
-  <div id="board-grid" class="csuite-grid"></div>
-</div>
-
-<!-- ═══════════ NEWS ═══════════ -->
-<div id="page-news" class="page">
-  <div class="sec-header">
-    <div class="sec-title">News & <span>Announcements</span></div>
-    <div class="sec-actions" id="news-actions"></div>
-  </div>
-  <div class="leadership-layout">
-    <div id="news-feed" class="news-feed"></div>
-    <div style="display:flex;flex-direction:column;gap:.75rem">
-      <div class="card">
-        <div class="card-title">Categories</div>
-        <div style="display:flex;flex-direction:column;gap:.35rem">
-          <button class="btn btn-ghost btn-sm" onclick="filterNews('all')" style="text-align:left">📋 All Posts</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterNews('breaking')" style="text-align:left">🔴 Breaking News</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterNews('retirement')" style="text-align:left">🏆 CEO Transition</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterNews('financial')" style="text-align:left">📈 Financial</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterNews('operational')" style="text-align:left">✈ Operational</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Pinned</div>
-        <div style="font-size:.78rem;color:var(--text-dim);line-height:1.7">
-          <div style="color:var(--gold-lt);font-family:'Barlow Condensed',sans-serif;font-weight:600;margin-bottom:.25rem">CEO Retirement</div>
-          Full retirement statement and successor announcement available in the news feed.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ FLEET ═══════════ -->
-<div id="page-fleet" class="page">
-  <div class="sec-header">
-    <div class="sec-title">Fleet <span>Acquisition</span></div>
-    <div class="sec-actions">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)">Treasury: <span id="fleet-treasury" class="gld">$5,900,000,000</span></span>
-    </div>
-  </div>
-  <div class="fleet-layout">
-    <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.75rem">Aircraft Catalog — Click to Purchase</div>
-      <div id="fleet-catalog" class="fleet-catalog"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:.75rem">
-      <div class="card">
-        <div class="card-title">Owned Fleet</div>
-        <div id="owned-fleet-list"><div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No aircraft purchased yet.</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Fleet Value</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold-lt)" id="fleet-value">$0</div>
-        <div style="font-size:.65rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem">Total acquisition cost</div>
-        <div style="margin-top:.75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)" id="fleet-count">0 aircraft owned</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Purchase Log</div>
-        <div id="purchase-log" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)">
-          <div style="color:var(--text-mute)">No purchases yet.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ ECONOMY ═══════════ -->
-<div id="page-economy" class="page">
-  <div class="sec-header">
-    <div class="sec-title">Economy <span>& Finance</span></div>
-    <div class="sec-actions">
-      <button class="btn btn-primary btn-sm" id="profit-share-btn" onclick="distributeProfit()" style="display:none">Distribute Profit Share</button>
-    </div>
-  </div>
-
-  <!-- Quarterly Summary -->
-  <div class="qtr-grid">
-    <div class="qtr-card">
-      <div class="qtr-period">Q1 2024</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$21.7B</div>
-      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
-      <div style="font-size:.65rem;color:var(--red-lt);margin-top:.1rem">▼ -5.3% YoY</div>
-    </div>
-    <div class="qtr-card">
-      <div class="qtr-period">Q2 2024</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$22.1B</div>
-      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
-      <div style="font-size:.65rem;color:var(--green-lt);margin-top:.1rem">▲ +1.8% QoQ</div>
-    </div>
-    <div class="qtr-card">
-      <div class="qtr-period">Q3 2024</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$22.2B</div>
-      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
-      <div style="font-size:.65rem;color:var(--green-lt);margin-top:.1rem">▲ +5.6% YoY</div>
-    </div>
-    <div class="qtr-card" style="border-color:rgba(200,146,10,.3);background:rgba(200,146,10,.04)">
-      <div class="qtr-period" style="color:var(--gold-lt)">Q4 2024 ★</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold-lt)" id="q4-rev">$0</div>
-      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Live Session</div>
-      <div style="font-size:.65rem;color:var(--gold-lt);margin-top:.1rem">Current Quarter</div>
-    </div>
-  </div>
-
-  <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat"><div class="stat-val gld" id="eco-total">$5,900,000,000</div><div class="stat-lbl">Treasury</div><div class="stat-sub pos">Starting balance — UPS Cash on Hand</div></div>
-    <div class="stat"><div class="stat-val neg" id="eco-cost">$0</div><div class="stat-lbl">Session Costs</div><div class="stat-sub" style="color:var(--text-mute)">Fuel + fees</div></div>
-    <div class="stat"><div class="stat-val pos" id="eco-net">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI fleet earning</div></div>
-    <div class="stat"><div class="stat-val gld" id="eco-pool">$413,000,000</div><div class="stat-lbl">Profit Share Pool</div><div class="stat-sub warn">7% of treasury</div></div>
-  </div>
-
-  <div class="eco-layout">
-    <div style="display:flex;flex-direction:column;gap:.75rem">
-      <div class="card">
-        <div class="card-title">Pay Rate Tiers</div>
-        <div class="ledger-item"><span class="li-desc">🔴 Next Day Air</span><span class="li-pos">$18.00/lb</span></div>
-        <div class="ledger-item"><span class="li-desc">🟡 2nd Day Air</span><span style="color:var(--gold-lt);font-family:'Share Tech Mono',monospace">$12.00/lb</span></div>
-        <div class="ledger-item"><span class="li-desc">🟢 3-Day Select</span><span class="li-pos">$8.50/lb</span></div>
-        <div class="ledger-item"><span class="li-desc">⚪ Standard Ground</span><span style="color:var(--text-dim);font-family:'Share Tech Mono',monospace">$4.00/lb</span></div>
-        <div class="ledger-item"><span class="li-desc">⚠ Hazmat Surcharge</span><span class="warn">+$6.00/lb</span></div>
-        <div class="ledger-item"><span class="li-desc">🌙 Night Shift Bonus</span><span class="gld">+15%</span></div>
-        <div class="ledger-item"><span class="li-desc">🤖 AI Pilot Rate</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace">×0.80 base</span></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Quarterly Report — Full Year 2024</div>
-        <div class="report-layout" style="grid-template-columns:1fr 1fr;margin-bottom:0">
-          <div class="report-card">
-            <div class="report-stat-big pos">$88.0B</div>
-            <div class="report-label">Annual Revenue (2024)</div>
-            <div class="report-change neg">▼ -3.3% YoY</div>
-          </div>
-          <div class="report-card">
-            <div class="report-stat-big" style="color:var(--gold-lt)">9.8%</div>
-            <div class="report-label">Operating Margin</div>
-            <div class="report-change pos">Above guidance</div>
-          </div>
-          <div class="report-card">
-            <div class="report-stat-big" style="color:var(--blue-lt)">22.3M</div>
-            <div class="report-label">Packages / Day</div>
-            <div class="report-change pos">5.7B annually</div>
-          </div>
-          <div class="report-card">
-            <div class="report-stat-big gld">$5.9B</div>
-            <div class="report-label">Cash on Hand</div>
-            <div class="report-change pos">Strong liquidity</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:.75rem">
-      <div class="card">
-        <div class="card-title">Crew Earnings</div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>Pilot</th><th>Type</th><th>Flights</th><th>Hours</th><th>Gross Pay</th><th>Share</th></tr></thead>
-          <tbody id="earnings-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew enrolled.</td></tr></tbody></table>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Transaction Ledger</div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>Time (Z)</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
-          <tbody id="ledger-tbody"><tr><td>--:--</td><td>Starting treasury</td><td class="li-pos">+$5,900,000,000</td><td>$5,900,000,000</td></tr></tbody></table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ HUBS ═══════════ -->
-<div id="page-hubs" class="page">
-  <div class="sec-header">
-    <div class="sec-title">Hub <span>Network</span></div>
-    <div class="sec-actions" id="hub-actions"></div>
-  </div>
-  <div id="hubs-grid" class="hubs-grid"></div>
-</div>
-
-<!-- ═══════════ ADMIN ═══════════ -->
-<div id="page-admin" class="page">
-  <div class="admin-wrap">
-    <div class="admin-warn">⬡ Admin Panel — changes here are reflected immediately across the site.</div>
-
-    <!-- CREW -->
-    <div class="admin-section">
-      <div class="admin-section-title">
-        Crew Management
-        <div style="display:flex;gap:.5rem">
-          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ai')">+ AI Pilot</button>
-          <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-human')">+ Human Crew</button>
-        </div>
-      </div>
-      <div class="admin-grid-2">
-        <div class="card">
-          <div class="card-title">Human Roster</div>
-          <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Base</th><th>Hours</th><th>Actions</th></tr></thead><tbody id="admin-human-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr></tbody></table></div>
-        </div>
-        <div class="card">
-          <div class="card-title">AI Pilot Roster</div>
-          <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Route</th><th>Flights</th><th>Actions</th></tr></thead><tbody id="admin-ai-tbody"></tbody></table></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LEADERSHIP -->
-    <div class="admin-section">
-      <div class="admin-section-title">
-        Leadership Management
-        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-exec')">+ Add Executive</button>
-      </div>
-      <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Title</th><th>Type</th><th>Since</th><th>Actions</th></tr></thead><tbody id="admin-exec-tbody"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- NEWS -->
-    <div class="admin-section">
-      <div class="admin-section-title">
-        News & Announcements
-        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-news')">+ Post Announcement</button>
-      </div>
-      <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Headline</th><th>Category</th><th>Author</th><th>Actions</th></tr></thead><tbody id="admin-news-tbody"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- HUBS -->
-    <div class="admin-section">
-      <div class="admin-section-title">
-        Hub Management
-        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-hub')">+ Add Hub</button>
-      </div>
-      <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>ICAO</th><th>Name</th><th>Type</th><th>Aircraft</th><th>Actions</th></tr></thead><tbody id="admin-hub-tbody"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- TREASURY -->
-    <div class="admin-section">
-      <div class="admin-section-title">Treasury Controls</div>
-      <div class="card">
-        <div class="form-row" style="align-items:flex-end">
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Amount ($)</label><input class="form-input" type="number" id="treasury-adj" placeholder="50000"></div>
-          <div style="display:flex;gap:.5rem">
-            <button class="btn btn-primary btn-sm" onclick="adjustTreasury(1)">+ Add</button>
-            <button class="btn btn-danger btn-sm" onclick="adjustTreasury(-1)">− Deduct</button>
-          </div>
-        </div>
-        <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$5,900,000,000</strong></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</main>
-
-<!-- ═══ MODALS ═══ -->
-
-<!-- Add Human -->
-<div class="modal-overlay" id="modal-add-human">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add Crew Member</div><button class="modal-close" onclick="closeModal('modal-add-human')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="James" id="h-first"></div>
-        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Walker" id="h-last"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
-        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option><option>KHSV</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">Starting Hours</label><input class="form-input" type="number" placeholder="0" id="h-hours" value="0"></div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-human')">Cancel</button><button class="btn btn-primary" onclick="addHuman()">Add Member</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- Add AI -->
-<div class="modal-overlay" id="modal-add-ai">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add AI Pilot</div><button class="modal-close" onclick="closeModal('modal-add-ai')">✕</button></div>
-    <div class="modal-body">
-      <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">AI pilots fly autonomously, earn at 80% base rate, and rank up over time.</p>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Callsign</label><input class="form-input" placeholder="Martinez" id="ai-name"></div>
-        <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="ai-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="ai-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
-        <div class="form-group"><label class="form-label">Route Preference</label><select class="form-select" id="ai-route"><option value="longhaul">Long Haul</option><option value="domestic">Domestic</option><option value="feeder">Feeder</option><option value="any">Any</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">Flights Per Cycle</label><select class="form-select" id="ai-freq"><option value="1">1 per cycle</option><option value="2" selected>2 per cycle</option><option value="3">3 per cycle</option></select></div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-ai')">Cancel</button><button class="btn btn-primary" onclick="addAI()">Deploy</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Executive -->
-<div class="modal-overlay" id="modal-add-exec">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add Executive / Board Member</div><button class="modal-close" onclick="closeModal('modal-add-exec')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" placeholder="Ben Hoffman" id="ex-name"></div>
-        <div class="form-group"><label class="form-label">Initials</label><input class="form-input" placeholder="CT" id="ex-initials" maxlength="3"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Title</label><input class="form-input" placeholder="Chief Executive Officer" id="ex-title"></div>
-        <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ex-type"><option value="csuite">C-Suite</option><option value="board">Board of Directors</option></select></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Tenure / Since</label><input class="form-input" placeholder="2021" id="ex-tenure"></div>
-        <div class="form-group"><label class="form-label">Avatar Color</label><select class="form-select" id="ex-color"><option value="exec-av-gold">Gold</option><option value="exec-av-blue">Blue</option><option value="exec-av-green">Green</option><option value="exec-av-purple">Purple</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">Bio / Description</label><textarea class="form-textarea" placeholder="Brief description of role and background..." id="ex-bio"></textarea></div>
-      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="ex-status"><option value="active">Active</option><option value="retiring">Retiring</option><option value="incoming">Incoming / Successor</option></select></div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-exec')">Cancel</button><button class="btn btn-primary" onclick="addExec()">Add Executive</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- Post News -->
-<div class="modal-overlay" id="modal-add-news">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Post Announcement</div><button class="modal-close" onclick="closeModal('modal-add-news')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">Headline</label><input class="form-input" placeholder="Virtual UPS Expands to Tokyo" id="nw-headline"></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="nw-cat"><option value="breaking">Breaking News</option><option value="retirement">CEO Transition</option><option value="financial">Financial</option><option value="operational">Operational</option></select></div>
-        <div class="form-group"><label class="form-label">Author</label><input class="form-input" placeholder="Office of the CEO" id="nw-author"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Full Statement</label><textarea class="form-textarea" style="min-height:120px" placeholder="Write the full announcement here..." id="nw-body"></textarea></div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-news')">Cancel</button><button class="btn btn-primary" onclick="addNews()">Publish</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Hub -->
-<div class="modal-overlay" id="modal-add-hub">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add Hub / Base</div><button class="modal-close" onclick="closeModal('modal-add-hub')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">ICAO Code</label><input class="form-input" placeholder="KLAX" id="hub-icao" style="text-transform:uppercase"></div>
-        <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="hub-type"><option>Global</option><option>Regional</option><option>Feeder</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">City / Name</label><input class="form-input" placeholder="Los Angeles International" id="hub-name"></div>
-      <div class="form-group"><label class="form-label">Aircraft Based Here</label><input class="form-input" placeholder="B747-400F, B767-300F" id="hub-ac"></div>
-      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-hub')">Cancel</button><button class="btn btn-primary" onclick="addHub()">Add Hub</button></div>
-    </div>
-  </div>
+<div class="card">
+<h3>Active AI Flights</h3>
+<table>
+<thead>
+<tr>
+<th>Flight</th>
+<th>Route</th>
+<th>Aircraft</th>
+<th>Pilot</th>
+<th>Progress</th>
+<th>ETA (Z)</th>
+<th>Revenue</th>
+<th>Fatigue</th>
+</tr>
+</thead>
+<tbody id="flights"></tbody>
+</table>
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-//  CREDENTIALS — change ADMIN_PASS before uploading!
-// ════════════════════════════════════════════════
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'ups5yops';
 
-// ════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════
-const S = {
-  isAdmin: false,
-  treasury: 5900000000,
-  sessionRevenue: 0,
-  sessionCosts: 0,
-  totalFlights: 0,
-  totalFreight: 0,
-  nextId: 20,
-  stockPrice: 142.80,
-  stockBase: 142.80,
+/* ================= CORE DATA ================= */
 
-  pilots: [
-    { id:1, type:'ai', name:'AI Chen',   rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:2241, flights:401, ontime:98, earned:55000, xp:100 },
-    { id:2, type:'ai', name:'AI Patel',  rank:'Regional F/O',   base:'EDDK', route:'domestic', freq:2, hours:580,  flights:96,  ontime:96, earned:16000, xp:58  },
-    { id:3, type:'ai', name:'AI Torres', rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:1910, flights:344, ontime:99, earned:51000, xp:100 },
-    { id:4, type:'ai', name:'AI Kim',    rank:'Feeder Pilot',   base:'KSDF', route:'feeder',   freq:1, hours:88,   flights:22,  ontime:91, earned:1800,  xp:18  },
-  ],
+let treasury = localStorage.getItem("vups_treasury")
+  ? parseFloat(localStorage.getItem("vups_treasury"))
+  : 5900000000;
 
-  hubs: [
-    { icao:'KSDF', name:'Louisville Intl — Worldport', type:'Global',   aircraft:'B747-400F, MD-11F, B767-300F', ramp:78, active:14 },
-    { icao:'EDDK', name:'Cologne/Bonn Airport',        type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:52, active:6  },
-    { icao:'VHHH', name:'Hong Kong International',     type:'Regional', aircraft:'B747-400F, MD-11F',            ramp:65, active:4  },
-    { icao:'KONT', name:'Ontario International',       type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:41, active:3  },
-    { icao:'KHSV', name:'Huntsville International',    type:'Feeder',   aircraft:'C208B Caravan, ATR-42',        ramp:30, active:2  },
-    { icao:'KLEX', name:'Bluegrass Airport',           type:'Feeder',   aircraft:'C208B Caravan',                ramp:20, active:1  },
-  ],
+let maintenanceFund = 0;
 
-  executives: [
-    { id:1, name:'David P. Abney', initials:'DA', title:'Chief Executive Officer', type:'csuite', tenure:'2014', color:'exec-av-gold',   bio:'Founding CEO of Virtual UPS Airlines. Led the airline from a single route to a global operation with 6 hubs on 3 continents. Retiring after 12 years of distinguished service.', status:'retiring' },
-    { id:2, name:'Ben Hoffman',  initials:'BH', title:'Chief Executive Officer (Designate)', type:'csuite', tenure:'2025', color:'exec-av-purple', bio:'Named successor to the founding CEO. A trusted confidant of David Abney and a core member of the founding team, Ben has been instrumental in shaping the airline\'s culture and operations from the ground up. The Board unanimously selected him to carry the airline into its next chapter. Takes the CEO role effective Q1 2025.', status:'incoming' },
-    { id:3, name:'Brian Newman',   initials:'BN', title:'Chief Financial Officer',   type:'csuite', tenure:'2018', color:'exec-av-blue',   bio:'Oversees all financial operations, treasury management, profit share distribution, and quarterly earnings reporting.', status:'active' },
-    { id:4, name:'Kate Gutmann',   initials:'KG', title:'Chief Commercial Officer',  type:'csuite', tenure:'2019', color:'exec-av-green',  bio:'Leads network expansion, route strategy, and hub development. Architected the VHHH and EDDK regional hub buildout.', status:'active' },
-    { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet maintenance scheduling, and the AI pilot program.', status:'active' },
-    { id:6, name:'Scott Price',    initials:'SP', title:'Independent Director',      type:'board',  tenure:'2020', color:'exec-av-gray',   bio:'Former logistics executive. Chairs the Audit and Finance Committee.', status:'active' },
-    { id:7, name:'Angela Hwang',   initials:'AH', title:'Independent Director',      type:'board',  tenure:'2021', color:'exec-av-gray',   bio:'Aviation industry veteran. Member of the Safety and Operations Committee.', status:'active' },
-    { id:8, name:'Rodney Adkins',  initials:'RA', title:'Independent Director',      type:'board',  tenure:'2019', color:'exec-av-gray',   bio:'Technology and innovation specialist. Championed the AI pilot program initiative.', status:'active' },
-  ],
-
-  news: [
-    {
-      id:1, category:'retirement', date:'December 18, 2024',
-      headline:'Founding CEO David Abney Announces Retirement After 12 Years',
-      body:`After more than a decade at the helm of Virtual UPS Airlines, Chief Executive Officer David P. Abney has announced his intention to retire effective Q1 2025.\n\n"Leading this airline from a single route out of Louisville to a global operation spanning three continents has been the honor of my career," Abney said in a statement issued to all crew and stakeholders. "We built something real here — not just a virtual airline, but a community of professionals who take pride in every ton of freight we move."\n\nAbney joined the airline at its founding and oversaw the expansion to six hubs, the introduction of the AI pilot program, and consecutive years of record revenue. Under his leadership, Virtual UPS achieved a 98% on-time delivery rate — a figure he called his proudest accomplishment.\n\nThe Board of Directors has named Ben Hoffman as his successor. Hoffman, a trusted member of the founding team, was described by Abney as \"the only person I ever considered for this role.\"`,
-      author:'Office of the CEO — Corporate Communications'
-    },
-    {
-      id:2, category:'retirement', date:'December 18, 2024',
-      headline:'Board Names Ben Hoffman as Incoming CEO — Effective Q1 2025',
-      body:`The Virtual UPS Airlines Board of Directors has unanimously confirmed Ben Hoffman as the next Chief Executive Officer, effective Q1 2025 following a formal leadership transition.\n\nHoffman has been a core member of the founding team since day one, helping shape every major decision the airline has made. The Board cited his deep operational knowledge and his vision for expansion to new international routes as central to the unanimous selection.\n\n"We built this together," Hoffman said. "I am not stepping into a new role — I am stepping up in one I have always been part of. We will push this further than anyone thought possible."\n\nAbney will remain available in an advisory capacity through the end of Q2 2025 to ensure a smooth transition.`,
-      author:'Board of Directors — Virtual UPS Airlines'
-    },
-    {
-      id:3, category:'financial', date:'December 15, 2024',
-      headline:'Q3 2024 Earnings: Revenue Up 10.3%, Margin Reaches Record 62%',
-      body:`Virtual UPS Airlines reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The AI pilot program continued to be the primary revenue driver, completing 344 flights across the long-haul network.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "The AI program runs at 80% of standard rate with zero downtime."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
-      author:'Brian Newman — Chief Financial Officer'
-    },
-    {
-      id:4, category:'operational', date:'December 10, 2024',
-      headline:'Virtual UPS Expands AI Pilot Fleet — Two New Captains Added',
-      body:`Chief Operations Officer Juan Perez announced the deployment of two additional AI Global Captains to the long-haul fleet, bringing total AI capacity to four active pilots.\n\nThe expansion is expected to increase daily freight volume by approximately 35% across the KSDF–EDDK and KSDF–VHHH corridors. Both new pilots have been assigned B747-400F type ratings.\n\n"The AI fleet is the backbone of our operation," Perez said. "They fly around the clock, they don't call in sick, and they consistently deliver at 98% on-time. We're going to keep scaling this."`,
-      author:'Juan Perez — Chief Operations Officer'
-    },
-    {
-      id:5, category:'breaking', date:'December 5, 2024',
-      headline:'VUPS Stock Reaches All-Time High of $84.20 — Up 142% Since Launch',
-      body:`Shares of Virtual UPS Airlines (ticker: VUPS) closed at $142.80 on Friday, matching the real UPS share price — a symbolic milestone for the virtual airline as it mirrors its real-world counterpart. Analysts cited the consistent profitability of the AI fleet, the upcoming CEO transition, and the planned international expansion as key drivers.\n\n"The market is pricing in a lot of good news here," noted one analyst. "The fundamentals are strong — revenue growth is consistent, margins are elite, and the leadership transition appears orderly."\n\nThe stock has now outperformed both real-world UPS (NYSE: UPS) and FedEx (NYSE: FDX) over the trailing 12 months.`,
-      author:'Corporate Communications'
-    },
-  ],
-
-  fleet: [],
-  ownedFleet: {},
-  loadBars: {},
-  activeFlights: 0,
+const hubs = {
+  KSDF:{lat:38.17,lon:-85.73,weight:3},
+  EDDK:{lat:50.86,lon:7.14,weight:2},
+  VHHH:{lat:22.30,lon:113.91,weight:2},
+  KONT:{lat:34.05,lon:-117.60,weight:2},
+  KHSV:{lat:34.63,lon:-86.77,weight:1}
 };
 
-const AIRCRAFT_CATALOG = [
-  { model:'Cessna C208B',   type:'Turboprop Freighter', price:2500000,    maxPayload:3200,   range:'800 nm',  crew:1,  icon:'🛩' },
-  { model:'ATR-72F',        type:'Regional Freighter',  price:8000000,    maxPayload:15000,  range:'1,500 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 757-200F',type:'Narrowbody Freighter',price:22000000,   maxPayload:115600, range:'3,500 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 767-300F',type:'Widebody Freighter',  price:38000000,   maxPayload:97000,  range:'3,255 nm',crew:2,  icon:'✈' },
-  { model:'Airbus A300-600F',type:'Widebody Freighter', price:42000000,   maxPayload:140000, range:'4,000 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 747-400F',type:'Heavy Freighter',     price:95000000,   maxPayload:228000, range:'4,950 nm',crew:3,  icon:'🛫' },
-  { model:'McDonnell MD-11F',type:'Heavy Freighter',    price:88000000,   maxPayload:197000, range:'4,165 nm',crew:2,  icon:'🛫' },
-  { model:'Boeing 777F',    type:'Long-Range Heavy',    price:138000000,  maxPayload:226000, range:'5,600 nm',crew:2,  icon:'🛫' },
+let pilots = JSON.parse(localStorage.getItem("vups_pilots")) || [
+  {name:"Chen",fatigue:0},
+  {name:"Martinez",fatigue:0},
+  {name:"Singh",fatigue:0},
+  {name:"Rossi",fatigue:0}
 ];
 
-// ════════════════════════════════════════════════
-//  LOGIN
-// ════════════════════════════════════════════════
-document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-document.getElementById('l-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+let flights = JSON.parse(localStorage.getItem("vups_flights")) || [];
 
-function doLogin() {
-  const u=document.getElementById('l-user').value.trim();
-  const p=document.getElementById('l-pass').value;
-  if(u===ADMIN_USER && p===ADMIN_PASS){
-    S.isAdmin=true;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('admin-nav-btn').style.display='';
-    document.getElementById('admin-badge').style.display='';
-    document.getElementById('profit-share-btn').style.display='';
-    document.getElementById('leadership-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-exec\')">+ Add Executive</button>';
-    document.getElementById('news-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-news\')">+ Post Announcement</button>';
-    document.getElementById('hub-actions').innerHTML='<button class="btn btn-primary btn-sm" onclick="openModal(\'modal-add-hub\')">+ Add Hub</button>';
-    updateAdminTreasury();
-  } else {
-    document.getElementById('login-err').textContent='Invalid credentials.';
-    document.getElementById('l-pass').value='';
+/* ================= UTIL ================= */
+
+function saveState(){
+  localStorage.setItem("vups_treasury",treasury);
+  localStorage.setItem("vups_pilots",JSON.stringify(pilots));
+  localStorage.setItem("vups_flights",JSON.stringify(flights));
+}
+
+function updateTreasury(){
+  document.getElementById("treasury").innerText =
+    "$"+treasury.toLocaleString();
+}
+
+function hav(a,b){
+  const R=3440;
+  const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat);
+  const dLon=toRad(b.lon-a.lon);
+  const lat1=toRad(a.lat);
+  const lat2=toRad(b.lat);
+  const aCalc=Math.sin(dLat/2)**2+
+    Math.sin(dLon/2)**2*Math.cos(lat1)*Math.cos(lat2);
+  const c=2*Math.atan2(Math.sqrt(aCalc),Math.sqrt(1-aCalc));
+  return R*c;
+}
+
+function pickHub(){
+  let total=0;
+  Object.values(hubs).forEach(h=>total+=h.weight);
+  let r=Math.random()*total;
+  for(let k in hubs){
+    r-=hubs[k].weight;
+    if(r<=0) return k;
   }
 }
 
-function skipLogin(){
-  document.getElementById('login-screen').classList.add('hidden');
-}
+function newFlight(pilot){
+  let from=pickHub();
+  let to=pickHub();
+  while(to===from) to=pickHub();
 
-function logoutAdmin(){
-  S.isAdmin=false;
-  document.getElementById('admin-nav-btn').style.display='none';
-  document.getElementById('admin-badge').style.display='none';
-  document.getElementById('profit-share-btn').style.display='none';
-  document.getElementById('leadership-actions').innerHTML='';
-  document.getElementById('news-actions').innerHTML='';
-  document.getElementById('hub-actions').innerHTML='';
-  if(document.getElementById('page-admin').classList.contains('active')){
-    goNav(document.querySelector('.nav-btn'),'dispatch');
-    document.querySelector('.nav-btn').classList.add('active');
-  }
-}
+  const dist=hav(hubs[from],hubs[to]);
+  const hours=(dist/480)+0.7;
 
-// ════════════════════════════════════════════════
-//  CLOCK
-// ════════════════════════════════════════════════
-function tick(){
-  const n=new Date();
-  const p=x=>String(x).padStart(2,'0');
-  document.getElementById('zulu').textContent=`${p(n.getUTCHours())}:${p(n.getUTCMinutes())}Z`;
-}
-tick(); setInterval(tick,10000);
+  let aircraft="B757F";
+  if(dist>2500) aircraft="B767F";
+  if(dist>4500) aircraft="B747-8F";
 
-// ════════════════════════════════════════════════
-//  TREASURY
-// ════════════════════════════════════════════════
-function refreshTreasury(){
-  const fmt='$'+S.treasury.toLocaleString();
-  document.getElementById('treasury-display').textContent=fmt;
-  document.getElementById('eco-total').textContent=fmt;
-  document.getElementById('eco-net').textContent='$'+S.sessionRevenue.toLocaleString();
-  document.getElementById('eco-cost').textContent='$'+S.sessionCosts.toLocaleString();
-  document.getElementById('eco-pool').textContent='$'+Math.round(S.treasury*.07).toLocaleString();
-  document.getElementById('s-revenue').textContent='$'+S.sessionRevenue.toLocaleString();
-  document.getElementById('q4-rev').textContent='$'+S.sessionRevenue.toLocaleString();
-  document.getElementById('fleet-treasury').textContent=fmt;
-  updateAdminTreasury();
-}
-function updateAdminTreasury(){
-  const el=document.getElementById('admin-treasury-val');
-  if(el) el.textContent='$'+S.treasury.toLocaleString();
-}
-function adjustTreasury(sign){
-  const amt=parseInt(document.getElementById('treasury-adj').value);
-  if(!amt||isNaN(amt)) return alert('Enter a valid amount.');
-  S.treasury+=sign*Math.abs(amt);
-  if(sign<0) S.sessionCosts+=Math.abs(amt); else S.sessionRevenue+=Math.abs(amt);
-  refreshTreasury();
-  document.getElementById('treasury-adj').value='';
-  addLedgerRow(sign>0?'Admin: Funds added':'Admin: Funds deducted',sign*Math.abs(amt));
-}
+  let delay=0;
+  if(Math.random()<0.15) delay=0.5;
 
-// ════════════════════════════════════════════════
-//  STOCK TICKER
-// ════════════════════════════════════════════════
-function tickStock(){
-  const change=(Math.random()-.44)*1.8;
-  S.stockPrice=Math.max(100,S.stockPrice+change);
-  const pct=((S.stockPrice-S.stockBase)/S.stockBase*100).toFixed(2);
-  const diff=(S.stockPrice-S.stockBase).toFixed(2);
-  const up=change>=0;
-  document.getElementById('stk-vups').textContent='$'+S.stockPrice.toFixed(2);
-  const chgEl=document.getElementById('stk-vups-chg');
-  chgEl.textContent=`${up?'▲':'▼'} ${up?'+':''}${diff} (${up?'+':''}${pct}%)`;
-  chgEl.className='stock-chg '+(up?'up':'dn');
-  // bump stock on revenue
-  if(S.sessionRevenue>0) S.stockPrice+=0.01;
-}
-setInterval(tickStock,30000);
+  const revenue=Math.floor(Math.random()*200000)+80000;
 
-// ════════════════════════════════════════════════
-//  NAV
-// ════════════════════════════════════════════════
-function goNav(btn,page){
-  if(page==='admin'&&!S.isAdmin) return;
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('page-'+page).classList.add('active');
-  if(page==='crew')       renderCrew();
-  if(page==='leadership') renderLeadership();
-  if(page==='news')       renderNews('all');
-  if(page==='fleet')      renderFleet();
-  if(page==='economy')    renderEconomy();
-  if(page==='hubs')       renderHubs();
-  if(page==='admin')      renderAdmin();
-}
-
-// ════════════════════════════════════════════════
-//  MODALS
-// ════════════════════════════════════════════════
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});
-});
-
-// ════════════════════════════════════════════════
-//  CREW RENDER
-// ════════════════════════════════════════════════
-function rankColor(r){return r==='Global Captain'?'var(--gold-lt)':r==='Regional F/O'?'var(--blue-lt)':'var(--green-lt)'}
-function rankNext(r){return r==='Global Captain'?'Max Rank':r==='Regional F/O'?'→ Captain':'→ Regional'}
-
-function renderCrew(){
-  const grid=document.getElementById('crew-grid');
-  const empty=document.getElementById('crew-empty');
-  if(!S.pilots.length){grid.innerHTML='';empty.style.display='block';return}
-  empty.style.display='none';
-  grid.innerHTML=S.pilots.map(p=>{
-    const isAI=p.type==='ai';
-    const name=isAI?p.name:`${p.first} ${p.last}`;
-    const init=isAI?'AI':(p.first[0]+p.last[0]);
-    return `<div class="crew-card ${isAI?'ai-pilot':'human-pilot'}">
-      <div class="pilot-header">
-        <div class="avatar ${isAI?'av-ai':'av-human'}">${init}</div>
-        <div><div class="pilot-name">${name}</div><div class="pilot-rank" style="color:${rankColor(p.rank)}">${p.rank}</div></div>
-        <div class="pilot-type-badge">${isAI?'<span class="badge b-blue">AI</span>':'<span class="badge b-gray">Human</span>'}</div>
-      </div>
-      <div class="pilot-stats">
-        <div><div class="ps-val">${p.hours.toLocaleString()}</div><div class="ps-lbl">Hours</div></div>
-        <div><div class="ps-val">${p.ontime}%</div><div class="ps-lbl">On-Time</div></div>
-        <div><div class="ps-val">$${Math.round(p.earned/1000)}K</div><div class="ps-lbl">Earned</div></div>
-      </div>
-      <div class="xp-bar-wrap">
-        <div class="xp-bar-row"><span>${p.rank}</span><span>${p.xp}% — ${rankNext(p.rank)}</span></div>
-        <div class="xp-track"><div class="${isAI?'xp-fill-blue':'xp-fill'}" style="width:${p.xp}%"></div></div>
-      </div>
-      ${isAI?`<div class="pilot-actions"><button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly Now</button></div>`:''}
-    </div>`;
-  }).join('');
-
-  // Jumpseat
-  const jsb=document.getElementById('jumpseat-board');
-  const routes=[['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF']];
-  const flying=S.pilots.filter(p=>p.type==='ai').slice(0,3);
-  jsb.innerHTML=flying.length
-    ?flying.map((p,i)=>{const r=routes[i%routes.length];return `<div class="ledger-item"><span class="li-desc">${p.name}</span><span style="color:var(--text-dim)">${r[0]}→${r[1]}</span><span style="color:var(--green-lt)">1 seat</span></div>`}).join('')
-    :'<div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div>';
-}
-
-// ════════════════════════════════════════════════
-//  LEADERSHIP
-// ════════════════════════════════════════════════
-const statusLabel={active:'',retiring:'<span class="badge b-gold" style="margin-left:.5rem">Retiring</span>',incoming:'<span class="badge b-purple" style="margin-left:.5rem">Incoming CEO</span>'};
-const avGray='background:rgba(74,58,40,.2);color:var(--text-dim);border:1px solid var(--border2)';
-
-function execAvatarStyle(color){
-  const map={
-    'exec-av-gold':'background:rgba(200,146,10,.15);color:var(--gold-lt);border:2px solid rgba(200,146,10,.4)',
-    'exec-av-blue':'background:rgba(36,113,163,.15);color:var(--blue-lt);border:2px solid rgba(36,113,163,.35)',
-    'exec-av-green':'background:rgba(45,158,95,.15);color:var(--green-lt);border:2px solid rgba(45,158,95,.3)',
-    'exec-av-purple':'background:rgba(125,60,152,.15);color:var(--purple-lt);border:2px solid rgba(125,60,152,.3)',
-    'exec-av-gray':avGray,
-  };
-  return map[color]||avGray;
-}
-
-function renderLeadership(){
-  const csuite=S.executives.filter(e=>e.type==='csuite');
-  const board=S.executives.filter(e=>e.type==='board');
-
-  document.getElementById('csuite-grid').innerHTML=csuite.map(e=>`
-    <div class="exec-card ${e.title.includes('CEO')?'ceo-card':''}">
-      <div class="exec-avatar" style="${execAvatarStyle(e.color)}">${e.initials}</div>
-      <div class="exec-name">${e.name}${statusLabel[e.status]||''}</div>
-      <div class="exec-title">${e.title}</div>
-      <div class="exec-bio">${e.bio}</div>
-      <div class="exec-tenure">Since ${e.tenure}</div>
-      ${e.status==='retiring'?'<div class="retiring-banner">🏆 Retirement effective Q1 2025</div>':''}
-    </div>`).join('');
-
-  document.getElementById('board-grid').innerHTML=board.map(e=>`
-    <div class="exec-card">
-      <div class="exec-avatar" style="${execAvatarStyle(e.color)}">${e.initials}</div>
-      <div class="exec-name">${e.name}</div>
-      <div class="exec-title">${e.title}</div>
-      <div class="exec-bio">${e.bio}</div>
-      <div class="exec-tenure">Director since ${e.tenure}</div>
-    </div>`).join('');
-}
-
-// ════════════════════════════════════════════════
-//  NEWS
-// ════════════════════════════════════════════════
-const catLabel={breaking:'🔴 Breaking',retirement:'🏆 CEO Transition',financial:'📈 Financial',operational:'✈ Operational'};
-const catColor={breaking:'var(--gold-lt)',retirement:'var(--purple-lt)',financial:'var(--green-lt)',operational:'var(--blue-lt)'};
-
-function renderNews(filter){
-  const feed=document.getElementById('news-feed');
-  const items=filter==='all'?S.news:S.news.filter(n=>n.category===filter);
-  if(!items.length){feed.innerHTML='<div class="empty-state"><div class="icon">📰</div><p>No posts in this category yet.</p></div>';return}
-  feed.innerHTML=items.map(n=>`
-    <div class="news-card ${n.category}">
-      <div class="news-header">
-        <span class="news-category" style="color:${catColor[n.category]}">${catLabel[n.category]}</span>
-        <span class="news-date">${n.date}</span>
-      </div>
-      <div class="news-headline">${n.headline}</div>
-      <div class="news-body">${n.body.replace(/\n\n/g,'<br><br>')}</div>
-      <div class="news-author">— ${n.author}</div>
-    </div>`).join('');
-}
-
-function filterNews(cat){renderNews(cat)}
-
-// ════════════════════════════════════════════════
-//  FLEET
-// ════════════════════════════════════════════════
-function renderFleet(){
-  const catalog=document.getElementById('fleet-catalog');
-  catalog.innerHTML=AIRCRAFT_CATALOG.map(ac=>{
-    const owned=S.ownedFleet[ac.model]||0;
-    const canAfford=S.treasury>=ac.price;
-    return `<div class="aircraft-card ${owned>0?'owned':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem">
-        <div class="ac-model">${ac.icon} ${ac.model}</div>
-        ${owned>0?`<span class="badge b-green">Owned ×${owned}</span>`:''}
-      </div>
-      <div class="ac-type">${ac.type}</div>
-      <div class="ac-specs">
-        <div class="ac-spec"><div class="ac-spec-val">${ac.maxPayload.toLocaleString()}</div><div class="ac-spec-lbl">Max Payload (lbs)</div></div>
-        <div class="ac-spec"><div class="ac-spec-val">${ac.range}</div><div class="ac-spec-lbl">Range</div></div>
-        <div class="ac-spec"><div class="ac-spec-val">${ac.crew}</div><div class="ac-spec-lbl">Crew Req.</div></div>
-        <div class="ac-spec"><div class="ac-spec-val">${owned}</div><div class="ac-spec-lbl">Owned</div></div>
-      </div>
-      <div class="ac-price ${canAfford?'li-pos':'li-neg'}">$${(ac.price/1000000).toFixed(1)}M</div>
-      <button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>
-        ${canAfford?'Purchase':'Insufficient Funds'}
-      </button>
-    </div>`;
-  }).join('');
-  renderOwnedFleet();
-}
-
-function purchaseAircraft(model,price){
-  if(S.treasury<price){alert('Insufficient treasury funds.');return}
-  if(!confirm(`Purchase ${model} for $${(price/1000000).toFixed(1)}M?`)) return;
-  S.treasury-=price;
-  S.sessionCosts+=price;
-  S.ownedFleet[model]=(S.ownedFleet[model]||0)+1;
-  refreshTreasury();
-  addLedgerRow(`Fleet acquisition: ${model}`,-price);
-  // Log purchase
-  const log=document.getElementById('purchase-log');
-  const now=new Date();
-  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
-  const entry=document.createElement('div');
-  entry.style.cssText='padding:.25rem 0;border-bottom:1px solid rgba(46,31,18,.3)';
-  entry.innerHTML=`<span style="color:var(--text-mute)">${t}</span> <span style="color:var(--green-lt)">${model}</span> purchased`;
-  const placeholder=log.querySelector('div[style*="color:var(--text-mute)"]');
-  if(placeholder) log.innerHTML='';
-  log.prepend(entry);
-  renderFleet();
-}
-
-function renderOwnedFleet(){
-  const list=document.getElementById('owned-fleet-list');
-  const vc=document.getElementById('fleet-value');
-  const fc=document.getElementById('fleet-count');
-  const entries=Object.entries(S.ownedFleet).filter(([,q])=>q>0);
-  if(!entries.length){
-    list.innerHTML='<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No aircraft purchased yet.</div>';
-    vc.textContent='$0';fc.textContent='0 aircraft owned';return;
-  }
-  let totalVal=0,totalCount=0;
-  entries.forEach(([m,q])=>{
-    const ac=AIRCRAFT_CATALOG.find(a=>a.model===m);
-    if(ac){totalVal+=ac.price*q;totalCount+=q;}
+  flights.push({
+    id:"5Y"+Math.floor(Math.random()*900+100),
+    pilot:pilot.name,
+    from,to,
+    aircraft,
+    start:Date.now(),
+    duration:(hours+delay)*3600000,
+    revenue
   });
-  list.innerHTML=entries.map(([m,q])=>`
-    <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace;font-size:.72rem">
-      <span style="color:var(--text)">${m}</span><span class="gld">×${q}</span>
-    </div>`).join('');
-  vc.textContent='$'+(totalVal/1000000).toFixed(1)+'M';
-  fc.textContent=totalCount+' aircraft owned';
 }
 
-// ════════════════════════════════════════════════
-//  ECONOMY
-// ════════════════════════════════════════════════
-function renderEconomy(){
-  const humans=S.pilots.filter(p=>p.type==='human');
-  const totalE=humans.reduce((a,p)=>a+p.earned,0)||1;
-  const pool=Math.round(S.treasury*.07);
-  document.getElementById('earnings-tbody').innerHTML=humans.length
-    ?humans.map(p=>`<tr><td>${p.first} ${p.last}</td><td><span class="badge b-gray">Human</span></td><td>${p.flights}</td><td>${p.hours.toLocaleString()}</td><td class="li-pos">$${p.earned.toLocaleString()}</td><td class="li-pos">+$${Math.round((p.earned/totalE)*pool).toLocaleString()}</td></tr>`).join('')
-    :`<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew enrolled. AI earnings go to treasury.</td></tr>`;
+/* ================= ENGINE ================= */
+
+function engine(){
+  const now=Date.now();
+  flights=flights.filter(f=>{
+    const pct=(now-f.start)/f.duration;
+
+    if(pct>=1){
+      treasury+=f.revenue*0.45;
+      maintenanceFund+=f.revenue*0.05;
+
+      let p=pilots.find(x=>x.name===f.pilot);
+      p.fatigue+=10;
+
+      newFlight(p);
+      return false;
+    }
+    return true;
+  });
+
+  pilots.forEach(p=>{
+    if(!flights.find(f=>f.pilot===p.name)){
+      newFlight(p);
+    }
+    if(p.fatigue>0) p.fatigue-=0.02;
+  });
+
+  renderFlights();
+  saveState();
 }
 
-// ════════════════════════════════════════════════
-//  HUBS
-// ════════════════════════════════════════════════
-function renderHubs(){
-  const cls={Global:'b-gold',Regional:'b-blue',Feeder:'b-green'};
-  const bf={Global:'bf-gold',Regional:'bf-blue',Feeder:'bf-green'};
-  document.getElementById('hubs-grid').innerHTML=S.hubs.map(h=>`
-    <div class="hub-card">
-      <div class="hub-icao">${h.icao}</div>
-      <div class="hub-name">${h.name}</div>
-      <div class="hub-detail-row"><span>Type</span><span class="hub-detail-val"><span class="badge ${cls[h.type]}">${h.type}</span></span></div>
-      <div class="hub-detail-row"><span>Aircraft</span><span class="hub-detail-val" style="font-size:.65rem;text-align:right;max-width:150px">${h.aircraft}</span></div>
-      <div class="hub-detail-row"><span>Active</span><span class="hub-detail-val pos">${h.active}</span></div>
-      <div class="hub-detail-row" style="border:none"><span>Ramp</span><span class="hub-detail-val">${h.ramp}%</span></div>
-      <div class="bar-wrap" style="margin-top:.5rem;margin-bottom:0"><div class="bar-track"><div class="bar-fill ${h.ramp>80?'bf-red':bf[h.type]}" style="width:${h.ramp}%"></div></div></div>
-    </div>`).join('');
+function renderFlights(){
+  const tb=document.getElementById("flights");
+  tb.innerHTML="";
+  const now=Date.now();
+
+  flights.forEach(f=>{
+    const pct=Math.min(1,(now-f.start)/f.duration);
+    const eta=new Date(f.start+f.duration)
+      .toUTCString().split(" ")[4];
+
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${f.id}</td>
+      <td>${f.from}→${f.to}</td>
+      <td>${f.aircraft}</td>
+      <td>${f.pilot}</td>
+      <td>
+        <div class="progress">
+          <div class="progress-bar" style="width:${pct*100}%"></div>
+        </div>
+        ${(pct*100).toFixed(1)}%
+      </td>
+      <td>${eta}</td>
+      <td>$${f.revenue.toLocaleString()}</td>
+      <td>${pilots.find(p=>p.name===f.pilot).fatigue.toFixed(1)}%</td>
+    `;
+    tb.appendChild(tr);
+  });
 }
 
-// ════════════════════════════════════════════════
-//  ADMIN RENDER
-// ════════════════════════════════════════════════
-function renderAdmin(){
-  const humans=S.pilots.filter(p=>p.type==='human');
-  document.getElementById('admin-human-tbody').innerHTML=humans.length
-    ?humans.map(p=>`<tr>
-      <td>${p.first} ${p.last}</td>
-      <td><span class="badge ${p.rank==='Global Captain'?'b-gold':p.rank==='Regional F/O'?'b-blue':'b-green'}">${p.rank}</span></td>
-      <td>${p.base}</td><td>${p.hours}</td>
-      <td style="display:flex;gap:.35rem">
-        <button class="btn btn-ghost btn-sm" onclick="editHours(${p.id})">Edit Hrs</button>
-        <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
-      </td></tr>`).join('')
-    :`<tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr>`;
+/* ================= STOCK ================= */
 
-  document.getElementById('admin-ai-tbody').innerHTML=S.pilots.filter(p=>p.type==='ai').map(p=>`<tr>
-    <td>${p.name}</td><td><span class="badge b-blue">${p.rank.split(' ')[0]}</span></td>
-    <td>${p.route}</td><td>${p.flights}</td>
-    <td style="display:flex;gap:.35rem">
-      <button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly</button>
-      <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
-    </td></tr>`).join('');
-
-  document.getElementById('admin-exec-tbody').innerHTML=S.executives.map(e=>`<tr>
-    <td>${e.name}</td><td style="color:var(--text-dim);font-size:.7rem">${e.title}</td>
-    <td><span class="badge ${e.type==='csuite'?'b-gold':'b-gray'}">${e.type==='csuite'?'C-Suite':'Board'}</span></td>
-    <td>${e.tenure}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeExec(${e.id})">Remove</button></td></tr>`).join('');
-
-  document.getElementById('admin-news-tbody').innerHTML=S.news.map(n=>`<tr>
-    <td style="white-space:nowrap">${n.date}</td>
-    <td style="font-size:.7rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.headline}</td>
-    <td><span class="badge" style="color:${catColor[n.category]};border-color:${catColor[n.category]};background:transparent">${catLabel[n.category]}</span></td>
-    <td style="font-size:.68rem;color:var(--text-dim)">${n.author.split('—')[0].trim()}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeNews(${n.id})">Remove</button></td></tr>`).join('');
-
-  document.getElementById('admin-hub-tbody').innerHTML=S.hubs.map((h,i)=>`<tr>
-    <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold)">${h.icao}</td>
-    <td>${h.name}</td>
-    <td><span class="badge ${h.type==='Global'?'b-gold':h.type==='Regional'?'b-blue':'b-green'}">${h.type}</span></td>
-    <td style="font-size:.68rem;color:var(--text-dim)">${h.aircraft}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeHub(${i})">Remove</button></td></tr>`).join('');
-
-  updateAdminTreasury();
-}
-
-// ════════════════════════════════════════════════
-//  ADD / REMOVE
-// ════════════════════════════════════════════════
-function addHuman(){
-  const first=document.getElementById('h-first').value.trim();
-  const last=document.getElementById('h-last').value.trim();
-  if(!first||!last){alert('Enter first and last name.');return}
-  S.pilots.push({id:S.nextId++,type:'human',first,last,rank:document.getElementById('h-rank').value,base:document.getElementById('h-base').value,hours:parseInt(document.getElementById('h-hours').value)||0,flights:0,ontime:100,earned:0,xp:0});
-  ['h-first','h-last'].forEach(id=>{document.getElementById(id).value=''});
-  document.getElementById('h-hours').value='0';
-  closeModal('modal-add-human');
-  updateCrewCounts();renderAdmin();
-}
-
-function addAI(){
-  const raw=document.getElementById('ai-name').value.trim();
-  if(!raw){alert('Enter a callsign.');return}
-  const name=raw.startsWith('AI ')?raw:'AI '+raw;
-  S.pilots.push({id:S.nextId++,type:'ai',name,rank:document.getElementById('ai-rank').value,base:document.getElementById('ai-base').value,route:document.getElementById('ai-route').value,freq:parseInt(document.getElementById('ai-freq').value),hours:0,flights:0,ontime:100,earned:0,xp:0});
-  document.getElementById('ai-name').value='';
-  closeModal('modal-add-ai');
-  updateCrewCounts();renderAdmin();
-}
-
-function removePilot(id){
-  if(!confirm('Remove this crew member?')) return;
-  S.pilots=S.pilots.filter(p=>p.id!==id);
-  updateCrewCounts();renderAdmin();
-}
-
-function editHours(id){
-  const p=S.pilots.find(x=>x.id===id);
-  if(!p) return;
-  const val=prompt(`Hours for ${p.first} ${p.last} (current: ${p.hours}):`,p.hours);
-  if(val!==null&&!isNaN(parseInt(val))){p.hours=parseInt(val);renderAdmin();}
-}
-
-function updateCrewCounts(){
-  document.getElementById('s-crew-count').textContent=S.pilots.filter(p=>p.type==='ai').length;
-  document.getElementById('s-human-count').textContent=S.pilots.filter(p=>p.type==='human').length;
-}
-
-function addExec(){
-  const name=document.getElementById('ex-name').value.trim();
-  const title=document.getElementById('ex-title').value.trim();
-  if(!name||!title){alert('Name and title required.');return}
-  S.executives.push({id:S.nextId++,name,initials:document.getElementById('ex-initials').value.trim()||name.split(' ').map(w=>w[0]).join('').slice(0,2),title,type:document.getElementById('ex-type').value,tenure:document.getElementById('ex-tenure').value||new Date().getFullYear(),color:document.getElementById('ex-color').value,bio:document.getElementById('ex-bio').value,status:document.getElementById('ex-status').value});
-  ['ex-name','ex-initials','ex-title','ex-tenure','ex-bio'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-exec');renderAdmin();
-}
-
-function removeExec(id){
-  if(!confirm('Remove this executive?')) return;
-  S.executives=S.executives.filter(e=>e.id!==id);renderAdmin();
-}
-
-function addNews(){
-  const headline=document.getElementById('nw-headline').value.trim();
-  const body=document.getElementById('nw-body').value.trim();
-  if(!headline||!body){alert('Headline and body required.');return}
-  const now=new Date();
-  S.news.unshift({id:S.nextId++,category:document.getElementById('nw-cat').value,date:now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),headline,body,author:document.getElementById('nw-author').value||'Office of the CEO'});
-  ['nw-headline','nw-body','nw-author'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-news');renderAdmin();
-  if(document.getElementById('page-news').classList.contains('active')) renderNews('all');
-}
-
-function removeNews(id){
-  if(!confirm('Remove this announcement?')) return;
-  S.news=S.news.filter(n=>n.id!==id);renderAdmin();
-}
-
-function addHub(){
-  const icao=document.getElementById('hub-icao').value.trim().toUpperCase();
-  const name=document.getElementById('hub-name').value.trim();
-  if(!icao||!name){alert('ICAO and name required.');return}
-  S.hubs.push({icao,name,type:document.getElementById('hub-type').value,aircraft:document.getElementById('hub-ac').value||'TBD',ramp:0,active:0});
-  ['hub-icao','hub-name','hub-ac'].forEach(id=>{document.getElementById(id).value=''});
-  closeModal('modal-add-hub');renderHubs();renderAdmin();
-}
-
-function removeHub(i){
-  if(!confirm('Remove this hub?')) return;
-  S.hubs.splice(i,1);renderHubs();renderAdmin();
-}
-
-// ════════════════════════════════════════════════
-//  FLIGHT BOARD
-// ════════════════════════════════════════════════
-function addFlightRow(fn,origin,dest,ac,pname,isAI,freight){
-  const tbody=document.getElementById('flight-tbody');
-  document.getElementById('flight-empty').style.display='none';
-  const now=new Date();
-  const eta=`${String((now.getUTCHours()+Math.floor(Math.random()*7)+2)%24).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
-  const pCell=isAI?`<span class="badge b-blue">AI</span> ${pname.replace('AI ','')}`:(pname);
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${fn}</td><td>${origin}→${dest}</td><td>${ac}</td><td>${pCell}</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td><td>${eta}</td><td>${freight.toLocaleString()}</td><td>${Math.round(freight/210000*100)}%</td>`;
-  tbody.prepend(tr);
-  while(tbody.children.length>12) tbody.removeChild(tbody.lastChild);
-  S.totalFlights++;S.activeFlights=Math.min(tbody.children.length,12);
-  document.getElementById('s-active').textContent=S.activeFlights;
-  document.getElementById('sum-flights').textContent=S.totalFlights;
-  updateLoadBar(ac,freight);
-}
-
-function updateLoadBar(ac,freight){
-  S.loadBars[ac]=(S.loadBars[ac]||0)+freight;
-  const maxMap={'Boeing 747-400F':228000,'McDonnell MD-11F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
-  const max=maxMap[ac]||200000;
-  const pct=Math.min(99,Math.round(S.loadBars[ac]/max*100));
-  const key=ac.replace(/[^a-z0-9]/gi,'');
-  const container=document.getElementById('load-bars');
-  const placeholder=container.querySelector('div[style*="color:var(--text-mute)"]');
-  if(placeholder) container.innerHTML='';
-  let wrap=document.getElementById('lb-'+key);
-  if(!wrap){
-    wrap=document.createElement('div');wrap.className='bar-wrap';wrap.id='lb-'+key;
-    wrap.innerHTML=`<div class="bar-header"><span>${ac}</span><span id="lbv-${key}">${S.loadBars[ac].toLocaleString()} lbs — ${pct}%</span></div><div class="bar-track"><div class="bar-fill bf-gold" id="lbf-${key}" style="width:${pct}%"></div></div>`;
-    container.appendChild(wrap);
-  } else {
-    const v=document.getElementById('lbv-'+key),f=document.getElementById('lbf-'+key);
-    if(v) v.textContent=`${S.loadBars[ac].toLocaleString()} lbs — ${pct}%`;
-    if(f){f.style.width=pct+'%';f.className='bar-fill '+(pct>85?'bf-red':pct>65?'bf-gold':'bf-green');}
+async function stock(){
+  let key=localStorage.getItem("finnhub");
+  if(!key){
+    key=prompt("Enter Finnhub API key");
+    localStorage.setItem("finnhub",key);
   }
+
+  async function get(sym){
+    const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${key}`);
+    return r.json();
+  }
+
+  const ups=await get("UPS");
+  const fdx=await get("FDX");
+
+  const vups=ups.c*1.15;
+
+  document.getElementById("ups").innerText="$"+ups.c.toFixed(2);
+  document.getElementById("fdx").innerText="$"+fdx.c.toFixed(2);
+  document.getElementById("vups").innerText="$"+vups.toFixed(2);
 }
 
-// ════════════════════════════════════════════════
-//  AI FLIGHT ENGINE
-// ════════════════════════════════════════════════
-const routeMap={
-  longhaul:[['KSDF','EDDK','B747-400F'],['KSDF','VHHH','MD-11F'],['EDDK','VHHH','B747-400F'],['VHHH','KSDF','MD-11F'],['KSDF','EDDK','MD-11F']],
-  domestic:[['KSDF','KONT','B757-200F'],['KONT','KSDF','B757-200F'],['KSDF','KLEX','B767-300F'],['EDDK','KSDF','B767-300F']],
-  feeder:[['KSDF','KHSV','C208B Caravan'],['KSDF','KLEX','C208B Caravan'],['KHSV','KSDF','C208B Caravan']],
-  any:[['KSDF','EDDK','B747-400F'],['KSDF','KONT','B757-200F'],['KSDF','KHSV','C208B Caravan']]
-};
-const freightMap={'B747-400F':[80000,210000],'MD-11F':[60000,190000],'B767-300F':[40000,95000],'B757-200F':[30000,112000],'C208B Caravan':[500,3200],'ATR-72F':[5000,15000]};
+/* ================= CLOCK ================= */
 
-function triggerAI(id){
-  const p=S.pilots.find(x=>x.id===id);if(!p) return;
-  const pool=routeMap[p.route]||routeMap.any;
-  const [origin,dest,ac]=pool[Math.floor(Math.random()*pool.length)];
-  const [fmin,fmax]=freightMap[ac]||[50000,150000];
-  const freight=Math.floor(Math.random()*(fmax-fmin)+fmin);
-  const baseRate=p.rank==='Global Captain'?12:p.rank==='Regional F/O'?8.5:4;
-  const revenue=Math.round(freight*baseRate*.80);
-  const fn='5Y'+(Math.floor(Math.random()*900)+100);
-  const fuelCost=Math.round(revenue*.18);
-
-  p.flights++;p.hours+=Math.round(Math.random()*8+2);p.earned+=revenue;
-  p.xp=Math.min(100,p.xp+Math.floor(Math.random()*3)+1);
-  checkRankUp(p);
-
-  S.treasury+=revenue-fuelCost;
-  S.sessionRevenue+=revenue;
-  S.sessionCosts+=fuelCost;
-  S.totalFreight+=freight;
-
-  refreshTreasury();
-  document.getElementById('sum-ai-rev').textContent='$'+S.sessionRevenue.toLocaleString();
-  document.getElementById('sum-freight').textContent=S.totalFreight.toLocaleString()+' lbs';
-
-  addFlightRow(fn,origin,dest,ac,p.name,true,freight);
-  addAILog(p.name,fn,origin,dest,revenue);
-  addLedgerRow(`${fn} Revenue — ${p.name}`,revenue);
-
-  // Nudge stock up slightly
-  S.stockPrice+=Math.random()*.15;
-}
-
-function checkRankUp(p){
-  const old=p.rank;
-  if(p.hours>=1000&&p.rank!=='Global Captain'){p.rank='Global Captain';p.xp=10;}
-  else if(p.hours>=250&&p.rank==='Feeder Pilot'){p.rank='Regional F/O';p.xp=5;}
-  if(p.rank!==old) addAILog(p.name,'—','—','—',0,`promoted to <span style="color:var(--gold-lt)">${p.rank}</span> 🎖`);
-}
-
-// Auto-cycle
 setInterval(()=>{
-  S.pilots.filter(p=>p.type==='ai').forEach(p=>{
-    for(let i=0;i<p.freq;i++){if(Math.random()<.4) triggerAI(p.id);}
-  });
-},55000);
+  document.getElementById("zulu").innerText=
+    new Date().toUTCString().split(" ")[4];
+},1000);
 
-// ════════════════════════════════════════════════
-//  LOGGING
-// ════════════════════════════════════════════════
-function addAILog(name,fn,origin,dest,revenue,customMsg){
-  const log=document.getElementById('ai-log');if(!log) return;
-  const now=new Date();
-  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
-  const msg=customMsg||`completed ${fn} ${origin}→${dest} <span class="earn">+$${revenue.toLocaleString()}</span>`;
-  if(log.children.length===1&&log.children[0].querySelector('.ai-time')?.textContent==='--:--Z') log.innerHTML='';
-  const div=document.createElement('div');div.className='ai-line';
-  div.innerHTML=`<span class="ai-time">${t}</span><span><span class="hi">${name}</span> ${msg}</span>`;
-  log.prepend(div);
-  while(log.children.length>8) log.removeChild(log.lastChild);
-}
+setInterval(engine,60000);
+setInterval(stock,60000);
 
-function addLedgerRow(desc,amount){
-  const tbody=document.getElementById('ledger-tbody');if(!tbody) return;
-  const now=new Date();
-  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
-  const isPos=amount>=0;
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${t}</td><td>${desc}</td><td class="${isPos?'li-pos':'li-neg'}">${isPos?'+':'-'}$${Math.abs(amount).toLocaleString()}</td><td>$${S.treasury.toLocaleString()}</td>`;
-  tbody.prepend(tr);
-  while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
-}
+updateTreasury();
+engine();
+stock();
 
-// ════════════════════════════════════════════════
-//  PROFIT SHARE
-// ════════════════════════════════════════════════
-function distributeProfit(){
-  const humans=S.pilots.filter(p=>p.type==='human');
-  if(!humans.length){alert('No human crew enrolled yet. Add crew first.');return}
-  const pool=Math.round(S.treasury*.07);
-  const totalH=humans.reduce((a,p)=>a+Math.max(p.hours,1),0);
-  humans.forEach(p=>{p.earned+=Math.round((Math.max(p.hours,1)/totalH)*pool)});
-  S.treasury-=pool;refreshTreasury();
-  addLedgerRow('Profit share distributed',-pool);
-  alert(`$${pool.toLocaleString()} distributed across ${humans.length} crew member${humans.length!==1?'s':''}.`);
-  renderEconomy();
-}
-
-// ════════════════════════════════════════════════
-//  METAR
-// ════════════════════════════════════════════════
-const metarPool=['KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180','KSDF 012054Z 22012KT 6SM FEW018 BKN040 09/06 A2985 RMK AO2','KSDF 012354Z 19015G22KT 3SM -TSRA OVC008 07/06 A2978 RMK AO2','KSDF 020054Z 21010KT 10SM SCT025 BKN060 11/05 A2990 RMK AO2'];
-let metarIdx=0;
-function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getElementById('metar-text').textContent=metarPool[metarIdx];}
-
-// ════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════
-refreshTreasury();
-renderHubs();
 </script>
 </body>
 </html>
