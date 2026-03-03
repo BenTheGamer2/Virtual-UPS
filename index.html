@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Virtual UPS Airlines — Operations</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -716,29 +717,76 @@ tr:last-child td{border-bottom:none}
 <!-- ═══════════ DISPATCHER ═══════════ -->
 <div id="page-dispatcher" class="page">
   <div class="sec-header">
-    <div class="sec-title">✈ <span>Dispatcher</span> — Route Selection</div>
+    <div class="sec-title">✈ <span>Dispatcher</span></div>
     <div class="sec-actions" id="dispatcher-admin-actions"></div>
   </div>
 
-  <!-- Info banner for non-admins -->
-  <div id="dispatcher-public-banner" style="background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.75rem 1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;font-size:.78rem;color:var(--text-dim)">
-    <span style="font-size:1.1rem">📋</span>
-    <span>Select a route below to dispatch an AI flight. Admins can create and manage routes from the Admin panel.</span>
+  <!-- Sync status -->
+  <div id="sync-banner" style="background:rgba(36,113,163,.08);border:1px solid rgba(36,113,163,.25);border-radius:4px;padding:.5rem 1rem;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--blue-lt);display:flex;align-items:center;gap:.6rem">
+    <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mute);flex-shrink:0;display:inline-block"></span>
+    <span id="sync-label">Connecting to live database...</span>
   </div>
 
-  <!-- Route grid -->
-  <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
+  <!-- ── CUSTOM FLIGHT BUILDER ── -->
+  <div class="card" style="margin-bottom:1.25rem;border-color:rgba(200,146,10,.25)">
+    <div class="card-title" style="color:var(--gold-lt)">✦ Custom Flight Builder</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.65rem;margin-bottom:.75rem">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Origin ICAO</label>
+        <input class="form-input" id="cb-origin" placeholder="KSDF" maxlength="4" style="text-transform:uppercase">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Destination ICAO</label>
+        <input class="form-input" id="cb-dest" placeholder="VHHH" maxlength="4" style="text-transform:uppercase">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Aircraft</label>
+        <select class="form-select" id="cb-aircraft">
+          <option value="C208B Caravan">C208B Caravan</option>
+          <option value="ATR-72F">ATR-72F</option>
+          <option value="B757-200F">B757-200F</option>
+          <option value="B767-300F">B767-300F</option>
+          <option value="B747-400F" selected>B747-400F</option>
+          <option value="MD-11F">MD-11F</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Cruise Alt</label>
+        <input class="form-input" id="cb-alt" placeholder="FL350" value="FL350" maxlength="6">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Cost Index</label>
+        <input class="form-input" id="cb-ci" placeholder="52" value="52" maxlength="4" type="number">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">SimBrief User</label>
+        <input class="form-input" id="cb-sbuser" placeholder="username" value="VisualLanding112">
+      </div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="dispatchCustomFlight()">&#9654; Dispatch Custom Flight</button>
+      <button class="btn btn-blue" onclick="openSimbrief()">&#9992; Generate SimBrief OFP</button>
+    </div>
+    <div id="cb-simbrief-note" style="display:none;margin-top:.6rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--blue-lt)"></div>
+  </div>
 
-  <!-- Dispatch result toast -->
+  <!-- Pre-made routes -->
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem">
+    Pre-Made Routes
+    <span id="dispatcher-admin-route-btn" style="display:none;margin-left:.75rem"></span>
+  </div>
+  <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
+
+  <!-- Toast -->
   <div id="dispatch-toast" style="display:none;background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.35);border-radius:4px;padding:.75rem 1.1rem;font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--green-lt);margin-bottom:1rem"></div>
 
-  <!-- Recent dispatches table -->
+  <!-- Recent dispatches table — LIVE, synced -->
   <div class="card">
-    <div class="card-title">Recent Dispatches — This Session</div>
+    <div class="card-title">Live Dispatch Board <span style="color:var(--text-mute);font-weight:400;font-size:.65rem;margin-left:.5rem">— synced across all users</span></div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Time (Z)</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Est. Revenue</th><th>Status</th></tr></thead>
-        <tbody id="dispatcher-log-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-mute);padding:1.25rem">No dispatches this session yet.</td></tr></tbody>
+        <thead><tr><th>Time (Z)</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block</th><th>Revenue</th><th>Pilot</th><th>SimBrief</th><th>Status</th></tr></thead>
+        <tbody id="dispatcher-log-tbody"><tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:1.25rem">Loading...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -816,7 +864,7 @@ tr:last-child td{border-bottom:none}
         </div>
         <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$5,900,000,000</strong></div>
         <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(125,60,152,.2)">
-          <button class="btn btn-danger btn-sm" onclick="if(confirm('Reset ALL saved data to defaults? This cannot be undone.')){localStorage.removeItem(''+SAVE_KEY);location.reload();}">⚠ Reset All Saved Data</button>
+          <button class="btn btn-danger btn-sm" onclick="if(confirm('Reset ALL saved data to defaults? This cannot be undone.')){localStorage.removeItem(SAVE_KEY);_supa.from('state').delete().eq('key','main').then(()=>location.reload());}">⚠ Reset All Saved Data</button>
           <div class="form-note" style="margin-top:.3rem">Clears treasury, crew, fleet, and all session data.</div>
         </div>
       </div>
@@ -1329,14 +1377,16 @@ function renderDispatcher(){
         </div>
       </div>
       <button class="btn btn-primary" style="width:100%;margin-bottom:.3rem" onclick="dispatchRoute(${route.id})">&#9654; Dispatch Flight</button>
+      <button class="btn btn-blue btn-sm" style="width:100%;margin-bottom:.3rem" onclick="openSimbrief(null,'${route.origin}','${route.dest}','${route.aircraft}')">&#9992; SimBrief OFP</button>
       ${S.isAdmin ? `<button class="btn btn-danger btn-sm" style="width:100%" onclick="removeDispatchRoute(${route.id})">Remove Route</button>` : ''}
     </div>`;
   }).join('');
 }
 
-function dispatchRoute(routeId){
-  const route = S.dispatcherRoutes.find(r=>r.id===routeId);
+function dispatchRoute(routeId, routeOverride, sbUserOverride){
+  const route = routeOverride || S.dispatcherRoutes.find(r=>r.id===routeId);
   if(!route) return;
+  const sbUser = sbUserOverride || (document.getElementById("cb-sbuser")?document.getElementById("cb-sbuser").value:"VisualLanding112");
   const aiPilots = S.pilots.filter(p=>p.type==='ai');
   let pilot = aiPilots[Math.floor(Math.random()*aiPilots.length)];
   if(!pilot) pilot = {id:0,type:'ai',name:'AI Dispatch',rank:'Regional F/O',route:'any',freq:1,hours:500,flights:50,ontime:97,earned:0,xp:50};
@@ -1371,9 +1421,77 @@ function dispatchRoute(routeId){
   const placeholder = tbody.querySelector('td[colspan]');
   if(placeholder) tbody.innerHTML='';
   const tr = document.createElement('tr');
-  tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
+  const sbAc2 = SIMBRIEF_AC_MAP[route.aircraft]||'B744';
+  const sbParams = new URLSearchParams({orig:route.origin,dest:route.dest,type:sbAc2,airline:'UPS',fltnum:fn.replace('5Y',''),units:'LBS'});
+  const sbUrl = 'https://dispatch.simbrief.com/options/custom?'+sbParams.toString()+'&userid='+sbUser;
+  tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td>'+pilot.name.replace('AI ','')+'</td><td><a href="'+sbUrl+'" target="_blank" style="color:var(--blue-lt);font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.7rem;text-decoration:none;border:1px solid rgba(36,113,163,.4);border-radius:2px;padding:.1rem .4rem">OFP</a></td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
   tbody.prepend(tr);
   while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
+}
+
+
+// ── Custom Flight Builder ──────────────────────────────────────────────────
+const SIMBRIEF_AC_MAP = {
+  'B747-400F':'B744','MD-11F':'MD11','B767-300F':'B763',
+  'B757-200F':'B752','C208B Caravan':'C208','ATR-72F':'AT76'
+};
+
+function getCustomFields(){
+  return {
+    origin:   (document.getElementById('cb-origin').value||'').trim().toUpperCase(),
+    dest:     (document.getElementById('cb-dest').value||'').trim().toUpperCase(),
+    aircraft: document.getElementById('cb-aircraft').value,
+    alt:      (document.getElementById('cb-alt').value||'FL350').trim(),
+    ci:       parseInt(document.getElementById('cb-ci').value)||52,
+    sbUser:   (document.getElementById('cb-sbuser').value||'VisualLanding112').trim(),
+  };
+}
+
+function openSimbrief(fnOverride, originOverride, destOverride, acOverride){
+  const f = getCustomFields();
+  const origin   = originOverride || f.origin;
+  const dest     = destOverride   || f.dest;
+  const aircraft = acOverride     || f.aircraft;
+  const sbAc     = SIMBRIEF_AC_MAP[aircraft] || 'B744';
+  const fn       = fnOverride || ('5Y'+(Math.floor(Math.random()*900)+100));
+  const sbUser   = f.sbUser;
+
+  if(!origin || !dest){
+    alert('Enter origin and destination ICAO codes first.');
+    return;
+  }
+
+  // SimBrief new dispatch URL
+  const params = new URLSearchParams({
+    orig:     origin,
+    dest:     dest,
+    type:     sbAc,
+    airline:  'UPS',
+    fltnum:   fn.replace('5Y',''),
+    cruisealt:f.alt.replace('FL','').padStart(3,'0')+'00',
+    ci:       f.ci,
+    units:    'LBS',
+    reg:      'N' + fn.slice(-3),
+  });
+
+  const url = `https://dispatch.simbrief.com/options/custom?${params.toString()}&userid=${sbUser}`;
+
+  const note = document.getElementById('cb-simbrief-note');
+  if(note){ note.style.display=''; note.textContent = 'Opening SimBrief OFP for ' + fn + ' ' + origin + '->' + dest + ' in new tab...'; }
+
+  window.open(url, '_blank');
+}
+
+function dispatchCustomFlight(){
+  const f = getCustomFields();
+  if(!f.origin || !f.dest){ alert('Enter origin and destination ICAO codes.'); return; }
+
+  const fakeRoute = {
+    id: -1, origin: f.origin, dest: f.dest,
+    aircraft: f.aircraft, label: f.origin + ' to ' + f.dest,
+    category: blockTime(f.origin,f.dest) >= 8 ? 'longhaul' : blockTime(f.origin,f.dest) >= 3 ? 'domestic' : 'feeder'
+  };
+  dispatchRoute(-1, fakeRoute, f.sbUser);
 }
 
 function removeDispatchRoute(id){
@@ -1975,61 +2093,157 @@ function addLedgerRow(desc,amount){
 }
 
 // ════════════════════════════════════════════════
-//  PERSISTENCE — localStorage
+//  SUPABASE — REAL-TIME SHARED STATE
+//  All users see the same data, live.
 // ════════════════════════════════════════════════
-const SAVE_KEY = 'vups_state_v2';
+const SUPA_URL  = 'https://mpmvfqkmvvbnsqvtvlnu.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0';
+const SAVE_KEY  = 'vups_state_v2'; // local cache key
 
-function saveState(){
-  try {
-    const snap = {
-      treasury:       S.treasury,
-      sessionRevenue: S.sessionRevenue,
-      sessionCosts:   S.sessionCosts,
-      totalFlights:   S.totalFlights,
-      totalFreight:   S.totalFreight,
-      nextId:         S.nextId,
-      pilots:         S.pilots,
-      hubs:           S.hubs,
-      executives:     S.executives,
-      news:           S.news,
-      ownedFleet:     S.ownedFleet,
-      liveFlightsSnap: liveFlights.map(f=>({...f})),
-    };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(snap));
-  } catch(e){ console.warn('Save failed', e); }
+const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let _supaConnected = false;
+let _saveTimeout = null;
+
+function setSyncStatus(connected, label){
+  _supaConnected = connected;
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if(dot) dot.style.background = connected ? 'var(--green-lt)' : 'var(--red-lt)';
+  if(lbl) lbl.textContent = label || (connected ? 'Live — synced' : 'Offline — local only');
 }
 
-function loadState(){
+// ── Snapshot helpers ──────────────────────────────
+function buildSnap(){
+  return {
+    treasury:        S.treasury,
+    sessionRevenue:  S.sessionRevenue,
+    sessionCosts:    S.sessionCosts,
+    totalFlights:    S.totalFlights,
+    totalFreight:    S.totalFreight,
+    nextId:          S.nextId,
+    pilots:          S.pilots,
+    hubs:            S.hubs,
+    executives:      S.executives,
+    news:            S.news,
+    ownedFleet:      S.ownedFleet,
+    dispatcherRoutes:S.dispatcherRoutes,
+    liveFlightsSnap: liveFlights.map(f=>({...f})),
+  };
+}
+
+function applySnap(snap){
+  if(!snap) return;
+  if(snap.treasury          !== undefined) S.treasury          = snap.treasury;
+  if(snap.sessionRevenue    !== undefined) S.sessionRevenue    = snap.sessionRevenue;
+  if(snap.sessionCosts      !== undefined) S.sessionCosts      = snap.sessionCosts;
+  if(snap.totalFlights      !== undefined) S.totalFlights      = snap.totalFlights;
+  if(snap.totalFreight      !== undefined) S.totalFreight      = snap.totalFreight;
+  if(snap.nextId            !== undefined) S.nextId            = snap.nextId;
+  if(snap.pilots            && snap.pilots.length)          S.pilots          = snap.pilots;
+  if(snap.hubs              && snap.hubs.length)            S.hubs            = snap.hubs;
+  if(snap.executives        && snap.executives.length)      S.executives      = snap.executives;
+  if(snap.news              && snap.news.length)            S.news            = snap.news;
+  if(snap.ownedFleet)       S.ownedFleet      = snap.ownedFleet;
+  if(snap.dispatcherRoutes) S.dispatcherRoutes = snap.dispatcherRoutes;
+  if(snap.liveFlightsSnap){
+    liveFlights.length = 0;
+    snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
+  }
+}
+
+function refreshAllUI(){
+  refreshTreasury();
+  updateCrewCounts();
+  renderHubs();
+  document.getElementById('sum-ai-rev').textContent  = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  document.getElementById('sum-flights').textContent = S.totalFlights;
+  // Re-render whichever page is active
+  const active = document.querySelector('.page.active');
+  if(active){
+    const id = active.id.replace('page-','');
+    if(id==='crew')       renderCrew();
+    if(id==='leadership') renderLeadership();
+    if(id==='news')       renderNews('all');
+    if(id==='fleet')      renderFleet();
+    if(id==='economy')    renderEconomy();
+    if(id==='hubs')       renderHubs();
+    if(id==='admin')      renderAdmin();
+    if(id==='dispatcher') renderDispatcher();
+  }
+}
+
+// ── Save to Supabase (debounced 800ms) ────────────────────────────────────
+function saveState(){
+  // Always write to local cache immediately
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(buildSnap())); } catch(e){}
+  // Debounce remote write
+  clearTimeout(_saveTimeout);
+  _saveTimeout = setTimeout(async ()=>{
+    try {
+      const snap = buildSnap();
+      const { error } = await _supa.from('state').upsert(
+        { key: 'main', value: snap, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if(error) throw error;
+      setSyncStatus(true, 'Saved · ' + new Date().toLocaleTimeString());
+    } catch(e){
+      console.warn('Supabase save error:', e);
+      setSyncStatus(false, 'Save failed — local only');
+    }
+  }, 800);
+}
+
+// ── Load from Supabase (or localStorage fallback) ─────────────────────────
+async function loadState(){
+  // First apply local cache so page feels instant
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    if(!raw) return false;
-    const snap = JSON.parse(raw);
-    if(snap.treasury   !== undefined) S.treasury       = snap.treasury;
-    if(snap.sessionRevenue !== undefined) S.sessionRevenue = snap.sessionRevenue;
-    if(snap.sessionCosts   !== undefined) S.sessionCosts   = snap.sessionCosts;
-    if(snap.totalFlights   !== undefined) S.totalFlights   = snap.totalFlights;
-    if(snap.totalFreight   !== undefined) S.totalFreight   = snap.totalFreight;
-    if(snap.nextId         !== undefined) S.nextId         = snap.nextId;
-    if(snap.pilots         && snap.pilots.length)     S.pilots     = snap.pilots;
-    if(snap.hubs           && snap.hubs.length)       S.hubs       = snap.hubs;
-    if(snap.executives     && snap.executives.length) S.executives = snap.executives;
-    if(snap.news           && snap.news.length)       S.news       = snap.news;
-    if(snap.ownedFleet)    S.ownedFleet = snap.ownedFleet;
-    // Restore live flights
-    if(snap.liveFlightsSnap){
-      snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
+    if(raw) applySnap(JSON.parse(raw));
+  } catch(e){}
+
+  // Then fetch from Supabase
+  try {
+    setSyncStatus(false, 'Connecting...');
+    const { data, error } = await _supa.from('state').select('value').eq('key','main').single();
+    if(error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows yet
+    if(data && data.value){
+      applySnap(data.value);
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(data.value)); } catch(e){}
     }
-    return true;
-  } catch(e){ console.warn('Load failed', e); return false; }
+    setSyncStatus(true, 'Live — synced');
+    refreshAllUI();
+  } catch(e){
+    console.warn('Supabase load error:', e);
+    setSyncStatus(false, 'Offline — using local data');
+  }
 }
 
-// Auto-save every 30 seconds and on key events
-setInterval(saveState, 30000);
+// ── Real-time subscription — push changes to all connected browsers ────────
+function subscribeRealtime(){
+  _supa
+    .channel('state-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'state', filter: 'key=eq.main' },
+      (payload) => {
+        if(!payload.new || !payload.new.value) return;
+        applySnap(payload.new.value);
+        try { localStorage.setItem(SAVE_KEY, JSON.stringify(payload.new.value)); } catch(e){}
+        refreshAllUI();
+        setSyncStatus(true, 'Live · updated ' + new Date().toLocaleTimeString());
+      }
+    )
+    .subscribe((status)=>{
+      if(status === 'SUBSCRIBED') setSyncStatus(true, 'Live — real-time active');
+      if(status === 'CLOSED' || status === 'CHANNEL_ERROR') setSyncStatus(false, 'Reconnecting...');
+    });
+}
+
+// Auto-save every 60s as heartbeat
+setInterval(saveState, 60000);
 window.addEventListener('beforeunload', saveState);
 
-// Wrap treasury refresh to also save
-const _origRefreshTreasury = refreshTreasury;
-// (called after definition — patched below in INIT)
+// (no _origRefreshTreasury stub needed)
 
 function distributeProfit(){
   const humans=S.pilots.filter(p=>p.type==='human');
@@ -2055,32 +2269,32 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 //  INIT
 // ════════════════════════════════════════════════
 
-// Load persisted state before rendering anything
-loadState();
-
+// 1. Render with defaults immediately so page isn't blank
 refreshTreasury();
 renderHubs();
 initFinnhubBanner();
 updateCrewCounts();
 
-// Restore session summary labels
-document.getElementById('sum-ai-rev').textContent = '$' + S.sessionRevenue.toLocaleString();
-document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
-document.getElementById('sum-flights').textContent = S.totalFlights;
-document.getElementById('s-active').textContent = liveFlights.filter(f => Date.now() < f.startTime + f.blockHours * 3600000).length;
-
-// Restore live flight rows from saved flights
-liveFlights.forEach(f => {
-  // Only show if not more than 2h past ETA
-  if(Date.now() < f.startTime + f.blockHours * 3600000 + 7200000){
-    addFlightRow(f, true);
-  }
+// 2. Load from Supabase (async — will update UI when ready)
+loadState().then(() => {
+  // Restore live flight rows after state loads
+  const now = Date.now();
+  liveFlights.forEach(f => {
+    if(now < f.startTime + f.blockHours * 3600000 + 7200000){
+      addFlightRow(f, true);
+    }
+  });
+  document.getElementById('s-active').textContent = liveFlights.filter(f => now < f.startTime + f.blockHours * 3600000).length;
+  document.getElementById('sum-ai-rev').textContent  = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  document.getElementById('sum-flights').textContent = S.totalFlights;
 });
 
-// Initialize stocks — always live
-(function initStocks(){
-  fetchLiveStocks();
-})();
+// 3. Subscribe to real-time updates
+subscribeRealtime();
+
+// 4. Stock simulation
+fetchLiveStocks();
 </script>
 </body>
 </html>
