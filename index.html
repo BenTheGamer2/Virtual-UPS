@@ -388,6 +388,7 @@ tr:last-child td{border-bottom:none}
     <button class="nav-btn"            onclick="goNav(this,'fleet')">Fleet</button>
     <button class="nav-btn"            onclick="goNav(this,'economy')">Economy</button>
     <button class="nav-btn"            onclick="goNav(this,'hubs')">Hubs</button>
+    <button class="nav-btn"            onclick="goNav(this,'dispatcher')">✈ Dispatcher</button>
     <button class="nav-btn admin-only-nav" id="admin-nav-btn" onclick="goNav(this,'admin')" style="display:none">⬡ Admin</button>
   </nav>
   <div class="header-right">
@@ -711,6 +712,38 @@ tr:last-child td{border-bottom:none}
   <div id="hubs-grid" class="hubs-grid"></div>
 </div>
 
+
+<!-- ═══════════ DISPATCHER ═══════════ -->
+<div id="page-dispatcher" class="page">
+  <div class="sec-header">
+    <div class="sec-title">✈ <span>Dispatcher</span> — Route Selection</div>
+    <div class="sec-actions" id="dispatcher-admin-actions"></div>
+  </div>
+
+  <!-- Info banner for non-admins -->
+  <div id="dispatcher-public-banner" style="background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.75rem 1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;font-size:.78rem;color:var(--text-dim)">
+    <span style="font-size:1.1rem">📋</span>
+    <span>Select a route below to dispatch an AI flight. Admins can create and manage routes from the Admin panel.</span>
+  </div>
+
+  <!-- Route grid -->
+  <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
+
+  <!-- Dispatch result toast -->
+  <div id="dispatch-toast" style="display:none;background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.35);border-radius:4px;padding:.75rem 1.1rem;font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--green-lt);margin-bottom:1rem"></div>
+
+  <!-- Recent dispatches table -->
+  <div class="card">
+    <div class="card-title">Recent Dispatches — This Session</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Time (Z)</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Est. Revenue</th><th>Status</th></tr></thead>
+        <tbody id="dispatcher-log-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-mute);padding:1.25rem">No dispatches this session yet.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ ADMIN ═══════════ -->
 <div id="page-admin" class="page">
   <div class="admin-wrap">
@@ -794,6 +827,43 @@ tr:last-child td{border-bottom:none}
 </main>
 
 <!-- ═══ MODALS ═══ -->
+
+<!-- Add Dispatcher Route -->
+<div class="modal-overlay" id="modal-add-disp-route">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Create Dispatch Route</div><button class="modal-close" onclick="closeModal('modal-add-disp-route')">X</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Origin ICAO</label><input class="form-input" placeholder="KSDF" id="dr-origin" style="text-transform:uppercase" maxlength="4"></div>
+        <div class="form-group"><label class="form-label">Destination ICAO</label><input class="form-input" placeholder="VHHH" id="dr-dest" style="text-transform:uppercase" maxlength="4"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Aircraft Type</label>
+          <select class="form-select" id="dr-aircraft">
+            <option value="C208B Caravan">C208B Caravan</option>
+            <option value="ATR-72F">ATR-72F</option>
+            <option value="B757-200F">Boeing 757-200F</option>
+            <option value="B767-300F">Boeing 767-300F</option>
+            <option value="B747-400F">Boeing 747-400F</option>
+            <option value="MD-11F">McDonnell MD-11F</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Category</label>
+          <select class="form-select" id="dr-category">
+            <option value="longhaul">Long Haul</option>
+            <option value="domestic">Domestic</option>
+            <option value="feeder">Feeder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-note">Block time is calculated automatically. Unknown ICAO pairs default to 3h.</div>
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-disp-route')">Cancel</button>
+        <button class="btn btn-primary" onclick="addDispatchRoute()">Add Route</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Add Human -->
 <div class="modal-overlay" id="modal-add-human">
@@ -975,7 +1045,19 @@ const S = {
   ownedFleet: {},
   loadBars: {},
   activeFlights: 0,
+  dispatcherRoutes: [
+    { id:1, origin:'KSDF', dest:'VHHH', aircraft:'MD-11F',        label:'Louisville → Hong Kong',    category:'longhaul' },
+    { id:2, origin:'KSDF', dest:'EDDK', aircraft:'B747-400F',     label:'Louisville → Cologne',      category:'longhaul' },
+    { id:3, origin:'EDDK', dest:'VHHH', aircraft:'B747-400F',     label:'Cologne → Hong Kong',       category:'longhaul' },
+    { id:4, origin:'VHHH', dest:'KSDF', aircraft:'MD-11F',        label:'Hong Kong → Louisville',    category:'longhaul' },
+    { id:5, origin:'KSDF', dest:'KONT', aircraft:'B757-200F',     label:'Louisville → Ontario CA',   category:'domestic' },
+    { id:6, origin:'KONT', dest:'KSDF', aircraft:'B757-200F',     label:'Ontario CA → Louisville',   category:'domestic' },
+    { id:7, origin:'KSDF', dest:'KLEX', aircraft:'B767-300F',     label:'Louisville → Lexington',    category:'domestic' },
+    { id:8, origin:'KSDF', dest:'KHSV', aircraft:'C208B Caravan', label:'Louisville → Huntsville',   category:'feeder'   },
+    { id:9, origin:'KHSV', dest:'KSDF', aircraft:'C208B Caravan', label:'Huntsville → Louisville',   category:'feeder'   },
+  ],
 };
+
 
 const AIRCRAFT_CATALOG = [
   { model:'Cessna C208B',   type:'Turboprop Freighter', price:2500000,    maxPayload:3200,   range:'800 nm',  crew:1,  icon:'🛩' },
@@ -1195,6 +1277,126 @@ setInterval(()=>{ marketTick(); }, 60000);
 // ════════════════════════════════════════════════
 //  NAV
 // ════════════════════════════════════════════════
+
+// DISPATCHER PAGE
+const categoryMeta = {
+  longhaul: { label:'Long Haul', badge:'b-gold',  icon:'\u{1F310}' },
+  domestic: { label:'Domestic',  badge:'b-blue',  icon:'\u2708'  },
+  feeder:   { label:'Feeder',    badge:'b-green', icon:'\u{1F6E9}' },
+};
+
+function renderDispatcher(){
+  const grid = document.getElementById('dispatcher-route-grid');
+  const adminActions = document.getElementById('dispatcher-admin-actions');
+  if(adminActions){
+    adminActions.innerHTML = S.isAdmin
+      ? '<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-disp-route\')">+ Create Route</button>'
+      : '';
+  }
+  const banner = document.getElementById('dispatcher-public-banner');
+  if(banner) banner.style.display = S.isAdmin ? 'none' : '';
+  if(!S.dispatcherRoutes.length){
+    grid.innerHTML = '<div class="empty-state"><div class="icon">\u{1F5FA}</div><p>No routes configured yet.</p></div>';
+    return;
+  }
+  grid.innerHTML = S.dispatcherRoutes.map(route => {
+    const bt = blockTime(route.origin, route.dest);
+    const btStr = bt >= 1 ? bt + 'h block' : Math.round(bt*60) + 'min block';
+    const cat = categoryMeta[route.category] || categoryMeta.domestic;
+    const borderCol = route.category==='longhaul'?'var(--gold)':route.category==='domestic'?'var(--blue-lt)':'var(--green-lt)';
+    const [fmin, fmax] = freightMap[route.aircraft] || [10000, 100000];
+    const estRev = Math.round(((fmin+fmax)/2) * 8 * 0.80);
+    return `<div class="card" style="border-left:2px solid ${borderCol}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.65rem">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text)">${route.icon||cat.icon} ${route.origin} <span style="color:var(--text-mute)">&#8594;</span> ${route.dest}</div>
+          <div style="font-size:.72rem;color:var(--text-dim);margin-top:.1rem">${route.label}</div>
+        </div>
+        <span class="badge ${cat.badge}">${cat.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem;margin-bottom:.75rem">
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--text)">${route.aircraft}</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Aircraft</div>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--blue-lt)">${btStr}</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Block Time</div>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--green-lt)">~$${Math.round(estRev/1000)}K</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Est. Rev</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:.3rem" onclick="dispatchRoute(${route.id})">&#9654; Dispatch Flight</button>
+      ${S.isAdmin ? `<button class="btn btn-danger btn-sm" style="width:100%" onclick="removeDispatchRoute(${route.id})">Remove Route</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function dispatchRoute(routeId){
+  const route = S.dispatcherRoutes.find(r=>r.id===routeId);
+  if(!route) return;
+  const aiPilots = S.pilots.filter(p=>p.type==='ai');
+  let pilot = aiPilots[Math.floor(Math.random()*aiPilots.length)];
+  if(!pilot) pilot = {id:0,type:'ai',name:'AI Dispatch',rank:'Regional F/O',route:'any',freq:1,hours:500,flights:50,ontime:97,earned:0,xp:50};
+  const [fmin,fmax] = freightMap[route.aircraft] || [10000,100000];
+  const freight = Math.floor(Math.random()*(fmax-fmin)+fmin);
+  const baseRate = pilot.rank==='Global Captain'?12:pilot.rank==='Regional F/O'?8.5:4;
+  const revenue = Math.round(freight * baseRate * 0.80);
+  const fuelCost = Math.round(revenue * 0.18);
+  const fn = '5Y' + (Math.floor(Math.random()*900)+100);
+  const blockHours = blockTime(route.origin, route.dest);
+  if(pilot.id!==0){ pilot.flights++; pilot.hours+=Math.round(blockHours); pilot.earned+=revenue; pilot.xp=Math.min(100,pilot.xp+2); checkRankUp(pilot); }
+  S.treasury += revenue - fuelCost;
+  S.sessionRevenue += revenue;
+  S.sessionCosts += fuelCost;
+  S.totalFreight += freight;
+  refreshTreasury();
+  document.getElementById('sum-ai-rev').textContent = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  const flightObj = {fn, origin:route.origin, dest:route.dest, ac:route.aircraft, pilot:pilot.name, startTime:Date.now(), blockHours, freight, revenue};
+  liveFlights.push(flightObj);
+  addFlightRow(flightObj, true);
+  addAILog(pilot.name, fn, route.origin, route.dest, revenue);
+  addLedgerRow(fn + ' Revenue — ' + pilot.name, revenue);
+  updateLoadBar(route.aircraft, freight);
+  saveState();
+  const toast = document.getElementById('dispatch-toast');
+  if(toast){ toast.style.display=''; toast.innerHTML='&#10004; <strong>'+fn+'</strong> dispatched &mdash; '+route.origin+'&#8594;'+route.dest+' &middot; '+route.aircraft+' &middot; '+pilot.name+' &middot; est. <span style="color:var(--green-lt)">+$'+revenue.toLocaleString()+'</span> &middot; '+blockHours+'h block'; setTimeout(()=>{toast.style.display='none';},8000); }
+  const tbody = document.getElementById('dispatcher-log-tbody');
+  const now = new Date();
+  const t = String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0')+'Z';
+  const bt = blockHours>=1?blockHours+'h':Math.round(blockHours*60)+'min';
+  const placeholder = tbody.querySelector('td[colspan]');
+  if(placeholder) tbody.innerHTML='';
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
+  tbody.prepend(tr);
+  while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
+}
+
+function removeDispatchRoute(id){
+  if(!confirm('Remove this route?')) return;
+  S.dispatcherRoutes = S.dispatcherRoutes.filter(r=>r.id!==id);
+  renderDispatcher(); saveState();
+}
+
+function addDispatchRoute(){
+  const origin   = document.getElementById('dr-origin').value.trim().toUpperCase();
+  const dest     = document.getElementById('dr-dest').value.trim().toUpperCase();
+  const aircraft = document.getElementById('dr-aircraft').value;
+  const category = document.getElementById('dr-category').value;
+  if(!origin||!dest){ alert('Origin and destination required.'); return; }
+  const label = origin + ' to ' + dest;
+  S.dispatcherRoutes.push({id:S.nextId++, origin, dest, aircraft, label, category});
+  document.getElementById('dr-origin').value='';
+  document.getElementById('dr-dest').value='';
+  closeModal('modal-add-disp-route');
+  renderDispatcher(); saveState();
+}
+// END DISPATCHER
+
 function goNav(btn,page){
   if(page==='admin'&&!S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -1207,6 +1409,7 @@ function goNav(btn,page){
   if(page==='fleet')      renderFleet();
   if(page==='economy')    renderEconomy();
   if(page==='hubs')       renderHubs();
+  if(page==='dispatcher') renderDispatcher();
   if(page==='admin')      renderAdmin();
 }
 
