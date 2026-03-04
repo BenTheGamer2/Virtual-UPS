@@ -767,12 +767,14 @@ tr:last-child td{border-bottom:none}
       <div class="form-group" style="margin:0">
         <label class="form-label">Aircraft</label>
         <select class="form-select" id="cb-aircraft">
-          <option value="C208B Caravan">C208B Caravan</option>
-          <option value="ATR-72F">ATR-72F</option>
-          <option value="B757-200F">B757-200F</option>
-          <option value="B767-300F">B767-300F</option>
-          <option value="B747-400F" selected>B747-400F</option>
-          <option value="MD-11F">MD-11F</option>
+          <option value="Boeing 757-200F">Boeing 757-200F</option>
+          <option value="Boeing 757-300F">Boeing 757-300F</option>
+          <option value="Boeing 767-300F">Boeing 767-300F</option>
+          <option value="Boeing 767-300ERF">Boeing 767-300ERF</option>
+          <option value="Airbus A300-600RF">Airbus A300-600RF</option>
+          <option value="Boeing 747-400F">Boeing 747-400F</option>
+          <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+          <option value="McDonnell MD-11F">McDonnell MD-11F</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
@@ -950,12 +952,14 @@ tr:last-child td{border-bottom:none}
       <div class="form-row">
         <div class="form-group"><label class="form-label">Aircraft Type</label>
           <select class="form-select" id="dr-aircraft">
-            <option value="C208B Caravan">C208B Caravan</option>
-            <option value="ATR-72F">ATR-72F</option>
-            <option value="B757-200F">Boeing 757-200F</option>
-            <option value="B767-300F">Boeing 767-300F</option>
-            <option value="B747-400F">Boeing 747-400F</option>
-            <option value="MD-11F">McDonnell MD-11F</option>
+            <option value="Boeing 757-200F">Boeing 757-200F</option>
+            <option value="Boeing 757-300F">Boeing 757-300F</option>
+            <option value="Boeing 767-300F">Boeing 767-300F</option>
+            <option value="Boeing 767-300ERF">Boeing 767-300ERF</option>
+            <option value="Airbus A300-600RF">Airbus A300-600RF</option>
+            <option value="Boeing 747-400F">Boeing 747-400F</option>
+            <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+            <option value="McDonnell MD-11F">McDonnell MD-11F</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">Category</label>
@@ -1104,7 +1108,7 @@ const S = {
     { icao:'VHHH', name:'Hong Kong International',     type:'Regional', aircraft:'B747-400F, MD-11F',            ramp:65, active:4  },
     { icao:'KONT', name:'Ontario International',       type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:41, active:3  },
     { icao:'KHSV', name:'Huntsville International',    type:'Feeder',   aircraft:'C208B Caravan, ATR-42',        ramp:30, active:2  },
-    { icao:'KLEX', name:'Bluegrass Airport',           type:'Feeder',   aircraft:'C208B Caravan',                ramp:20, active:1  },
+    { icao:'KLEX', name:'Bluegrass Airport',           type:'Feeder',   aircraft:'Boeing 757-200F',                ramp:20, active:1  },
   ],
 
   executives: [
@@ -1156,28 +1160,60 @@ const S = {
   loadBars: {},
   activeFlights: 0,
   dispatcherRoutes: [
-    { id:1, origin:'KSDF', dest:'VHHH', aircraft:'MD-11F',        label:'Louisville → Hong Kong',    category:'longhaul' },
-    { id:2, origin:'KSDF', dest:'EDDK', aircraft:'B747-400F',     label:'Louisville → Cologne',      category:'longhaul' },
-    { id:3, origin:'EDDK', dest:'VHHH', aircraft:'B747-400F',     label:'Cologne → Hong Kong',       category:'longhaul' },
-    { id:4, origin:'VHHH', dest:'KSDF', aircraft:'MD-11F',        label:'Hong Kong → Louisville',    category:'longhaul' },
-    { id:5, origin:'KSDF', dest:'KONT', aircraft:'B757-200F',     label:'Louisville → Ontario CA',   category:'domestic' },
-    { id:6, origin:'KONT', dest:'KSDF', aircraft:'B757-200F',     label:'Ontario CA → Louisville',   category:'domestic' },
-    { id:7, origin:'KSDF', dest:'KLEX', aircraft:'B767-300F',     label:'Louisville → Lexington',    category:'domestic' },
-    { id:8, origin:'KSDF', dest:'KHSV', aircraft:'C208B Caravan', label:'Louisville → Huntsville',   category:'feeder'   },
-    { id:9, origin:'KHSV', dest:'KSDF', aircraft:'C208B Caravan', label:'Huntsville → Louisville',   category:'feeder'   },
+    // ── International Long Haul ──
+    { id:1,  origin:'KSDF', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Louisville → Hong Kong',         category:'longhaul' },
+    { id:2,  origin:'VHHH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Hong Kong → Louisville',         category:'longhaul' },
+    { id:3,  origin:'KSDF', dest:'EDDK', aircraft:'Boeing 747-8F', label:'Louisville → Cologne',           category:'longhaul' },
+    { id:4,  origin:'EDDK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Cologne → Louisville',           category:'longhaul' },
+    { id:5,  origin:'KSDF', dest:'ZPBH', aircraft:'Boeing 747-8F', label:'Louisville → Shenzhen',          category:'longhaul' },
+    { id:6,  origin:'ZPBH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Shenzhen → Louisville',          category:'longhaul' },
+    { id:7,  origin:'KSDF', dest:'ZSPD', aircraft:'McDonnell MD-11F',    label:'Louisville → Shanghai',          category:'longhaul' },
+    { id:8,  origin:'ZSPD', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Shanghai → Louisville',          category:'longhaul' },
+    { id:9,  origin:'KSDF', dest:'OMDB', aircraft:'Boeing 747-8F', label:'Louisville → Dubai',             category:'longhaul' },
+    { id:10, origin:'OMDB', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Dubai → Louisville',             category:'longhaul' },
+    { id:11, origin:'KSDF', dest:'PANC', aircraft:'Boeing 747-8F', label:'Louisville → Anchorage (relay)', category:'longhaul' },
+    { id:12, origin:'PANC', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Anchorage → Hong Kong',          category:'longhaul' },
+    { id:13, origin:'KPHL', dest:'EDDK', aircraft:'Boeing 767-300F', label:'Philadelphia → Cologne',         category:'longhaul' },
+    { id:14, origin:'KPHL', dest:'EGSS', aircraft:'Boeing 767-300F', label:'Philadelphia → London Stansted', category:'longhaul' },
+    { id:15, origin:'EDDK', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Cologne → Hong Kong',            category:'longhaul' },
+    { id:16, origin:'WMKK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Kuala Lumpur → Louisville',      category:'longhaul' },
+    // ── Domestic Hub Routes ──
+    { id:17, origin:'KSDF', dest:'KPHL', aircraft:'Boeing 767-300F', label:'Louisville → Philadelphia',      category:'domestic' },
+    { id:18, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:19, origin:'KSDF', dest:'KONT', aircraft:'Boeing 757-200F', label:'Louisville → Ontario CA',        category:'domestic' },
+    { id:20, origin:'KONT', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Ontario CA → Louisville',        category:'domestic' },
+    { id:21, origin:'KSDF', dest:'KRFD', aircraft:'Boeing 757-200F', label:'Louisville → Rockford IL',       category:'domestic' },
+    { id:22, origin:'KRFD', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Rockford → Louisville',          category:'domestic' },
+    { id:23, origin:'KSDF', dest:'KMIA', aircraft:'Boeing 767-300F', label:'Louisville → Miami',             category:'domestic' },
+    { id:24, origin:'KMIA', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Miami → Louisville',             category:'domestic' },
+    { id:25, origin:'KSDF', dest:'KCLT', aircraft:'Boeing 757-200F', label:'Louisville → Charlotte',         category:'domestic' },
+    { id:26, origin:'KSDF', dest:'KDFW', aircraft:'Boeing 757-200F', label:'Louisville → Dallas/Fort Worth',  category:'domestic' },
+    { id:27, origin:'KSDF', dest:'KSEA', aircraft:'Boeing 767-300F', label:'Louisville → Seattle',           category:'domestic' },
+    { id:28, origin:'KSDF', dest:'KATL', aircraft:'Boeing 757-200F', label:'Louisville → Atlanta',           category:'domestic' },
+    { id:29, origin:'KSDF', dest:'KPIT', aircraft:'McDonnell MD-11F',    label:'Louisville → Pittsburgh',        category:'domestic' },
+    { id:30, origin:'KPIT', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Pittsburgh → Louisville',        category:'domestic' },
+    { id:31, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:32, origin:'KSDF', dest:'PANC', aircraft:'Boeing 767-300F', label:'Louisville → Anchorage',         category:'domestic' },
+    // ── Feeder / Regional ──
+    { id:33, origin:'KSDF', dest:'KLEX', aircraft:'Boeing 757-200F', label:'Louisville → Lexington',         category:'feeder' },
+    { id:34, origin:'KSDF', dest:'KHSV', aircraft:'Boeing 757-200F',   label:'Louisville → Huntsville',        category:'feeder' },
+    { id:35, origin:'KSDF', dest:'KBNA', aircraft:'Boeing 757-200F', label:'Louisville → Nashville',         category:'feeder' },
+    { id:36, origin:'KSDF', dest:'KIND', aircraft:'Boeing 757-200F', label:'Louisville → Indianapolis',      category:'feeder' },
+    { id:37, origin:'KSDF', dest:'KCVG', aircraft:'Boeing 757-200F', label:'Louisville → Cincinnati',        category:'feeder' },
   ],
 };
 
 
 const AIRCRAFT_CATALOG = [
-  { model:'Cessna C208B',   type:'Turboprop Freighter', price:2500000,    maxPayload:3200,   range:'800 nm',  crew:1,  icon:'🛩' },
-  { model:'ATR-72F',        type:'Regional Freighter',  price:8000000,    maxPayload:15000,  range:'1,500 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 757-200F',type:'Narrowbody Freighter',price:22000000,   maxPayload:115600, range:'3,500 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 767-300F',type:'Widebody Freighter',  price:38000000,   maxPayload:97000,  range:'3,255 nm',crew:2,  icon:'✈' },
-  { model:'Airbus A300-600F',type:'Widebody Freighter', price:42000000,   maxPayload:140000, range:'4,000 nm',crew:2,  icon:'✈' },
-  { model:'Boeing 747-400F',type:'Heavy Freighter',     price:95000000,   maxPayload:228000, range:'4,950 nm',crew:3,  icon:'🛫' },
-  { model:'McDonnell MD-11F',type:'Heavy Freighter',    price:88000000,   maxPayload:197000, range:'4,165 nm',crew:2,  icon:'🛫' },
-  { model:'Boeing 777F',    type:'Long-Range Heavy',    price:138000000,  maxPayload:226000, range:'5,600 nm',crew:2,  icon:'🛫' },
+  // ── Real UPS Fleet (active 2024) ──────────────────────────────────────────
+  { model:'Boeing 757-200F',   type:'Narrowbody Freighter',  qty:75,  price:22000000,  maxPayload:116000, range:'3,500 nm', crew:2, icon:'✈',  note:'Backbone domestic workhorse. Serves most US spoke routes.' },
+  { model:'Boeing 757-300F',   type:'Narrowbody Freighter',  qty:78,  price:28000000,  maxPayload:124000, range:'3,600 nm', crew:2, icon:'✈',  note:'Stretched 757 variant. Higher capacity than -200.' },
+  { model:'Boeing 767-300F',   type:'Widebody Freighter',    qty:84,  price:38000000,  maxPayload:116000, range:'3,255 nm', crew:2, icon:'✈',  note:'Primary widebody. Transatlantic and long domestic routes.' },
+  { model:'Boeing 767-300ERF', type:'Extended Range Widebody',qty:24, price:44000000,  maxPayload:116000, range:'3,900 nm', crew:2, icon:'✈',  note:'Extended range 767. Newer deliveries 2024-2026.' },
+  { model:'Airbus A300-600RF', type:'Widebody Freighter',    qty:52,  price:35000000,  maxPayload:140000, range:'4,000 nm', crew:2, icon:'✈',  note:'High-capacity widebody. Domestic hub-to-hub.' },
+  { model:'Boeing 747-400F',   type:'Heavy Freighter',       qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
+  { model:'Boeing 747-8F',     type:'Super Heavy Freighter', qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
+  { model:'McDonnell MD-11F',  type:'Heavy Trijet Freighter', qty:40, price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
 ];
 
 // ════════════════════════════════════════════════
@@ -1720,16 +1756,22 @@ function renderFleet(){
     const owned=S.ownedFleet[ac.model]||0;
     const canAfford=S.treasury>=ac.price;
     return `<div class="aircraft-card ${owned>0?'owned':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem">
-        <div class="ac-model">${ac.icon} ${ac.model}</div>
-        ${owned>0?`<span class="badge b-green">Owned ×${owned}</span>`:''}
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.2rem">
+        <div>
+          <div class="ac-model">${ac.icon} ${ac.model}</div>
+          <div class="ac-type">${ac.type}</div>
+        </div>
+        <div style="text-align:right">
+          ${owned>0?`<span class="badge b-green">×${owned} Owned</span>`:''}
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">UPS Fleet: ${ac.qty||'—'}</div>
+        </div>
       </div>
-      <div class="ac-type">${ac.type}</div>
+      ${ac.note?`<div style="font-size:.67rem;color:var(--text-dim);margin-bottom:.5rem;line-height:1.4;font-style:italic">${ac.note}</div>`:''}
       <div class="ac-specs">
         <div class="ac-spec"><div class="ac-spec-val">${ac.maxPayload.toLocaleString()}</div><div class="ac-spec-lbl">Max Payload (lbs)</div></div>
         <div class="ac-spec"><div class="ac-spec-val">${ac.range}</div><div class="ac-spec-lbl">Range</div></div>
         <div class="ac-spec"><div class="ac-spec-val">${ac.crew}</div><div class="ac-spec-lbl">Crew Req.</div></div>
-        <div class="ac-spec"><div class="ac-spec-val">${owned}</div><div class="ac-spec-lbl">Owned</div></div>
+        <div class="ac-spec"><div class="ac-spec-val">${owned}</div><div class="ac-spec-lbl">VA Owned</div></div>
       </div>
       <div class="ac-price ${canAfford?'li-pos':'li-neg'}">$${(ac.price/1000000).toFixed(1)}M</div>
       <button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>
@@ -2054,25 +2096,144 @@ function updateLoadBar(ac,freight){
 //  AI FLIGHT ENGINE — REAL BLOCK TIMES
 // ════════════════════════════════════════════════
 
-// Block times in hours (real-world approximations)
+// ── Real UPS block times (hours) ──────────────────────────────────────────────
 const blockTimeMap = {
-  'KSDF-VHHH': 16.5, 'VHHH-KSDF': 16.5,
-  'KSDF-EDDK':  9.5, 'EDDK-KSDF':  9.5,
-  'EDDK-VHHH': 11.5, 'VHHH-EDDK': 11.5,
-  'KSDF-KONT':  4.5, 'KONT-KSDF':  4.5,
-  'KSDF-KLEX':  0.75,'KLEX-KSDF':  0.75,
-  'KSDF-KHSV':  1.25,'KHSV-KSDF':  1.25,
-  'KONT-EDDK':  9.0, 'EDDK-KONT':  9.0,
+  // International — Transatlantic
+  'KSDF-EDDK':9.5,  'EDDK-KSDF':9.5,
+  'KPHL-EDDK':8.5,  'EDDK-KPHL':8.5,
+  'KPHL-EGSS':7.5,  'EGSS-KPHL':7.5,
+  'KSDF-OMDB':14.5, 'OMDB-KSDF':14.5,
+  // International — Transpacific
+  'KSDF-VHHH':16.5, 'VHHH-KSDF':16.5,
+  'KSDF-ZPBH':16.0, 'ZPBH-KSDF':16.0,
+  'KSDF-ZSPD':15.5, 'ZSPD-KSDF':15.5,
+  'KSDF-WMKK':18.5, 'WMKK-KSDF':18.5,
+  'EDDK-VHHH':11.5, 'VHHH-EDDK':11.5,
+  // Via Anchorage relay
+  'KSDF-PANC':8.0,  'PANC-KSDF':8.5,
+  'PANC-VHHH':9.0,  'VHHH-PANC':9.5,
+  'PANC-ZPBH':8.5,  'ZPBH-PANC':9.0,
+  // Domestic hub routes
+  'KSDF-KPHL':1.5,  'KPHL-KSDF':1.5,
+  'KSDF-KONT':4.5,  'KONT-KSDF':4.5,
+  'KSDF-KRFD':1.25, 'KRFD-KSDF':1.25,
+  'KSDF-KMIA':2.5,  'KMIA-KSDF':2.5,
+  'KSDF-KCLT':1.5,  'KCLT-KSDF':1.5,
+  'KSDF-KDFW':2.5,  'KDFW-KSDF':2.5,
+  'KSDF-KSEA':5.0,  'KSEA-KSDF':5.0,
+  'KSDF-KATL':1.5,  'KATL-KSDF':1.5,
+  'KSDF-KPIT':1.25, 'KPIT-KSDF':1.25,
+  'KSDF-PANC':8.0,
+  'KPHL-KSDF':1.5,
+  // Feeder / regional
+  'KSDF-KLEX':0.75, 'KLEX-KSDF':0.75,
+  'KSDF-KHSV':1.25, 'KHSV-KSDF':1.25,
+  'KSDF-KBNA':0.75, 'KBNA-KSDF':0.75,
+  'KSDF-KIND':0.75, 'KIND-KSDF':0.75,
+  'KSDF-KCVG':0.5,  'KCVG-KSDF':0.5,
 };
-function blockTime(o,d){ return blockTimeMap[`${o}-${d}`] || 3.0; }
+function blockTime(o,d){
+  return blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o] || 3.0;
+}
 
+// ── Real UPS scheduled flights (UTC departure hour, flight number, route, aircraft) ──
+// Based on actual UPS Airlines published operations. Times in UTC.
+const UPS_SCHEDULE = [
+  // ── Nightly bank from KSDF (approx 05:00-10:00 UTC = 1am-6am EST) ──
+  { fn:'5X3',   dep:6,  orig:'KSDF', dest:'EDDK', ac:'Boeing 747-8F' },
+  { fn:'5X4',   dep:19, orig:'EDDK', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X7',   dep:7,  orig:'KSDF', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X8',   dep:14, orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X17',  dep:7,  orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },
+  { fn:'5X18',  dep:14, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X37',  dep:8,  orig:'KSDF', dest:'PANC', ac:'Boeing 747-8F' },
+  { fn:'5X38',  dep:18, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X15',  dep:8,  orig:'KSDF', dest:'ZSPD', ac:'McDonnell MD-11F'    },
+  { fn:'5X16',  dep:15, orig:'ZSPD', dest:'KSDF', ac:'McDonnell MD-11F'    },
+  { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },
+  { fn:'5X748', dep:22, orig:'OMDB', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X63',  dep:9,  orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },
+  { fn:'5X64',  dep:20, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X31',  dep:9,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },
+  { fn:'5X32',  dep:19, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X271', dep:9,  orig:'EDDK', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X272', dep:22, orig:'VHHH', dest:'EDDK', ac:'Boeing 747-8F' },
+  // ── Domestic overnight (approx 05:00-12:00 UTC) ──
+  { fn:'5X101', dep:6,  orig:'KSDF', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X102', dep:10, orig:'KPHL', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X201', dep:5,  orig:'KSDF', dest:'KONT', ac:'Boeing 757-200F' },
+  { fn:'5X202', dep:9,  orig:'KONT', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X301', dep:6,  orig:'KSDF', dest:'KRFD', ac:'Boeing 757-200F' },
+  { fn:'5X302', dep:8,  orig:'KRFD', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X401', dep:5,  orig:'KSDF', dest:'KMIA', ac:'Boeing 767-300F' },
+  { fn:'5X402', dep:9,  orig:'KMIA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X501', dep:6,  orig:'KSDF', dest:'KDFW', ac:'Boeing 757-200F' },
+  { fn:'5X601', dep:5,  orig:'KSDF', dest:'KSEA', ac:'Boeing 767-300F' },
+  { fn:'5X602', dep:14, orig:'KSEA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X701', dep:6,  orig:'KSDF', dest:'KATL', ac:'Boeing 757-200F' },
+  { fn:'5X702', dep:10, orig:'KATL', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X801', dep:6,  orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
+  { fn:'5X802', dep:14, orig:'KPIT', dest:'KSDF', ac:'McDonnell MD-11F'    },
+  { fn:'5X803', dep:19, orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
+  { fn:'5X805', dep:5,  orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
+  // ── Feeder / regional ──
+  { fn:'5X901', dep:6,  orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'5X902', dep:9,  orig:'KLEX', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X911', dep:7,  orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F'   },
+  { fn:'5X912', dep:10, orig:'KHSV', dest:'KSDF', ac:'Boeing 757-200F'   },
+  { fn:'5X921', dep:6,  orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'5X922', dep:8,  orig:'KBNA', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X931', dep:6,  orig:'KSDF', dest:'KIND', ac:'Boeing 757-200F' },
+  { fn:'5X932', dep:8,  orig:'KIND', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X941', dep:5,  orig:'KSDF', dest:'KCVG', ac:'Boeing 757-200F' },
+  { fn:'5X942', dep:7,  orig:'KCVG', dest:'KSDF', ac:'Boeing 757-200F' },
+];
+
+// Which scheduled flights should currently be airborne?
+function getActiveScheduledFlights(){
+  const now = Date.now();
+  const utcH = new Date().getUTCHours();
+  const active = [];
+  UPS_SCHEDULE.forEach(sched => {
+    const bt = blockTime(sched.orig, sched.dest);
+    const depMs = sched.dep * 3600000;
+    const dayMs = 86400000;
+    // Check today's and yesterday's departure
+    [-1, 0].forEach(dayOffset => {
+      const midnight = new Date();
+      midnight.setUTCHours(0,0,0,0);
+      const startTime = midnight.getTime() + dayOffset*dayMs + depMs;
+      const eta = startTime + bt*3600000;
+      // Is this flight currently airborne? (departed but not arrived, within +2h window)
+      if(now >= startTime && now < eta + 7200000){
+        active.push({
+          fn: sched.fn,
+          origin: sched.orig,
+          dest: sched.dest,
+          ac: sched.ac,
+          pilot: 'AI — ' + sched.fn,
+          startTime,
+          blockHours: bt,
+          freight: Math.floor(Math.random()*50000+50000),
+          revenue: 0,
+          scheduled: true,
+        });
+      }
+    });
+  });
+  // deduplicate by fn
+  const seen = new Set();
+  return active.filter(f=>{ if(seen.has(f.fn)) return false; seen.add(f.fn); return true; });
+}
+
+// routeMap kept for legacy AI trigger compatibility
 const routeMap={
-  longhaul:[['KSDF','EDDK','B747-400F'],['KSDF','VHHH','MD-11F'],['EDDK','VHHH','B747-400F'],['VHHH','KSDF','MD-11F'],['KSDF','EDDK','MD-11F']],
-  domestic:[['KSDF','KONT','B757-200F'],['KONT','KSDF','B757-200F'],['KSDF','KLEX','B767-300F'],['EDDK','KSDF','B767-300F']],
-  feeder:[['KSDF','KHSV','C208B Caravan'],['KSDF','KLEX','C208B Caravan'],['KHSV','KSDF','C208B Caravan']],
-  any:[['KSDF','EDDK','B747-400F'],['KSDF','KONT','B757-200F'],['KSDF','KHSV','C208B Caravan']]
+  longhaul:[['KSDF','EDDK','B747-400F'],['KSDF','VHHH','B747-400F'],['KSDF','OMDB','B747-400F'],['KPHL','EDDK','B767-300F']],
+  domestic:[['KSDF','KPHL','B767-300F'],['KSDF','KONT','B757-200F'],['KSDF','KPIT','MD-11F'],['KSDF','KMIA','B767-300F']],
+  feeder:[['KSDF','KLEX','B757-200F'],['KSDF','KHSV','ATR-72F'],['KSDF','KBNA','B757-200F']],
+  any:[['KSDF','EDDK','B747-400F'],['KSDF','KPHL','B767-300F'],['KSDF','KLEX','B757-200F']]
 };
-const freightMap={'B747-400F':[80000,210000],'MD-11F':[60000,190000],'B767-300F':[40000,95000],'B757-200F':[30000,112000],'C208B Caravan':[500,3200],'ATR-72F':[5000,15000]};
+const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,248000],'McDonnell MD-11F':[90000,200000],'Boeing 767-300ERF':[70000,116000],'Boeing 767-300F':[65000,116000],'Airbus A300-600RF':[80000,140000],'Boeing 757-300F':[60000,124000],'Boeing 757-200F':[50000,116000],'B747-400F':[120000,248000],'MD-11F':[90000,200000],'B767-300F':[65000,116000],'B757-200F':[50000,116000],'ATR-72F':[5000,15000]};
 
 // Active live flights: { fn, origin, dest, ac, pilot, startTime, blockHours, freight, revenue }
 const liveFlights = [];
@@ -2122,36 +2283,55 @@ function checkRankUp(p){
   if(p.rank!==old) addAILog(p.name,'—','—','—',0,`promoted to <span style="color:var(--gold-lt)">${p.rank}</span> 🎖`);
 }
 
-// Auto-cycle — leader election so only ONE tab fires AI flights
-// Uses a localStorage timestamp as a simple mutex
+// ── Leader election (only one tab fires scheduled flights) ───────────────────
 const CYCLE_KEY = 'vups_cycle_leader';
-const CYCLE_TTL = 70000; // 70s — if leader goes silent, another takes over
-
-function amLeader(){
-  const raw = localStorage.getItem(CYCLE_KEY);
-  if(!raw) return true; // no leader yet
-  const { ts, id } = JSON.parse(raw);
-  if(Date.now() - ts > CYCLE_TTL) return true; // leader timed out
-  return id === _tabId; // we are the leader
-}
-
+const CYCLE_TTL = 70000;
 const _tabId = Math.random().toString(36).slice(2);
 
+function amLeader(){
+  try {
+    const raw = localStorage.getItem(CYCLE_KEY);
+    if(!raw) return true;
+    const {ts,id} = JSON.parse(raw);
+    if(Date.now()-ts > CYCLE_TTL) return true;
+    return id === _tabId;
+  } catch(e){ return true; }
+}
 function claimLeadership(){
-  localStorage.setItem(CYCLE_KEY, JSON.stringify({ts:Date.now(), id:_tabId}));
+  try{ localStorage.setItem(CYCLE_KEY, JSON.stringify({ts:Date.now(),id:_tabId})); }catch(e){}
 }
 
-setInterval(()=>{
-  if(!amLeader()) return; // another tab is running the cycle
-  claimLeadership();
-  S.pilots.filter(p=>p.type==='ai').forEach(p=>{
-    for(let i=0;i<p.freq;i++){
-      if(Math.random()<.4) triggerAI(p.id);
+// ── Seed live flights from UPS schedule on load ───────────────────────────────
+function seedScheduledFlights(){
+  if(!amLeader()) return;
+  const scheduled = getActiveScheduledFlights();
+  scheduled.forEach(f => {
+    // Only add if not already tracked
+    const alreadyTracked = liveFlights.some(lf => lf.fn === f.fn);
+    if(!alreadyTracked){
+      liveFlights.push(f);
+      addFlightRow(f, true);
+      const now = new Date();
+      const t = String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0')+'Z';
+      addAILog('Scheduled', f.fn, f.origin, f.dest, 0, f.fn+' departed '+f.origin+' at scheduled time');
     }
   });
-},55000);
+  document.getElementById('s-active').textContent = liveFlights.filter(f=>Date.now()<f.startTime+f.blockHours*3600000).length;
+  saveState();
+}
 
-// Heartbeat — keep claiming leadership every 20s while tab is open
+// ── Auto-cycle: check for new scheduled departures every 5 minutes ───────────
+setInterval(()=>{
+  if(!amLeader()) return;
+  claimLeadership();
+  seedScheduledFlights();
+  // Also allow manual AI pilots to fly extra routes
+  S.pilots.filter(p=>p.type==='ai').forEach(p=>{
+    if(Math.random()<0.15) triggerAI(p.id); // much lower rate — scheduled flights carry the load
+  });
+}, 300000); // every 5 min
+
+// Heartbeat
 setInterval(()=>{ if(amLeader()) claimLeadership(); }, 20000);
 
 // ════════════════════════════════════════════════
@@ -2361,11 +2541,37 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 
 // Airport coordinates: [lat, lon]
 const AIRPORT_COORDS = {
-  KSDF:[38.1744,-85.7364], EDDK:[50.8659,7.1427],  VHHH:[22.3080,113.9145],
-  KONT:[34.0560,-117.6009],KHSV:[34.6372,-86.7752], KLEX:[38.0366,-84.6059],
-  KLAX:[33.9425,-118.4085],KJFK:[40.6398,-73.7789], EGLL:[51.4775,-0.4543],
-  RJAA:[35.7653,140.3864], OMDB:[25.2528,55.3657],  WSSS:[1.3592,103.9940],
-  CYYZ:[43.6777,-79.6248], LFPG:[49.0097,2.5479],   LEMD:[40.4983,-3.5676],
+  // UPS Primary Hubs
+  KSDF:[38.1744,-85.7364],  // Louisville — Worldport
+  KPHL:[39.8729,-75.2437],  // Philadelphia — East Coast Hub
+  KONT:[34.0560,-117.6009], // Ontario CA — West Coast Hub
+  KRFD:[42.1954,-89.0972],  // Rockford IL — Midwest Hub
+  KMIA:[25.7959,-80.2870],  // Miami — Latin America Hub
+  EDDK:[50.8659,7.1427],    // Cologne — Europe Hub
+  VHHH:[22.3080,113.9145],  // Hong Kong — Asia Hub
+  ZPBH:[22.6393,113.8107],  // Shenzhen — China Hub
+  ZSPD:[31.1443,121.8083],  // Shanghai Pudong
+  WMKK:[2.7456,101.7099],   // Kuala Lumpur
+  OMDB:[25.2528,55.3657],   // Dubai
+  PANC:[61.1744,-149.9964], // Anchorage — Pacific relay
+  EGSS:[51.8850,0.2350],    // London Stansted
+  // Domestic spokes
+  KPIT:[40.4915,-80.2329],  // Pittsburgh
+  KATL:[33.6407,-84.4277],  // Atlanta
+  KDFW:[32.8998,-97.0403],  // Dallas/Fort Worth
+  KSEA:[47.4502,-122.3088], // Seattle
+  KCLT:[35.2140,-80.9431],  // Charlotte
+  KLEX:[38.0366,-84.6059],  // Lexington
+  KHSV:[34.6372,-86.7752],  // Huntsville
+  KBNA:[36.1245,-86.6782],  // Nashville
+  KIND:[39.7173,-86.2944],  // Indianapolis
+  KCVG:[39.0489,-84.6678],  // Cincinnati
+  KJFK:[40.6398,-73.7789],  // New York JFK
+  KLAX:[33.9425,-118.4085], // Los Angeles
+  KORD:[41.9742,-87.9073],  // Chicago O'Hare
+  CYYZ:[43.6777,-79.6248],  // Toronto
+  LFPG:[49.0097,2.5479],    // Paris CDG
+  RJAA:[35.7653,140.3864],  // Tokyo Narita
 };
 function getCoords(icao){ return AIRPORT_COORDS[icao]||null; }
 
@@ -2388,9 +2594,35 @@ function gcPoint(lat1,lon1,lat2,lon2,t){
 }
 
 function gcPolyline(lat1,lon1,lat2,lon2,steps=80){
+  // Split into multiple segments at antimeridian to prevent wrap-around lines
   const pts=[];
-  for(let i=0;i<=steps;i++) pts.push(gcPoint(lat1,lon1,lat2,lon2,i/steps));
-  return pts;
+  let segment=[];
+  let prevLon=null;
+  for(let i=0;i<=steps;i++){
+    const p=gcPoint(lat1,lon1,lat2,lon2,i/steps);
+    if(prevLon!==null && Math.abs(p[1]-prevLon)>180){
+      // Crossed antimeridian — start new segment
+      pts.push(segment);
+      segment=[];
+    }
+    segment.push(p);
+    prevLon=p[1];
+  }
+  pts.push(segment);
+  return pts; // array of arrays
+}
+
+// Draw a possibly-split polyline (handles antimeridian)
+function addGcPolyline(pts, opts){
+  const layers=[];
+  pts.forEach(seg=>{
+    if(seg.length>1){
+      const l=L.polyline(seg,opts).addTo(_leafletMap);
+      layers.push(l);
+      _mapLayers.push(l);
+    }
+  });
+  return layers;
 }
 
 // ── Leaflet map instance ──────────────────────────────────────────────────
@@ -2409,49 +2641,24 @@ const HUB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" wid
 </svg>`;
 
 function initLeafletMap(){
-  if(_leafletMap) return; // already initialized
+  if(_leafletMap) return;
 
   _leafletMap = L.map('leaflet-map', {
-    center: [30, 10],
-    zoom: 3,
+    center: [35, -20],
+    zoom: 2,
     zoomControl: true,
     attributionControl: true,
+    worldCopyJump: true,
   });
 
-  // Dark-styled tile layer (CartoDB dark matter — no API key)
-  // Try CartoDB dark tiles first
-  const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19,
-    crossOrigin: true,
-  });
-  tileLayer.addTo(_leafletMap);
-  tileLayer.on('tileerror', function(){
-    // Fallback to OSM standard tiles if CartoDB fails
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(_leafletMap);
-  });
+    maxZoom: 18,
+    minZoom: 2,
+  }).addTo(_leafletMap);
 
-  // Draw hub markers
-  S.hubs.forEach(h => {
-    const coords = getCoords(h.icao);
-    if(!coords) return;
-    const icon = L.divIcon({
-      html: HUB_SVG,
-      className: '',
-      iconSize: [20,20],
-      iconAnchor: [10,10],
-    });
-    const marker = L.marker(coords, {icon})
-      .bindPopup(`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:#c8920a">${h.icao}</div>
-<div style="font-size:.8rem;color:#7a6a52">${h.name}</div>
-<div style="font-size:.75rem;margin-top:.25rem;color:#d4c4a8">${h.type} Hub · ${h.active} active aircraft</div>`)
-      .addTo(_leafletMap);
-    _mapHubLayers.push(marker);
-  });
+  // Hub markers added when flights render
 }
 
 function clearMapLayers(){
@@ -2486,22 +2693,16 @@ function refreshMapFlights(){
     const arrived = frac >= 1;
     const col     = flightColor(f.origin, f.dest);
 
-    // Full great-circle arc (faint)
-    const fullArc = gcPolyline(c1[0],c1[1],c2[0],c2[1]);
-    const arcLine = L.polyline(fullArc, {
-      color: col, weight: 1.2, opacity: 0.18, dashArray: '5,6'
-    }).addTo(_leafletMap);
-    _mapLayers.push(arcLine);
+    // Full great-circle arc (faint, antimeridian-safe)
+    addGcPolyline(gcPolyline(c1[0],c1[1],c2[0],c2[1]), {
+      color: col, weight: 1.2, opacity: 0.2, dashArray: '6,6'
+    });
 
     // Traveled portion (solid, brighter)
     if(!arrived && frac>0.01){
-      const traveledSteps = Math.max(2, Math.round(frac*80));
-      const traveledArc   = gcPolyline(c1[0],c1[1],c2[0],c2[1], traveledSteps)
-                              .slice(0, traveledSteps+1);
-      const travelLine = L.polyline(traveledArc, {
-        color: col, weight: 2.5, opacity: 0.7
-      }).addTo(_leafletMap);
-      _mapLayers.push(travelLine);
+      addGcPolyline(gcPolyline(c1[0],c1[1],c2[0],c2[1], Math.max(3,Math.round(frac*80))).map(seg=>seg.slice(0, Math.ceil(seg.length*frac)+1)), {
+        color: col, weight: 2.5, opacity: 0.75
+      });
     }
 
     // Origin airport circle
@@ -2553,6 +2754,50 @@ function refreshMapFlights(){
       _mapLayers.push(plane);
     }
   });
+
+  // Draw hub markers
+  S.hubs.forEach(h=>{
+    const coords=getCoords(h.icao);
+    if(!coords) return;
+    const icon=L.divIcon({html:HUB_SVG,className:'',iconSize:[20,20],iconAnchor:[10,10]});
+    const m=L.marker(coords,{icon})
+      .bindPopup('<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:1rem;color:#c8920a">'+h.icao+'</div><div style="font-size:.78rem;color:#7a6a52">'+h.name+'</div>')
+      .addTo(_leafletMap);
+    _mapLayers.push(m);
+  });
+
+  // Also mark all active airports
+  const shownAirports=new Set();
+  active.forEach(f=>{
+    [f.origin,f.dest].forEach(icao=>{
+      if(shownAirports.has(icao)) return;
+      shownAirports.add(icao);
+      const coords=getCoords(icao);
+      if(!coords) return;
+      const dot=L.circleMarker(coords,{radius:4,color:'#c8920a',fillColor:'#c8920a',fillOpacity:0.6,weight:1})
+        .bindTooltip(icao,{permanent:false,direction:'top',className:'leaflet-dark-tooltip'})
+        .addTo(_leafletMap);
+      _mapLayers.push(dot);
+    });
+  });
+
+  // Hub markers
+  S.hubs.forEach(h=>{
+    const coords=getCoords(h.icao); if(!coords) return;
+    const icon=L.divIcon({html:HUB_SVG,className:'',iconSize:[20,20],iconAnchor:[10,10]});
+    const m=L.marker(coords,{icon}).bindTooltip('<strong>'+h.icao+'</strong> '+h.name,{direction:'top'}).addTo(_leafletMap);
+    _mapLayers.push(m);
+  });
+
+  // Airport dots for all active routes
+  const shownAP=new Set();
+  active.forEach(f=>{[f.origin,f.dest].forEach(icao=>{
+    if(shownAP.has(icao)) return; shownAP.add(icao);
+    const coords=getCoords(icao); if(!coords) return;
+    const d=L.circleMarker(coords,{radius:4,color:'#c8920a',fillColor:'#c8920a',fillOpacity:0.5,weight:1})
+      .bindTooltip(icao,{permanent:false,direction:'top'}).addTo(_leafletMap);
+    _mapLayers.push(d);
+  });});
 
   // Update flights table
   updateMapTable(active, now);
@@ -2631,6 +2876,9 @@ refreshTreasury();
 renderHubs();
 initFinnhubBanner();
 updateCrewCounts();
+
+// 1b. Seed scheduled flights (real UPS operations)
+setTimeout(seedScheduledFlights, 2000);
 
 // 2. Load from Supabase (async — will update UI when ready)
 loadState().then(() => {
