@@ -1103,12 +1103,18 @@ const S = {
   ],
 
   hubs: [
-    { icao:'KSDF', name:'Louisville Intl — Worldport', type:'Global',   aircraft:'B747-400F, MD-11F, B767-300F', ramp:78, active:14 },
-    { icao:'EDDK', name:'Cologne/Bonn Airport',        type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:52, active:6  },
-    { icao:'VHHH', name:'Hong Kong International',     type:'Regional', aircraft:'B747-400F, MD-11F',            ramp:65, active:4  },
-    { icao:'KONT', name:'Ontario International',       type:'Regional', aircraft:'B757-200F, B767-300F',         ramp:41, active:3  },
-    { icao:'KHSV', name:'Huntsville International',    type:'Feeder',   aircraft:'C208B Caravan, ATR-42',        ramp:30, active:2  },
-    { icao:'KLEX', name:'Bluegrass Airport',           type:'Feeder',   aircraft:'Boeing 757-200F',                ramp:20, active:1  },
+    // ── Real UPS Hub Network ──────────────────────────────────────────────────
+    { icao:'KSDF', name:'Louisville Intl — Worldport',       type:'Global',    aircraft:'Boeing 747-8F, MD-11F, B767-300F, A300-600RF', ramp:115, active:24 },
+    { icao:'EDDK', name:'Cologne/Bonn — UPS Europe Hub',     type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, B747-8F',          ramp:62,  active:10 },
+    { icao:'VHHH', name:'Hong Kong Intl — UPS Asia Hub',     type:'Regional',  aircraft:'Boeing 747-8F, MD-11F',                        ramp:70,  active:8  },
+    { icao:'KPHL', name:'Philadelphia Intl — East Hub',      type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, A300-600RF',        ramp:55,  active:9  },
+    { icao:'KONT', name:'Ontario Intl — West Coast Hub',     type:'Regional',  aircraft:'Boeing 757-200F, B767-300F, A300-600RF',        ramp:48,  active:7  },
+    { icao:'KRFD', name:'Chicago Rockford — Midwest Hub',    type:'Regional',  aircraft:'Boeing 757-200F, A300-600RF',                  ramp:40,  active:6  },
+    { icao:'KMIA', name:'Miami Intl — Latin America Hub',    type:'Regional',  aircraft:'Boeing 767-300F, B757-200F',                   ramp:38,  active:5  },
+    { icao:'PANC', name:'Ted Stevens Anchorage — Pacific Relay', type:'Relay', aircraft:'Boeing 747-8F, MD-11F',                        ramp:30,  active:4  },
+    { icao:'EGSS', name:'London Stansted — UK Gateway',      type:'Gateway',   aircraft:'Boeing 767-300F, B757-200F',                   ramp:25,  active:3  },
+    { icao:'ZPBH', name:'Shenzhen Baoan — China Hub',      type:'Regional',  aircraft:'Boeing 747-8F',                                ramp:30,  active:4  },
+    { icao:'OMDB', name:'Dubai Intl — Middle East Gateway',  type:'Gateway',   aircraft:'Boeing 747-8F, MD-11F',                        ramp:22,  active:3  },
   ],
 
   executives: [
