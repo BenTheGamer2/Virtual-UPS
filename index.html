@@ -752,52 +752,103 @@ tr:last-child td{border-bottom:none}
     <span id="sync-label">Connecting to live database...</span>
   </div>
 
-  <!-- ── CUSTOM FLIGHT BUILDER ── -->
-  <div class="card" style="margin-bottom:1.25rem;border-color:rgba(200,146,10,.25)">
-    <div class="card-title" style="color:var(--gold-lt)">✦ Custom Flight Builder</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.65rem;margin-bottom:.75rem">
+  <!-- ── ROUTE GENERATOR ── -->
+  <div class="card" style="margin-bottom:1.25rem;border-color:rgba(200,146,10,.3)">
+    <div class="card-title" style="color:var(--gold-lt);font-size:1rem">✦ Route Generator</div>
+    <div style="color:var(--text-dim);font-size:.75rem;margin-bottom:1rem">Pick a departure airport, aircraft type, and route length — the system picks a matching real destination automatically.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
       <div class="form-group" style="margin:0">
-        <label class="form-label">Origin ICAO</label>
-        <input class="form-input" id="cb-origin" placeholder="KSDF" maxlength="4" style="text-transform:uppercase">
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Destination ICAO</label>
-        <input class="form-input" id="cb-dest" placeholder="VHHH" maxlength="4" style="text-transform:uppercase">
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Aircraft</label>
-        <select class="form-select" id="cb-aircraft">
-          <option value="Boeing 757-200F">Boeing 757-200F</option>
-          <option value="Boeing 757-300F">Boeing 757-300F</option>
-          <option value="Boeing 767-300F">Boeing 767-300F</option>
-          <option value="Boeing 767-300ERF">Boeing 767-300ERF</option>
-          <option value="Airbus A300-600RF">Airbus A300-600RF</option>
-          <option value="Boeing 747-400F">Boeing 747-400F</option>
-          <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
-          <option value="McDonnell MD-11F">McDonnell MD-11F</option>
+        <label class="form-label">Departure Region</label>
+        <select class="form-select" id="rg-dep-region" onchange="updateDepAirports()">
+          <option value="US_MIDWEST">🇺🇸 US Midwest</option>
+          <option value="US_EAST">🇺🇸 US East Coast</option>
+          <option value="US_WEST">🇺🇸 US West Coast</option>
+          <option value="US_SOUTH">🇺🇸 US South</option>
+          <option value="EUROPE">🇪🇺 Europe</option>
+          <option value="ASIA_EAST">🌏 East Asia</option>
+          <option value="ASIA_SE">🌏 Southeast Asia</option>
+          <option value="MIDDLE_EAST">🌍 Middle East</option>
+          <option value="ALASKA">🌨 Alaska / Pacific</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">Cruise Alt</label>
-        <input class="form-input" id="cb-alt" placeholder="FL350" value="FL350" maxlength="6">
+        <label class="form-label">Departure Airport</label>
+        <select class="form-select" id="rg-dep-airport"></select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Aircraft Type</label>
+        <select class="form-select" id="rg-aircraft" onchange="updateLengthOptions()">
+          <option value="Airbus A300-600F">Airbus A300-600F</option>
+          <option value="Boeing 727-100F">Boeing 727-100F</option>
+          <option value="Boeing 727-200F">Boeing 727-200F</option>
+          <option value="Boeing 747-100F">Boeing 747-100F</option>
+          <option value="Boeing 747-200F">Boeing 747-200F</option>
+          <option value="Boeing 747-400F">Boeing 747-400F</option>
+          <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+          <option value="Boeing 757-200F">Boeing 757-200F</option>
+          <option value="Boeing 767-300F">Boeing 767-300F</option>
+          <option value="Douglas DC-8F">Douglas DC-8F</option>
+          <option value="McDonnell Douglas MD-11F">McDonnell Douglas MD-11F</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Route Length</label>
+        <select class="form-select" id="rg-length">
+          <option value="feeder">🟢 Short / Feeder (&lt;2h)</option>
+          <option value="domestic" selected>🔵 Medium / Domestic (2–8h)</option>
+          <option value="longhaul">🟡 Long Haul (8h+)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Cruise Altitude</label>
+        <select class="form-select" id="rg-alt">
+          <option value="FL280">FL280</option><option value="FL310">FL310</option>
+          <option value="FL330">FL330</option><option value="FL350" selected>FL350</option>
+          <option value="FL370">FL370</option><option value="FL390">FL390</option><option value="FL410">FL410</option>
+        </select>
       </div>
       <div class="form-group" style="margin:0">
         <label class="form-label">Cost Index</label>
-        <input class="form-input" id="cb-ci" placeholder="52" value="52" maxlength="4" type="number">
+        <select class="form-select" id="rg-ci">
+          <option value="0">0 — Max Range</option>
+          <option value="20">20 — Economy</option>
+          <option value="52" selected>52 — UPS Standard</option>
+          <option value="80">80 — Time Priority</option>
+          <option value="100">100 — Max Speed</option>
+        </select>
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">SimBrief User</label>
-        <input class="form-input" id="cb-sbuser" placeholder="username" value="VisualLanding112">
+        <label class="form-label">SimBrief Username</label>
+        <input class="form-input" id="rg-sbuser" value="VisualLanding112" placeholder="SimBrief username">
       </div>
     </div>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="dispatchCustomFlight()">&#9654; Dispatch Custom Flight</button>
-      <button class="btn btn-blue" onclick="openSimbrief()">&#9992; Generate SimBrief OFP</button>
+
+    <div id="rg-preview" style="display:none;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.85rem 1rem;margin-bottom:.85rem">
+      <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:.5rem">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold-lt)" id="rg-preview-fn"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text)" id="rg-preview-route"></div>
+      </div>
+      <div id="rg-preview-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.35rem .75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)"></div>
+      <div style="margin-top:.6rem;font-size:.68rem;font-style:italic;color:var(--text-mute)" id="rg-dest-reason"></div>
     </div>
-    <div id="cb-simbrief-note" style="display:none;margin-top:.6rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--blue-lt)"></div>
+
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="generateRoute()">🎲 Generate Route</button>
+      <button class="btn btn-primary" id="rg-dispatch-btn" onclick="dispatchGeneratedRoute()" style="display:none">▶ Dispatch Flight</button>
+      <button class="btn btn-blue" id="rg-simbrief-btn" onclick="openGeneratedSimbrief()" style="display:none">✈ Open SimBrief OFP</button>
+    </div>
+    <div id="cb-simbrief-note" style="display:none;margin-top:.5rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--blue-lt)"></div>
   </div>
 
-  <!-- Pre-made routes -->
+  <input type="hidden" id="cb-origin"><input type="hidden" id="cb-dest">
+  <input type="hidden" id="cb-aircraft"><input type="hidden" id="cb-alt" value="FL350">
+  <input type="hidden" id="cb-ci" value="52"><input type="hidden" id="cb-sbuser" value="VisualLanding112">
+
+    <!-- Pre-made routes -->
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem">
     Pre-Made Routes
     <span id="dispatcher-admin-route-btn" style="display:none;margin-left:.75rem"></span>
@@ -928,7 +979,7 @@ tr:last-child td{border-bottom:none}
         </div>
         <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$5,900,000,000</strong></div>
         <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(125,60,152,.2)">
-          <button class="btn btn-danger btn-sm" onclick="if(confirm('Reset ALL saved data to defaults? This cannot be undone.')){localStorage.removeItem(SAVE_KEY);_supa.from('state').delete().eq('key','main').then(()=>location.reload());}">⚠ Reset All Saved Data</button>
+          <button class="btn btn-danger btn-sm" onclick="hardReset()">⚠ Reset All Saved Data</button>
           <div class="form-note" style="margin-top:.3rem">Clears treasury, crew, fleet, and all session data.</div>
         </div>
       </div>
@@ -1211,15 +1262,18 @@ const S = {
 
 
 const AIRCRAFT_CATALOG = [
-  // ── Real UPS Fleet (active 2024) ──────────────────────────────────────────
-  { model:'Boeing 757-200F',   type:'Narrowbody Freighter',  qty:75,  price:22000000,  maxPayload:116000, range:'3,500 nm', crew:2, icon:'✈',  note:'Backbone domestic workhorse. Serves most US spoke routes.' },
-  { model:'Boeing 757-300F',   type:'Narrowbody Freighter',  qty:78,  price:28000000,  maxPayload:124000, range:'3,600 nm', crew:2, icon:'✈',  note:'Stretched 757 variant. Higher capacity than -200.' },
-  { model:'Boeing 767-300F',   type:'Widebody Freighter',    qty:84,  price:38000000,  maxPayload:116000, range:'3,255 nm', crew:2, icon:'✈',  note:'Primary widebody. Transatlantic and long domestic routes.' },
-  { model:'Boeing 767-300ERF', type:'Extended Range Widebody',qty:24, price:44000000,  maxPayload:116000, range:'3,900 nm', crew:2, icon:'✈',  note:'Extended range 767. Newer deliveries 2024-2026.' },
-  { model:'Airbus A300-600RF', type:'Widebody Freighter',    qty:52,  price:35000000,  maxPayload:140000, range:'4,000 nm', crew:2, icon:'✈',  note:'High-capacity widebody. Domestic hub-to-hub.' },
-  { model:'Boeing 747-400F',   type:'Heavy Freighter',       qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
-  { model:'Boeing 747-8F',     type:'Super Heavy Freighter', qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
-  { model:'McDonnell MD-11F',  type:'Heavy Trijet Freighter', qty:40, price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
+  // ── Full UPS Airlines Fleet (historic + active) ────────────────────────────
+  { model:'Douglas DC-8F',           type:'Classic Jet Freighter',  qty:0,   price:8000000,   maxPayload:95000,  range:'3,800 nm', crew:3, icon:'✈',  note:'Historic UPS workhorse. The DC-8 built UPS air freight from the ground up.' },
+  { model:'Boeing 727-100F',         type:'Classic Trijet',         qty:0,   price:5000000,   maxPayload:44000,  range:'1,800 nm', crew:3, icon:'✈',  note:'Original UPS jet. Short-field capable, served small spoke airports.' },
+  { model:'Boeing 727-200F',         type:'Classic Trijet',         qty:0,   price:6500000,   maxPayload:60000,  range:'2,200 nm', crew:3, icon:'✈',  note:'Stretched 727. Backbone of UPS domestic network through the 1990s.' },
+  { model:'Boeing 747-100F',         type:'Classic Jumbo Freighter',qty:0,   price:18000000,  maxPayload:220000, range:'4,000 nm', crew:3, icon:'🛫', note:'First UPS 747. Opened transcontinental freight capacity.' },
+  { model:'Boeing 747-200F',         type:'Classic Jumbo Freighter',qty:0,   price:22000000,  maxPayload:230000, range:'4,500 nm', crew:3, icon:'🛫', note:'Extended-range 747. Served major international routes.' },
+  { model:'Airbus A300-600F',        type:'Widebody Freighter',     qty:52,  price:35000000,  maxPayload:140000, range:'4,000 nm', crew:2, icon:'✈',  note:'High-capacity widebody. Major domestic hub-to-hub workhorse.' },
+  { model:'Boeing 757-200F',         type:'Narrowbody Freighter',   qty:75,  price:22000000,  maxPayload:116000, range:'3,500 nm', crew:2, icon:'✈',  note:'Backbone domestic workhorse. Serves most US spoke routes.' },
+  { model:'Boeing 767-300F',         type:'Widebody Freighter',     qty:84,  price:38000000,  maxPayload:116000, range:'3,255 nm', crew:2, icon:'✈',  note:'Primary widebody. Transatlantic and long domestic routes.' },
+  { model:'Boeing 747-400F',         type:'Heavy Freighter',        qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
+  { model:'Boeing 747-8F',           type:'Super Heavy Freighter',  qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
+  { model:'McDonnell Douglas MD-11F', type:'Heavy Trijet Freighter', qty:40,  price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
 ];
 
 // ════════════════════════════════════════════════
@@ -1534,69 +1588,317 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
 }
 
 
-// ── Custom Flight Builder ──────────────────────────────────────────────────
+// ── Route Generator ─────────────────────────────────────────────────────────
+
 const SIMBRIEF_AC_MAP = {
-  'B747-400F':'B744','MD-11F':'MD11','B767-300F':'B763',
-  'B757-200F':'B752','C208B Caravan':'C208','ATR-72F':'AT76'
+  'Airbus A300-600F':          'A306',
+  'Boeing 727-100F':           'B721',
+  'Boeing 727-200F':           'B722',
+  'Boeing 747-100F':           'B741',
+  'Boeing 747-200F':           'B742',
+  'Boeing 747-400F':           'B744',
+  'Boeing 747-8F':             'B748',
+  'Boeing 757-200F':           'B752',
+  'Boeing 757-300F':           'B753',
+  'Boeing 767-300F':           'B763',
+  'Boeing 767-300ERF':         'B763',
+  'Airbus A300-600RF':         'A306',
+  'Douglas DC-8F':             'DC86',
+  'McDonnell Douglas MD-11F':  'MD11',
+  'McDonnell MD-11F':          'MD11',
 };
 
-function getCustomFields(){
-  return {
-    origin:   (document.getElementById('cb-origin').value||'').trim().toUpperCase(),
-    dest:     (document.getElementById('cb-dest').value||'').trim().toUpperCase(),
-    aircraft: document.getElementById('cb-aircraft').value,
-    alt:      (document.getElementById('cb-alt').value||'FL350').trim(),
-    ci:       parseInt(document.getElementById('cb-ci').value)||52,
-    sbUser:   (document.getElementById('cb-sbuser').value||'VisualLanding112').trim(),
-  };
+// All UPS-served airports, tagged by region and type
+// type: feeder=<2h, domestic=2-8h, longhaul=8h+
+const ALL_AIRPORTS = [
+  // US Midwest
+  {icao:'KSDF', name:'Louisville (Worldport)',  region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
+  {icao:'KRFD', name:'Rockford IL',             region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KIND', name:'Indianapolis',            region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KCVG', name:'Cincinnati',              region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KORD', name:'Chicago OHare',           region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KMDW', name:'Chicago Midway',          region:'US_MIDWEST', types:['feeder']},
+  {icao:'KSTL', name:'St. Louis',               region:'US_MIDWEST', types:['feeder','domestic']},
+  // US East
+  {icao:'KPHL', name:'Philadelphia',            region:'US_EAST',    types:['domestic','longhaul']},
+  {icao:'KJFK', name:'New York JFK',            region:'US_EAST',    types:['domestic','longhaul']},
+  {icao:'KBOS', name:'Boston',                  region:'US_EAST',    types:['domestic']},
+  {icao:'KIAD', name:'Washington Dulles',       region:'US_EAST',    types:['domestic']},
+  {icao:'KBWI', name:'Baltimore',               region:'US_EAST',    types:['domestic']},
+  {icao:'KEWR', name:'Newark',                  region:'US_EAST',    types:['domestic']},
+  // US West
+  {icao:'KONT', name:'Ontario CA',              region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KLAX', name:'Los Angeles',             region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KSFO', name:'San Francisco',           region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KSEA', name:'Seattle',                 region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KLAS', name:'Las Vegas',               region:'US_WEST',    types:['domestic']},
+  {icao:'KPHX', name:'Phoenix',                 region:'US_WEST',    types:['domestic']},
+  // US South
+  {icao:'KMIA', name:'Miami',                   region:'US_SOUTH',   types:['domestic','longhaul']},
+  {icao:'KATL', name:'Atlanta',                 region:'US_SOUTH',   types:['domestic']},
+  {icao:'KDFW', name:'Dallas/Fort Worth',       region:'US_SOUTH',   types:['domestic']},
+  {icao:'KHOU', name:'Houston',                 region:'US_SOUTH',   types:['domestic']},
+  {icao:'KBNA', name:'Nashville',               region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KCLT', name:'Charlotte',               region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KHSV', name:'Huntsville',              region:'US_SOUTH',   types:['feeder']},
+  {icao:'KLEX', name:'Lexington',               region:'US_SOUTH',   types:['feeder']},
+  {icao:'KMEM', name:'Memphis',                 region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KPIT', name:'Pittsburgh',              region:'US_SOUTH',   types:['domestic']},
+  // Europe
+  {icao:'EDDK', name:'Cologne/Bonn',            region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'EGSS', name:'London Stansted',         region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'LFPG', name:'Paris CDG',               region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'EHAM', name:'Amsterdam',               region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'LEMD', name:'Madrid',                  region:'EUROPE',     types:['domestic']},
+  {icao:'LIRF', name:'Rome Fiumicino',          region:'EUROPE',     types:['domestic']},
+  {icao:'EDDM', name:'Munich',                  region:'EUROPE',     types:['domestic']},
+  {icao:'EPWA', name:'Warsaw',                  region:'EUROPE',     types:['domestic']},
+  // East Asia
+  {icao:'VHHH', name:'Hong Kong',               region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZPBH', name:'Shenzhen',                region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZSPD', name:'Shanghai Pudong',         region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'RJAA', name:'Tokyo Narita',            region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'RKSI', name:'Seoul Incheon',           region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZBAA', name:'Beijing Capital',         region:'ASIA_EAST',  types:['longhaul']},
+  // SE Asia
+  {icao:'WMKK', name:'Kuala Lumpur',            region:'ASIA_SE',    types:['longhaul']},
+  {icao:'WSSS', name:'Singapore Changi',        region:'ASIA_SE',    types:['longhaul']},
+  {icao:'VTBS', name:'Bangkok Suvarnabhumi',    region:'ASIA_SE',    types:['longhaul']},
+  {icao:'RPLL', name:'Manila',                  region:'ASIA_SE',    types:['longhaul']},
+  // Middle East
+  {icao:'OMDB', name:'Dubai',                   region:'MIDDLE_EAST',types:['longhaul']},
+  {icao:'OERK', name:'Riyadh',                  region:'MIDDLE_EAST',types:['longhaul']},
+  {icao:'OTHH', name:'Doha',                    region:'MIDDLE_EAST',types:['longhaul']},
+  // Alaska
+  {icao:'PANC', name:'Anchorage',               region:'ALASKA',     types:['domestic','longhaul']},
+  {icao:'PAFA', name:'Fairbanks',               region:'ALASKA',     types:['feeder','domestic']},
+];
+
+// Aircraft capability limits: [minBlockH, maxBlockH]
+const AC_CAPABILITY = {
+  'Boeing 727-100F':           [0.3, 4.0],
+  'Boeing 727-200F':           [0.3, 5.0],
+  'Douglas DC-8F':             [0.5, 8.0],
+  'Airbus A300-600F':          [0.5, 9.0],
+  'Boeing 757-200F':           [0.5, 8.0],
+  'Boeing 767-300F':           [1.0, 11.0],
+  'Boeing 747-100F':           [1.0, 12.0],
+  'Boeing 747-200F':           [1.0, 13.0],
+  'Boeing 747-400F':           [1.0, 16.0],
+  'Boeing 747-8F':             [1.0, 18.0],
+  'McDonnell Douglas MD-11F':  [1.0, 14.0],
+};
+
+// Why this destination was chosen — shown in preview
+const DEST_REASONS = {
+  feeder:   'Short feeder route — high-frequency, small regional package volume.',
+  domestic: 'Domestic trunk route — overnight hub-to-hub freight run.',
+  longhaul: 'Long-haul international — high-value, time-sensitive cargo.',
+};
+
+const AC_CRUISE_ALT = {
+  'Boeing 727-100F':'FL310','Boeing 727-200F':'FL330','Douglas DC-8F':'FL330',
+  'Boeing 747-100F':'FL350','Boeing 747-200F':'FL350','Boeing 747-400F':'FL350',
+  'Boeing 747-8F':'FL390','Boeing 757-200F':'FL350','Boeing 767-300F':'FL370',
+  'Airbus A300-600F':'FL330','McDonnell Douglas MD-11F':'FL370',
+};
+
+const UPS_FN_POOL = ['5X3','5X4','5X7','5X8','5X15','5X16','5X17','5X18','5X31','5X32',
+  '5X37','5X38','5X63','5X64','5X101','5X102','5X201','5X202','5X271','5X272',
+  '5X301','5X401','5X501','5X601','5X701','5X801','5X901','5X911'];
+
+let _generatedRoute = null;
+
+function populate(selectId, items){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = items.map(([v,l])=>`<option value="${v}">${v} — ${l}</option>`).join('');
 }
 
-function openSimbrief(fnOverride, originOverride, destOverride, acOverride){
-  const f = getCustomFields();
-  const origin   = originOverride || f.origin;
-  const dest     = destOverride   || f.dest;
-  const aircraft = acOverride     || f.aircraft;
-  const sbAc     = SIMBRIEF_AC_MAP[aircraft] || 'B744';
-  const fn       = fnOverride || ('5Y'+(Math.floor(Math.random()*900)+100));
-  const sbUser   = f.sbUser;
+function updateDepAirports(){
+  const region = document.getElementById('rg-dep-region').value;
+  const airports = ALL_AIRPORTS.filter(a=>a.region===region);
+  const sel = document.getElementById('rg-dep-airport');
+  if(!sel) return;
+  sel.innerHTML = airports.map(a=>`<option value="${a.icao}">${a.icao} — ${a.name}</option>`).join('');
+}
 
-  if(!origin || !dest){
-    alert('Enter origin and destination ICAO codes first.');
+function updateArrAirports(){} // no-op, kept for compatibility
+
+// When aircraft changes, disable length options the plane cant fly
+function updateLengthOptions(){
+  const ac = document.getElementById('rg-aircraft').value;
+  const cap = AC_CAPABILITY[ac] || [0.3, 18];
+  const sel = document.getElementById('rg-length');
+  if(!sel) return;
+  // feeder = <2h, domestic = 2-8h, longhaul = 8h+
+  sel.options[0].disabled = cap[1] < 0.5;   // feeder
+  sel.options[1].disabled = cap[1] < 2.0;   // domestic
+  sel.options[2].disabled = cap[1] < 8.0;   // longhaul
+  // auto-select first available
+  for(let i=0;i<sel.options.length;i++){
+    if(!sel.options[i].disabled){ sel.selectedIndex=i; break; }
+  }
+  // Also update cruise alt to match aircraft default
+  const altSel = document.getElementById('rg-alt');
+  if(altSel){
+    const defaultAlt = AC_CRUISE_ALT[ac]||'FL350';
+    for(let i=0;i<altSel.options.length;i++){
+      if(altSel.options[i].value===defaultAlt){ altSel.selectedIndex=i; break; }
+    }
+  }
+}
+
+function generateRoute(){
+  const orig     = document.getElementById('rg-dep-airport').value;
+  const aircraft = document.getElementById('rg-aircraft').value;
+  const length   = document.getElementById('rg-length').value;
+  const alt      = document.getElementById('rg-alt').value;
+  const ci       = document.getElementById('rg-ci').value;
+
+  if(!orig){ alert('Select a departure airport first.'); return; }
+
+  const cap = AC_CAPABILITY[aircraft] || [0.3, 18];
+
+  // Filter range: feeder <2h, domestic 2-8h, longhaul 8h+
+  const lengthRange = { feeder:[0,2], domestic:[2,8], longhaul:[8,99] };
+  const [minH, maxH] = lengthRange[length] || [0,99];
+
+  // Clamp to aircraft capability
+  const effectiveMin = Math.max(minH, cap[0]);
+  const effectiveMax = Math.min(maxH, cap[1]);
+
+  if(effectiveMin > effectiveMax){
+    alert('This aircraft cannot fly that route length. Try a different aircraft or length.');
     return;
   }
 
-  // SimBrief new dispatch URL
-  const params = new URLSearchParams({
-    orig:     origin,
-    dest:     dest,
-    type:     sbAc,
-    airline:  'UPS',
-    fltnum:   fn.replace('5Y',''),
-    cruisealt:f.alt.replace('FL','').padStart(3,'0')+'00',
-    ci:       f.ci,
-    units:    'LBS',
-    reg:      'N' + fn.slice(-3),
+  // Find candidate destinations: correct length bucket + compatible with aircraft
+  let candidates = ALL_AIRPORTS.filter(a => {
+    if(a.icao === orig) return false;
+    if(!a.types.includes(length)) return false;
+    const bt = estimateBlockTime(orig, a.icao);
+    return bt >= effectiveMin && bt <= effectiveMax;
   });
 
-  const url = `https://dispatch.simbrief.com/options/custom?${params.toString()}&userid=${sbUser}`;
+  // Shuffle for variety
+  candidates = candidates.sort(()=>Math.random()-0.5);
 
-  const note = document.getElementById('cb-simbrief-note');
-  if(note){ note.style.display=''; note.textContent = 'Opening SimBrief OFP for ' + fn + ' ' + origin + '->' + dest + ' in new tab...'; }
+  if(!candidates.length){
+    alert('No matching destinations found for this aircraft + length combination. Try adjusting the route length.');
+    return;
+  }
 
-  window.open(url, '_blank');
+  // Pick best match — prefer airports the aircraft type IRL serves
+  const heavyAC = ['Boeing 747-8F','Boeing 747-400F','Boeing 747-200F','Boeing 747-100F','McDonnell Douglas MD-11F'];
+  const isHeavy = heavyAC.includes(aircraft);
+
+  // Heavy aircraft prefer international destinations
+  let dest;
+  if(isHeavy && length==='longhaul'){
+    const intl = candidates.filter(a=>['ASIA_EAST','ASIA_SE','EUROPE','MIDDLE_EAST','ALASKA'].includes(a.region));
+    dest = intl.length ? intl[Math.floor(Math.random()*intl.length)] : candidates[0];
+  } else if(!isHeavy && length==='feeder'){
+    const domestic = candidates.filter(a=>['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'].includes(a.region));
+    dest = domestic.length ? domestic[Math.floor(Math.random()*domestic.length)] : candidates[0];
+  } else {
+    dest = candidates[Math.floor(Math.random()*Math.min(5,candidates.length))];
+  }
+
+  const bt = estimateBlockTime(orig, dest.icao);
+  const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
+  const btDisplay = btH>0 ? btH+'h '+btM+'m' : btM+'m';
+  const fn = UPS_FN_POOL[Math.floor(Math.random()*UPS_FN_POOL.length)];
+  const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
+  const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
+  const fRange = getFreightRange(aircraft);
+  const freight = Math.floor(Math.random()*(fRange[1]-fRange[0])+fRange[0]);
+  const revenuePerLb = bt>=8 ? 0.70 : bt>=3 ? 0.55 : 0.45;
+  const revenue = Math.round(freight*revenuePerLb/1000)*1000;
+
+  _generatedRoute = {fn, orig, dest:dest.icao, destName:dest.name, aircraft, alt:cruiseAlt, ci, bt, freight, revenue, sbAc, length};
+
+  // Show preview
+  document.getElementById('rg-preview-fn').textContent = fn;
+  document.getElementById('rg-preview-route').textContent = orig + ' → ' + dest.icao + '  (' + dest.name + ')';
+  document.getElementById('rg-preview-body').innerHTML = [
+    `<div><span style="color:var(--text-mute)">Aircraft</span><br>${aircraft}</div>`,
+    `<div><span style="color:var(--text-mute)">Block Time</span><br>${btDisplay}</div>`,
+    `<div><span style="color:var(--text-mute)">Cruise Alt</span><br>${cruiseAlt} · CI ${ci}</div>`,
+    `<div><span style="color:var(--text-mute)">Payload</span><br>${freight.toLocaleString()} lbs</div>`,
+    `<div><span style="color:var(--text-mute)">Est. Revenue</span><br>$${revenue.toLocaleString()}</div>`,
+  ].join('');
+  document.getElementById('rg-dest-reason').textContent = '↳ ' + DEST_REASONS[length];
+  document.getElementById('rg-preview').style.display = '';
+  document.getElementById('rg-dispatch-btn').style.display = '';
+  document.getElementById('rg-simbrief-btn').style.display = '';
 }
 
-function dispatchCustomFlight(){
-  const f = getCustomFields();
-  if(!f.origin || !f.dest){ alert('Enter origin and destination ICAO codes.'); return; }
-
-  const fakeRoute = {
-    id: -1, origin: f.origin, dest: f.dest,
-    aircraft: f.aircraft, label: f.origin + ' to ' + f.dest,
-    category: blockTime(f.origin,f.dest) >= 8 ? 'longhaul' : blockTime(f.origin,f.dest) >= 3 ? 'domestic' : 'feeder'
-  };
-  dispatchRoute(-1, fakeRoute, f.sbUser);
+function estimateBlockTime(orig, dest){
+  const c1=AIRPORT_COORDS[orig], c2=AIRPORT_COORDS[dest];
+  if(!c1||!c2) return 3.0;
+  // Check lookup table first
+  const lookup = blockTimeMap[orig+'-'+dest] || blockTimeMap[dest+'-'+orig];
+  if(lookup) return lookup;
+  // Otherwise compute from distance
+  const R=6371, toR=Math.PI/180;
+  const dlat=(c2[0]-c1[0])*toR, dlon=(c2[1]-c1[1])*toR;
+  const a=Math.sin(dlat/2)**2+Math.cos(c1[0]*toR)*Math.cos(c2[0]*toR)*Math.sin(dlon/2)**2;
+  const dist=2*R*Math.asin(Math.sqrt(a));
+  return Math.max(0.4, dist/850+0.5);
 }
+
+function getFreightRange(aircraft){
+  const fm=freightMap[aircraft];
+  if(fm) return fm;
+  if(aircraft.includes('747-8')) return [150000,295000];
+  if(aircraft.includes('747')) return [90000,248000];
+  if(aircraft.includes('MD-11')) return [90000,200000];
+  if(aircraft.includes('767')) return [65000,116000];
+  if(aircraft.includes('757')) return [50000,116000];
+  if(aircraft.includes('727')) return [20000,60000];
+  if(aircraft.includes('DC-8')) return [35000,95000];
+  if(aircraft.includes('A300')) return [80000,140000];
+  return [40000,100000];
+}
+
+function dispatchGeneratedRoute(){
+  if(!_generatedRoute){ alert('Generate a route first.'); return; }
+  const r=_generatedRoute;
+  const route={id:-1,origin:r.orig,dest:r.dest,aircraft:r.aircraft,label:r.orig+' to '+r.dest,category:r.length};
+  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  dispatchRoute(-1,route,sbUser);
+}
+
+function openGeneratedSimbrief(){
+  if(!_generatedRoute){ alert('Generate a route first.'); return; }
+  const r=_generatedRoute;
+  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  const params=new URLSearchParams({orig:r.orig,dest:r.dest,type:r.sbAc,airline:'UPS',
+    fltnum:r.fn.replace('5X',''),cruisealt:r.alt.replace('FL','')+'00',ci:r.ci,units:'LBS'});
+  const url='https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser;
+  const note=document.getElementById('cb-simbrief-note');
+  if(note){note.style.display='';note.textContent='Opening SimBrief for '+r.fn+' '+r.orig+'→'+r.dest+' ...';}
+  window.open(url,'_blank');
+}
+
+// Legacy compat for pre-made route card SimBrief buttons
+function openSimbrief(fnOverride,originOverride,destOverride,acOverride){
+  const sbUser=(document.getElementById('rg-sbuser')||{value:'VisualLanding112'}).value||'VisualLanding112';
+  const origin=originOverride||''; const dest=destOverride||'';
+  const aircraft=acOverride||'Boeing 747-8F';
+  const fn=fnOverride||('5X'+(Math.floor(Math.random()*900)+100));
+  const sbAc=SIMBRIEF_AC_MAP[aircraft]||'B744';
+  if(!origin||!dest){alert('No origin/destination.');return;}
+  const params=new URLSearchParams({orig:origin,dest:dest,type:sbAc,airline:'UPS',fltnum:fn.replace(/5[XY]/,''),units:'LBS'});
+  window.open('https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser,'_blank');
+}
+
+function getCustomFields(){
+  return {origin:'',dest:'',aircraft:'Boeing 747-8F',alt:'FL350',ci:52,sbUser:'VisualLanding112'};
+}
+function dispatchCustomFlight(){ dispatchGeneratedRoute(); }
+
 
 function removeDispatchRoute(id){
   if(!confirm('Remove this route?')) return;
@@ -1631,7 +1933,7 @@ function goNav(btn,page){
   if(page==='fleet')      renderFleet();
   if(page==='economy')    renderEconomy();
   if(page==='hubs')       renderHubs();
-  if(page==='dispatcher') renderDispatcher();
+  if(page==='dispatcher'){ renderDispatcher(); setTimeout(()=>{ updateDepAirports(); updateArrAirports(); },50); }
   if(page==='livemap')    onMapPageOpen();
   if(page==='admin')      renderAdmin();
 }
@@ -2239,7 +2541,7 @@ const routeMap={
   feeder:[['KSDF','KLEX','B757-200F'],['KSDF','KHSV','ATR-72F'],['KSDF','KBNA','B757-200F']],
   any:[['KSDF','EDDK','B747-400F'],['KSDF','KPHL','B767-300F'],['KSDF','KLEX','B757-200F']]
 };
-const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,248000],'McDonnell MD-11F':[90000,200000],'Boeing 767-300ERF':[70000,116000],'Boeing 767-300F':[65000,116000],'Airbus A300-600RF':[80000,140000],'Boeing 757-300F':[60000,124000],'Boeing 757-200F':[50000,116000],'B747-400F':[120000,248000],'MD-11F':[90000,200000],'B767-300F':[65000,116000],'B757-200F':[50000,116000],'ATR-72F':[5000,15000]};
+const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,248000],'Boeing 747-200F':[100000,230000],'Boeing 747-100F':[90000,220000],'McDonnell Douglas MD-11F':[90000,200000],'McDonnell MD-11F':[90000,200000],'Boeing 767-300F':[65000,116000],'Boeing 767-300ERF':[65000,116000],'Airbus A300-600F':[80000,140000],'Airbus A300-600RF':[80000,140000],'Boeing 757-200F':[50000,116000],'Boeing 757-300F':[60000,124000],'Boeing 727-200F':[30000,60000],'Boeing 727-100F':[20000,44000],'Douglas DC-8F':[35000,95000],'B747-400F':[120000,248000],'MD-11F':[90000,200000],'B767-300F':[65000,116000],'B757-200F':[50000,116000]};
 
 // Active live flights: { fn, origin, dest, ac, pilot, startTime, blockHours, freight, revenue }
 const liveFlights = [];
@@ -2472,26 +2774,31 @@ function saveState(){
 
 // ── Load from Supabase (or localStorage fallback) ─────────────────────────
 async function loadState(){
-  // First apply local cache so page feels instant
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if(raw) applySnap(JSON.parse(raw));
-  } catch(e){}
-
-  // Then fetch from Supabase
+  // Supabase is source of truth — fetch it first, only fall back to localStorage if offline
   try {
     setSyncStatus(false, 'Connecting...');
-    const { data, error } = await _supa.from('state').select('value').eq('key','main').single();
-    if(error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows yet
+    const { data, error } = await _supa.from('state').select('value,updated_at').eq('key','main').single();
+    if(error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows (fresh start)
+
     if(data && data.value){
+      // Supabase has data — use it, update local cache
       applySnap(data.value);
       try { localStorage.setItem(SAVE_KEY, JSON.stringify(data.value)); } catch(e){}
+      setSyncStatus(true, 'Live — synced');
+    } else {
+      // No Supabase data — fresh start, clear local cache too so old data doesnt persist
+      try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+      setSyncStatus(true, 'Live — fresh start');
     }
-    setSyncStatus(true, 'Live — synced');
     refreshAllUI();
   } catch(e){
+    // Offline fallback — use localStorage only
     console.warn('Supabase load error:', e);
     setSyncStatus(false, 'Offline — using local data');
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(raw) { applySnap(JSON.parse(raw)); refreshAllUI(); }
+    } catch(e2){}
   }
 }
 
@@ -2519,6 +2826,41 @@ setInterval(saveState, 60000);
 window.addEventListener('beforeunload', saveState);
 
 // (no _origRefreshTreasury stub needed)
+
+async function hardReset(){
+  if(!confirm('Reset ALL data to defaults for ALL users?\n\nThis wipes Supabase + local cache and cannot be undone.')) return;
+  const btn = event.target;
+  btn.textContent = 'Resetting...';
+  btn.disabled = true;
+  try {
+    // 1. Delete from Supabase
+    await _supa.from('state').delete().eq('key','main');
+    // 2. Wipe all localStorage keys for this app
+    ['vups_state_v2','vups_stocks','vups_cycle_leader'].forEach(k=>{
+      try{ localStorage.removeItem(k); }catch(e){}
+    });
+    // 3. Reload — page will start fresh with default state
+    location.reload();
+  } catch(e){
+    alert('Reset failed: ' + e.message + '\n\nTry running this in Supabase SQL Editor:\ndelete from state where key = \'main\';');
+    btn.textContent = '⚠ Reset All Saved Data';
+    btn.disabled = false;
+  }
+}
+
+async function hardReset(){
+  if(!confirm('Reset ALL data to defaults for ALL users? This wipes Supabase + local cache and cannot be undone.')) return;
+  const btn = document.querySelector('[onclick="hardReset()"]');
+  if(btn){ btn.textContent='Resetting...'; btn.disabled=true; }
+  try {
+    await _supa.from('state').delete().eq('key','main');
+    ['vups_state_v2','vups_stocks','vups_cycle_leader'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} });
+    location.reload();
+  } catch(e){
+    alert('Reset failed: '+e.message);
+    if(btn){ btn.textContent='Reset All Saved Data'; btn.disabled=false; }
+  }
+}
 
 function distributeProfit(){
   const humans=S.pilots.filter(p=>p.type==='human');
@@ -2563,6 +2905,14 @@ const AIRPORT_COORDS = {
   EGSS:[51.8850,0.2350],    // London Stansted
   // Domestic spokes
   KPIT:[40.4915,-80.2329],  // Pittsburgh
+  KSTL:[38.7487,-90.3700],  // St. Louis
+  KEWR:[40.6895,-74.1745],  // Newark
+  KPHX:[33.4373,-112.0078], // Phoenix
+  KHOU:[29.6454,-95.2789],  // Houston
+  KMEM:[35.0424,-89.9767],  // Memphis
+  EPWA:[52.1657,20.9671],   // Warsaw
+  ZBAA:[40.0799,116.5850],  // Beijing Capital
+  RKSI:[37.4692,126.4505],  // Seoul Incheon
   KATL:[33.6407,-84.4277],  // Atlanta
   KDFW:[32.8998,-97.0403],  // Dallas/Fort Worth
   KSEA:[47.4502,-122.3088], // Seattle
@@ -2574,7 +2924,7 @@ const AIRPORT_COORDS = {
   KCVG:[39.0489,-84.6678],  // Cincinnati
   KJFK:[40.6398,-73.7789],  // New York JFK
   KLAX:[33.9425,-118.4085], // Los Angeles
-  KORD:[41.9742,-87.9073],  // Chicago O'Hare
+  KORD:[41.9742,-87.9073],  // Chicago OHare
   CYYZ:[43.6777,-79.6248],  // Toronto
   LFPG:[49.0097,2.5479],    // Paris CDG
   RJAA:[35.7653,140.3864],  // Tokyo Narita
