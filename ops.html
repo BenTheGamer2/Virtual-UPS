@@ -35,7 +35,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 /* TICKER */
 .ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:28px;display:flex;align-items:center}
-.ticker-inner{display:flex;gap:3rem;animation:tick 40s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-mute)}
+.ticker-inner{display:flex;gap:3rem;animation:tick 90s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-mute)}
 .t-hi{color:var(--gold)}.t-g{color:var(--green-lt)}.t-r{color:var(--red-lt)}.t-b{color:var(--blue-lt)}
 @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
@@ -58,6 +58,8 @@ nav{display:flex;gap:.1rem;margin-left:.5rem}
 .nav-btn:hover{color:var(--text);background:rgba(200,146,10,.06)}
 .nav-btn.active{color:var(--gold);background:rgba(200,146,10,.1)}
 .admin-only-nav{color:var(--purple-lt) !important}
+.member-only-nav{color:var(--blue-lt) !important}
+.member-only-nav.active,.member-only-nav:hover{background:rgba(36,113,163,.12) !important;color:var(--blue-lt) !important}
 .admin-only-nav.active,.admin-only-nav:hover{background:rgba(125,60,152,.15) !important;color:var(--purple-lt) !important}
 .header-right{margin-left:auto;display:flex;align-items:center;gap:.85rem}
 .zulu{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
@@ -334,19 +336,34 @@ tr:last-child td{border-bottom:none}
     <div class="login-title">Operations Portal</div>
     <div class="login-sub">Virtual UPS Airlines</div>
     <div class="login-err" id="login-err"></div>
-    <div class="form-group">
-      <label class="form-label">Username</label>
-      <input class="form-input" type="text" id="l-user" placeholder="admin" autocomplete="off">
+
+    <div id="auth-signin">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="l-email" placeholder="crew@vups.app" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="l-pass" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.25rem">
+        <button class="btn btn-ghost" style="flex:1" onclick="guestAccess()">View Only</button>
+        <button class="btn btn-primary" style="flex:2" id="signin-btn" onclick="doLogin()">Sign In</button>
+      </div>
+      <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.7">Accounts are created by admin only.<br><span style="cursor:pointer;color:var(--blue-lt)" onclick="showReset()">Forgot password? Reset via email</span></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input class="form-input" type="password" id="l-pass" placeholder="••••••••">
+
+    <div id="auth-reset" style="display:none">
+      <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">Enter your email and we'll send a password reset link.</div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="l-reset-email" placeholder="crew@vups.app">
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.25rem">
+        <button class="btn btn-ghost" style="flex:1" onclick="showSignin()">&#x2190; Back</button>
+        <button class="btn btn-blue" style="flex:2" onclick="doReset()">Send Reset Link</button>
+      </div>
     </div>
-    <div style="display:flex;gap:.5rem;margin-top:.25rem">
-      <button class="btn btn-ghost" style="flex:1" onclick="skipLogin()">View Only</button>
-      <button class="btn btn-primary" style="flex:2" onclick="doLogin()">Sign In</button>
-    </div>
-    <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.7">View Only — anyone can browse.<br>Admin — full management access.</div>
   </div>
 </div>
 
@@ -415,6 +432,7 @@ tr:last-child td{border-bottom:none}
     <button class="nav-btn"            onclick="goNav(this,'hubs')">Hubs</button>
     <button class="nav-btn"            onclick="goNav(this,'dispatcher')">✈ Dispatcher</button>
     <button class="nav-btn"            onclick="goNav(this,'livemap')">🗺 Live Map</button>
+    <button class="nav-btn member-only-nav" id="pirep-nav-btn" onclick="goNav(this,'pirep')" style="display:none">✔ PIREPs</button>
     <button class="nav-btn admin-only-nav" id="admin-nav-btn" onclick="goNav(this,'admin')" style="display:none">⬡ Admin</button>
   </nav>
   <div class="header-right">
@@ -423,7 +441,8 @@ tr:last-child td{border-bottom:none}
       <span class="lbl">Treasury</span>
       <span id="treasury-display">$5,900,000,000</span>
     </div>
-    <div class="admin-logout-btn" id="admin-badge" onclick="logoutAdmin()" style="display:none">⬡ ADMIN · Logout</div>
+    <div id="member-badge" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.06em;cursor:pointer;padding:.25rem .6rem;border-radius:3px;border:1px solid var(--border2);color:var(--text-dim)" onclick="doLogout()">● <span id="member-badge-name">MEMBER</span> · Sign Out</div>
+    <div class="admin-logout-btn" id="admin-badge" onclick="doLogout()" style="display:none">⬡ ADMIN · Sign Out</div>
   </div>
 </header>
 
@@ -987,6 +1006,117 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+
+<!-- ── PIREP PAGE ── -->
+<div id="page-pirep" class="page">
+  <div class="sec-header">
+    <div class="sec-title">&#x2714; <span>PIREPs</span> <span style="font-size:.7rem;color:var(--text-mute);font-weight:400">Pilot Reports</span></div>
+    <div class="sec-actions">
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-file-pirep')">+ File PIREP</button>
+    </div>
+  </div>
+
+  <!-- File PIREP prompt for non-members -->
+  <div id="pirep-guest-msg" style="display:none;background:rgba(36,113,163,.06);border:1px solid rgba(36,113,163,.2);border-radius:4px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:.8rem;color:var(--blue-lt)">
+    Sign in to file PIREPs and log your flights.
+  </div>
+
+  <!-- Summary stats -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.65rem;margin-bottom:1.25rem" id="pirep-stats-row"></div>
+
+  <!-- PIREP log table -->
+  <div class="card">
+    <div class="card-title">Flight Reports Log</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Payload</th><th>Status</th>
+        </tr></thead>
+        <tbody id="pirep-tbody">
+          <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:'Share Tech Mono',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: File PIREP ── -->
+<div class="modal-overlay" id="modal-file-pirep">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">File Pilot Report</div>
+      <button class="modal-close" onclick="closeModal('modal-file-pirep')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Flight Number</label>
+          <input class="form-input" id="pr-fn" placeholder="5X101" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date (UTC)</label>
+          <input class="form-input" id="pr-date" type="date">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Origin ICAO</label>
+          <input class="form-input" id="pr-orig" placeholder="KSDF" maxlength="4" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dest ICAO</label>
+          <input class="form-input" id="pr-dest" placeholder="EDDK" maxlength="4" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Aircraft</label>
+        <select class="form-select" id="pr-ac">
+          <option>Boeing 747-8F</option>
+          <option>Boeing 747-400F</option>
+          <option>McDonnell Douglas MD-11F</option>
+          <option>Boeing 767-300F</option>
+          <option>Boeing 757-200F</option>
+          <option>Airbus A300-600F</option>
+          <option>Boeing 727-200F</option>
+          <option>Douglas DC-8F</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Block Time (hrs)</label>
+          <input class="form-input" id="pr-bt" type="number" step="0.1" placeholder="9.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payload (lbs)</label>
+          <input class="form-input" id="pr-payload" type="number" placeholder="180000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Dep Fuel (lbs)</label>
+          <input class="form-input" id="pr-fuel-dep" type="number" placeholder="180000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Arr Fuel (lbs)</label>
+          <input class="form-input" id="pr-fuel-arr" type="number" placeholder="32000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Landing Rate (fpm, optional)</label>
+        <input class="form-input" id="pr-ldgrate" type="number" placeholder="-120">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Remarks</label>
+        <textarea class="form-textarea" id="pr-remarks" placeholder="Smooth flight, light turbulence over Greenland..." rows="3"></textarea>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-file-pirep')">Cancel</button>
+        <button class="btn btn-primary" onclick="filePirep()">Submit PIREP</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- ═══ MODALS ═══ -->
@@ -1127,16 +1257,27 @@ tr:last-child td{border-bottom:none}
 
 <script>
 // ════════════════════════════════════════════════
-//  CREDENTIALS — change ADMIN_PASS before uploading!
+//  SUPABASE AUTH — roles: guest | member | admin
+//  Admin email set in ADMIN_EMAILS list below
 // ════════════════════════════════════════════════
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'ups5yops';
+const ADMIN_EMAILS = ['ben@vups.app']; // ← add your email here
+const _sb = supabase.createClient(
+  'https://mpmvfqkmvvbnsqvtvlnu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0'
+);
+
+function _role(){ return S.isAdmin ? 'admin' : S.isMember ? 'member' : 'guest'; }
+function _canEdit(){ return S.isAdmin; }
+function _canView(){ return S.isAdmin || S.isMember; }
 
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
+let _stateCache = null;
 const S = {
   isAdmin: false,
+  isMember: false,
+  currentUser: null,
   treasury: 5900000000,
   sessionRevenue: 0,
   sessionCosts: 0,
@@ -1277,46 +1418,142 @@ const AIRCRAFT_CATALOG = [
 ];
 
 // ════════════════════════════════════════════════
-//  LOGIN
+//  AUTH — Supabase email/password
 // ════════════════════════════════════════════════
-document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-document.getElementById('l-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
-function doLogin() {
-  const u=document.getElementById('l-user').value.trim();
-  const p=document.getElementById('l-pass').value;
-  if(u===ADMIN_USER && p===ADMIN_PASS){
-    S.isAdmin=true;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('admin-nav-btn').style.display='';
-    document.getElementById('admin-badge').style.display='';
-    document.getElementById('profit-share-btn').style.display='';
-    document.getElementById('leadership-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-exec\')">+ Add Executive</button>';
-    document.getElementById('news-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-news\')">+ Post Announcement</button>';
-    document.getElementById('hub-actions').innerHTML='<button class="btn btn-primary btn-sm" onclick="openModal(\'modal-add-hub\')">+ Add Hub</button>';
-    updateAdminTreasury();
-  } else {
-    document.getElementById('login-err').textContent='Invalid credentials.';
-    document.getElementById('l-pass').value='';
-  }
+// Member-only pages — guests get redirected
+const MEMBER_PAGES = ['crew','economy','pirep','dispatcher'];
+const ADMIN_PAGES  = ['admin'];
+
+// Check session on page load
+async function initAuth(){
+  const { data:{ session } } = await _sb.auth.getSession();
+  if(session) await applySession(session);
+  // Listen for auth changes (e.g. after password reset redirect)
+  _sb.auth.onAuthStateChange(async(_evt, sess)=>{
+    if(sess) await applySession(sess);
+    else clearSession();
+  });
+  // If no session at startup, still load public data
+  const { data:{ session:initSess }} = await _sb.auth.getSession();
+  if(!initSess) loadData();
 }
 
-function skipLogin(){
+async function applySession(session){
+  const email = session.user.email;
+  S.currentUser = session.user;
+  S.isMember = true;
+  S.isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
   document.getElementById('login-screen').classList.add('hidden');
+  applyRoleUI();
+  loadData();
 }
 
-function logoutAdmin(){
-  S.isAdmin=false;
-  document.getElementById('admin-nav-btn').style.display='none';
-  document.getElementById('admin-badge').style.display='none';
-  document.getElementById('profit-share-btn').style.display='none';
-  document.getElementById('leadership-actions').innerHTML='';
-  document.getElementById('news-actions').innerHTML='';
-  document.getElementById('hub-actions').innerHTML='';
-  if(document.getElementById('page-admin').classList.contains('active')){
-    goNav(document.querySelector('.nav-btn'),'dispatch');
-    document.querySelector('.nav-btn').classList.add('active');
+function clearSession(){
+  S.currentUser = null;
+  S.isMember = false;
+  S.isAdmin  = false;
+  document.getElementById('login-screen').classList.remove('hidden');
+  applyRoleUI();
+}
+
+function applyRoleUI(){
+  const role = _role();
+  // Nav visibility
+  document.getElementById('admin-nav-btn').style.display  = S.isAdmin  ? '' : 'none';
+  document.getElementById('pirep-nav-btn').style.display  = S.isMember ? '' : 'none';
+  document.getElementById('profit-share-btn').style.display = S.isAdmin ? '' : 'none';
+  // Badges
+  document.getElementById('admin-badge').style.display  = S.isAdmin  ? '' : 'none';
+  const mb = document.getElementById('member-badge');
+  mb.style.display = (S.isMember && !S.isAdmin) ? '' : 'none';
+  if(S.currentUser){
+    const name = S.currentUser.user_metadata?.display_name || S.currentUser.email.split('@')[0].toUpperCase();
+    const el = document.getElementById('member-badge-name');
+    if(el) el.textContent = name;
   }
+  // Admin action buttons
+  document.getElementById('leadership-actions').innerHTML = S.isAdmin
+    ? '<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-exec\')">+ Add Executive</button>' : '';
+  document.getElementById('news-actions').innerHTML = S.isAdmin
+    ? '<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-news\')">+ Post Announcement</button>' : '';
+  document.getElementById('hub-actions').innerHTML = S.isAdmin
+    ? '<button class="btn btn-primary btn-sm" onclick="openModal(\'modal-add-hub\')">+ Add Hub</button>' : '';
+  if(S.isAdmin) updateAdminTreasury();
+  // Grey out member-only nav buttons for guests
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    const page = btn.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
+    if(!page) return;
+    if(MEMBER_PAGES.includes(page) && !S.isMember){
+      btn.style.opacity = '0.35';
+      btn.title = 'Sign in to access';
+    } else {
+      btn.style.opacity = '';
+      btn.title = '';
+    }
+  });
+}
+
+async function doLogin(){
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const err   = document.getElementById('login-err');
+  const btn   = document.getElementById('signin-btn');
+  if(!email || !pass){ err.textContent='Enter your email and password.'; return; }
+  err.textContent='';
+  btn.textContent='Signing in...';
+  btn.disabled=true;
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password:pass });
+  btn.textContent='Sign In'; btn.disabled=false;
+  if(error){ err.textContent = error.message.includes('Invalid') ? 'Invalid email or password.' : error.message; return; }
+  await applySession(data.session);
+}
+
+function guestAccess(){
+  document.getElementById('login-screen').classList.add('hidden');
+  applyRoleUI();
+  loadData();
+}
+
+async function doLogout(){
+  await _sb.auth.signOut();
+  clearSession();
+  // Return to dispatch (public page)
+  goNav(document.querySelector('.nav-btn[onclick*=dispatch]'), 'dispatch');
+}
+
+function showReset(){
+  document.getElementById('auth-signin').style.display='none';
+  document.getElementById('auth-reset').style.display='';
+  document.getElementById('login-err').textContent='';
+}
+function showSignin(){
+  document.getElementById('auth-reset').style.display='none';
+  document.getElementById('auth-signin').style.display='';
+  document.getElementById('login-err').textContent='';
+}
+async function doReset(){
+  const email = document.getElementById('l-reset-email').value.trim();
+  const err = document.getElementById('login-err');
+  if(!email){ err.textContent='Enter your email.'; return; }
+  const { error } = await _sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  if(error){ err.textContent=error.message; return; }
+  err.style.color='var(--green-lt)';
+  err.textContent='Reset link sent! Check your email.';
+  showSignin();
+  setTimeout(()=>{ err.style.color=''; err.textContent=''; },5000);
+}
+
+// Redirect guests away from member-only pages
+function guardPage(page){
+  if(ADMIN_PAGES.includes(page) && !S.isAdmin){ return false; }
+  if(MEMBER_PAGES.includes(page) && !S.isMember){
+    document.getElementById('login-screen').classList.remove('hidden');
+    return false;
+  }
+  return true;
 }
 
 // ════════════════════════════════════════════════
@@ -1918,6 +2155,8 @@ function addDispatchRoute(){
 // END DISPATCHER
 
 function goNav(btn,page){
+  if(!guardPage(page)) return;
+  if(page==='pirep') setTimeout(renderPireps,50);
   if(page==='admin'&&!S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -2443,54 +2682,84 @@ function blockTime(o,d){
 // ── Real UPS scheduled flights (UTC departure hour, flight number, route, aircraft) ──
 // Based on actual UPS Airlines published operations. Times in UTC.
 const UPS_SCHEDULE = [
-  // ── Nightly bank from KSDF (approx 05:00-10:00 UTC = 1am-6am EST) ──
-  { fn:'5X3',   dep:6,  orig:'KSDF', dest:'EDDK', ac:'Boeing 747-8F' },
-  { fn:'5X4',   dep:19, orig:'EDDK', dest:'KSDF', ac:'Boeing 747-8F' },
-  { fn:'5X7',   dep:7,  orig:'KSDF', dest:'VHHH', ac:'Boeing 747-8F' },
-  { fn:'5X8',   dep:14, orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },
-  { fn:'5X17',  dep:7,  orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },
-  { fn:'5X18',  dep:14, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },
-  { fn:'5X37',  dep:8,  orig:'KSDF', dest:'PANC', ac:'Boeing 747-8F' },
-  { fn:'5X38',  dep:18, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },
-  { fn:'5X15',  dep:8,  orig:'KSDF', dest:'ZSPD', ac:'McDonnell MD-11F'    },
-  { fn:'5X16',  dep:15, orig:'ZSPD', dest:'KSDF', ac:'McDonnell MD-11F'    },
-  { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },
-  { fn:'5X748', dep:22, orig:'OMDB', dest:'KSDF', ac:'Boeing 747-8F' },
-  { fn:'5X63',  dep:9,  orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },
-  { fn:'5X64',  dep:20, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },
-  { fn:'5X31',  dep:9,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },
-  { fn:'5X32',  dep:19, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },
-  { fn:'5X271', dep:9,  orig:'EDDK', dest:'VHHH', ac:'Boeing 747-8F' },
-  { fn:'5X272', dep:22, orig:'VHHH', dest:'EDDK', ac:'Boeing 747-8F' },
-  // ── Domestic overnight (approx 05:00-12:00 UTC) ──
-  { fn:'5X101', dep:6,  orig:'KSDF', dest:'KPHL', ac:'Boeing 767-300F' },
-  { fn:'5X102', dep:10, orig:'KPHL', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X201', dep:5,  orig:'KSDF', dest:'KONT', ac:'Boeing 757-200F' },
+  // ── Long-haul international — spread across all 24h ──
+  { fn:'5X3',   dep:6,  orig:'KSDF', dest:'EDDK', ac:'Boeing 747-8F' },       // dep 06Z arr ~15:30Z
+  { fn:'5X4',   dep:19, orig:'EDDK', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 19Z arr ~04:30Z
+  { fn:'5X7',   dep:7,  orig:'KSDF', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 07Z arr ~23:30Z
+  { fn:'5X8',   dep:2,  orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 02Z arr ~18:30Z
+  { fn:'5X17',  dep:10, orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },       // dep 10Z arr ~02Z
+  { fn:'5X18',  dep:16, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 16Z arr ~08Z
+  { fn:'5X15',  dep:13, orig:'KSDF', dest:'ZSPD', ac:'McDonnell MD-11F' },    // dep 13Z arr ~04:30Z
+  { fn:'5X16',  dep:20, orig:'ZSPD', dest:'KSDF', ac:'McDonnell MD-11F' },    // dep 20Z arr ~11:30Z
+  { fn:'5X37',  dep:3,  orig:'KSDF', dest:'PANC', ac:'Boeing 767-300F' },     // dep 03Z arr ~11Z
+  { fn:'5X38',  dep:15, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 15Z arr ~00Z
+  { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },       // dep 05Z arr ~19:30Z
+  { fn:'5X748', dep:22, orig:'OMDB', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 22Z arr ~12:30Z
+  { fn:'5X271', dep:1,  orig:'EDDK', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 01Z arr ~12:30Z
+  { fn:'5X272', dep:14, orig:'VHHH', dest:'EDDK', ac:'Boeing 747-8F' },       // dep 14Z arr ~01:30Z
+  { fn:'5X21',  dep:9,  orig:'KSDF', dest:'WMKK', ac:'Boeing 747-8F' },       // dep 09Z arr ~03:30Z
+  { fn:'5X22',  dep:18, orig:'WMKK', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 18Z arr ~12:30Z
+  { fn:'5X25',  dep:16, orig:'KSDF', dest:'RJAA', ac:'Boeing 747-8F' },       // dep 16Z arr ~07:30Z
+  { fn:'5X26',  dep:0,  orig:'RJAA', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 00Z arr ~17Z
+  // ── Transatlantic / Europe ──
+  { fn:'5X63',  dep:11, orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 11Z arr ~19:30Z
+  { fn:'5X64',  dep:22, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 22Z arr ~06:30Z
+  { fn:'5X31',  dep:2,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },     // dep 02Z arr ~09:30Z
+  { fn:'5X32',  dep:14, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 14Z arr ~21:30Z
+  { fn:'5X51',  dep:18, orig:'KMIA', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 18Z arr ~02:30Z
+  { fn:'5X52',  dep:8,  orig:'EDDK', dest:'KMIA', ac:'Boeing 767-300F' },     // dep 08Z arr ~15:30Z
+  // ── Domestic trunk — spread through day and night ──
+  { fn:'5X101', dep:4,  orig:'KSDF', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X102', dep:8,  orig:'KPHL', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X103', dep:14, orig:'KSDF', dest:'KPHL', ac:'Boeing 757-200F' },
+  { fn:'5X104', dep:18, orig:'KPHL', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X201', dep:3,  orig:'KSDF', dest:'KONT', ac:'Boeing 757-200F' },
   { fn:'5X202', dep:9,  orig:'KONT', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X301', dep:6,  orig:'KSDF', dest:'KRFD', ac:'Boeing 757-200F' },
-  { fn:'5X302', dep:8,  orig:'KRFD', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X401', dep:5,  orig:'KSDF', dest:'KMIA', ac:'Boeing 767-300F' },
-  { fn:'5X402', dep:9,  orig:'KMIA', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X501', dep:6,  orig:'KSDF', dest:'KDFW', ac:'Boeing 757-200F' },
-  { fn:'5X601', dep:5,  orig:'KSDF', dest:'KSEA', ac:'Boeing 767-300F' },
-  { fn:'5X602', dep:14, orig:'KSEA', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X701', dep:6,  orig:'KSDF', dest:'KATL', ac:'Boeing 757-200F' },
-  { fn:'5X702', dep:10, orig:'KATL', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X801', dep:6,  orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
-  { fn:'5X802', dep:14, orig:'KPIT', dest:'KSDF', ac:'McDonnell MD-11F'    },
-  { fn:'5X803', dep:19, orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
-  { fn:'5X805', dep:5,  orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
-  // ── Feeder / regional ──
-  { fn:'5X901', dep:6,  orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
-  { fn:'5X902', dep:9,  orig:'KLEX', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X911', dep:7,  orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F'   },
-  { fn:'5X912', dep:10, orig:'KHSV', dest:'KSDF', ac:'Boeing 757-200F'   },
-  { fn:'5X921', dep:6,  orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
-  { fn:'5X922', dep:8,  orig:'KBNA', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X931', dep:6,  orig:'KSDF', dest:'KIND', ac:'Boeing 757-200F' },
-  { fn:'5X932', dep:8,  orig:'KIND', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X941', dep:5,  orig:'KSDF', dest:'KCVG', ac:'Boeing 757-200F' },
-  { fn:'5X942', dep:7,  orig:'KCVG', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X203', dep:15, orig:'KSDF', dest:'KONT', ac:'Airbus A300-600F' },
+  { fn:'5X204', dep:21, orig:'KONT', dest:'KSDF', ac:'Airbus A300-600F' },
+  { fn:'5X301', dep:5,  orig:'KSDF', dest:'KRFD', ac:'Boeing 757-200F' },
+  { fn:'5X302', dep:7,  orig:'KRFD', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X401', dep:2,  orig:'KSDF', dest:'KMIA', ac:'Boeing 767-300F' },
+  { fn:'5X402', dep:7,  orig:'KMIA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X403', dep:16, orig:'KSDF', dest:'KMIA', ac:'Boeing 757-200F' },
+  { fn:'5X501', dep:4,  orig:'KSDF', dest:'KDFW', ac:'Boeing 757-200F' },
+  { fn:'5X502', dep:8,  orig:'KDFW', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X503', dep:20, orig:'KSDF', dest:'KDFW', ac:'Airbus A300-600F' },
+  { fn:'5X601', dep:1,  orig:'KSDF', dest:'KSEA', ac:'Boeing 767-300F' },
+  { fn:'5X602', dep:10, orig:'KSEA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X603', dep:18, orig:'KSDF', dest:'KSEA', ac:'Boeing 757-200F' },
+  { fn:'5X701', dep:4,  orig:'KSDF', dest:'KATL', ac:'Boeing 757-200F' },
+  { fn:'5X702', dep:7,  orig:'KATL', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X703', dep:13, orig:'KSDF', dest:'KATL', ac:'Airbus A300-600F' },
+  { fn:'5X704', dep:17, orig:'KATL', dest:'KSDF', ac:'Airbus A300-600F' },
+  { fn:'5X801', dep:6,  orig:'KSDF', dest:'KPIT', ac:'Boeing 757-200F' },
+  { fn:'5X802', dep:9,  orig:'KPIT', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X803', dep:21, orig:'KSDF', dest:'KPIT', ac:'Boeing 757-200F' },
+  { fn:'5X805', dep:3,  orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
+  { fn:'5X806', dep:6,  orig:'KCLT', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X807', dep:19, orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
+  { fn:'5X811', dep:11, orig:'KSDF', dest:'KORD', ac:'Airbus A300-600F' },
+  { fn:'5X812', dep:14, orig:'KORD', dest:'KSDF', ac:'Airbus A300-600F' },
+  { fn:'5X821', dep:23, orig:'KSDF', dest:'KHOU', ac:'Boeing 757-200F' },
+  { fn:'5X822', dep:4,  orig:'KHOU', dest:'KSDF', ac:'Boeing 757-200F' },
+  // ── East Coast feeder — spread across multiple banks ──
+  { fn:'5X901', dep:4,  orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'5X902', dep:5,  orig:'KLEX', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X903', dep:16, orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'5X911', dep:5,  orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F' },
+  { fn:'5X912', dep:6,  orig:'KHSV', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X913', dep:17, orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F' },
+  { fn:'5X921', dep:3,  orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'5X922', dep:5,  orig:'KBNA', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X923', dep:15, orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'5X931', dep:4,  orig:'KSDF', dest:'KIND', ac:'Boeing 757-200F' },
+  { fn:'5X932', dep:6,  orig:'KIND', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X941', dep:3,  orig:'KSDF', dest:'KCVG', ac:'Boeing 757-200F' },
+  { fn:'5X942', dep:4,  orig:'KCVG', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X951', dep:22, orig:'KSDF', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'5X952', dep:1,  orig:'KMEM', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X961', dep:12, orig:'KSDF', dest:'KIND', ac:'Airbus A300-600F' },
+  { fn:'5X962', dep:14, orig:'KIND', dest:'KSDF', ac:'Airbus A300-600F' },
 ];
 
 // Which scheduled flights should currently be airborne?
@@ -2700,6 +2969,7 @@ function buildSnap(){
     ownedFleet:      S.ownedFleet,
     dispatcherRoutes:S.dispatcherRoutes,
     liveFlightsSnap: liveFlights.map(f=>({...f})),
+      pireps: _pireps,
   };
 }
 
@@ -2721,6 +2991,11 @@ function applySnap(snap){
     liveFlights.length = 0;
     snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
   }
+  if(snap.pireps && Array.isArray(snap.pireps)){
+    _pireps.length = 0;
+    _pireps.push(...snap.pireps);
+  }
+  _stateCache = snap;
 }
 
 function refreshAllUI(){
@@ -2743,6 +3018,7 @@ function refreshAllUI(){
     if(id==='admin')      renderAdmin();
     if(id==='dispatcher') renderDispatcher();
     if(id==='livemap')    onMapPageOpen();
+    if(id==='pirep')      renderPireps();
   }
 }
 
@@ -3252,6 +3528,77 @@ subscribeRealtime();
 
 // 4. Stock simulation
 fetchLiveStocks();
+
+// ════════════════════════════════════════════════
+//  PIREPs
+// ════════════════════════════════════════════════
+const _pireps = [];
+
+function renderPireps(){
+  const tb = document.getElementById('pirep-tbody');
+  if(!tb) return;
+  const guestMsg = document.getElementById('pirep-guest-msg');
+  if(guestMsg) guestMsg.style.display = S.isMember ? 'none' : '';
+
+  if(!_pireps.length){
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:\'Share Tech Mono\',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>';
+  } else {
+    tb.innerHTML = _pireps.slice().reverse().map(p=>`
+      <tr>
+        <td class="mono" style="font-size:.68rem">${p.date||'—'}</td>
+        <td style="color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem">${p.pilot||'—'}</td>
+        <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.92rem">${p.fn||'—'}</td>
+        <td style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600">${p.orig||'?'} → ${p.dest||'?'}</td>
+        <td class="mono" style="font-size:.68rem;white-space:nowrap">${p.ac||'—'}</td>
+        <td class="mono">${p.bt?p.bt+'h':'—'}</td>
+        <td class="mono">${p.payload?Number(p.payload).toLocaleString()+' lbs':'—'}</td>
+        <td><span class="badge b-green">&#x2714; Filed</span></td>
+      </tr>`).join('');
+  }
+
+  // Stats
+  const row = document.getElementById('pirep-stats-row');
+  if(row){
+    const total = _pireps.length;
+    const hrs   = _pireps.reduce((a,p)=>a+(parseFloat(p.bt)||0),0).toFixed(1);
+    const freq  = _pireps.reduce((a,p)=>a+(parseInt(p.payload)||0),0);
+    row.innerHTML = [
+      ['Total PIREPs', total],
+      ['Total Block Hrs', hrs+'h'],
+      ['Total Freight', freq>=1e6?(freq/1e6).toFixed(1)+'M lbs':freq.toLocaleString()+' lbs'],
+    ].map(([l,v])=>`<div class="stat" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.7rem 1rem"><div class="stat-val" style="font-size:1.4rem">${v}</div><div class="stat-lbl">${l}</div></div>`).join('');
+  }
+}
+
+async function filePirep(){
+  if(!S.isMember){ alert('Sign in to file PIREPs.'); return; }
+  const fn   = document.getElementById('pr-fn').value.trim().toUpperCase();
+  const date = document.getElementById('pr-date').value;
+  const orig = document.getElementById('pr-orig').value.trim().toUpperCase();
+  const dest = document.getElementById('pr-dest').value.trim().toUpperCase();
+  const ac   = document.getElementById('pr-ac').value;
+  const bt   = document.getElementById('pr-bt').value;
+  const pl   = document.getElementById('pr-payload').value;
+  const ldg  = document.getElementById('pr-ldgrate').value;
+  const rmk  = document.getElementById('pr-remarks').value.trim();
+  if(!fn||!orig||!dest||!bt){ alert('Fill in required fields: Flight #, Route, Block Time'); return; }
+  const pilot = S.currentUser?.user_metadata?.display_name || S.currentUser?.email?.split('@')[0] || 'Unknown';
+  const pirep = { fn, date, orig, dest, ac, bt:parseFloat(bt).toFixed(1), payload:pl, ldg, remarks:rmk, pilot, filed: Date.now() };
+  _pireps.push(pirep);
+  // Persist to Supabase state
+  try {
+    const snap = (_stateCache||{});
+    snap.pireps = _pireps;
+    await saveState(snap);
+  } catch(e){ console.warn('PIREP save error',e); }
+  closeModal('modal-file-pirep');
+  // Clear form
+  ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-ldgrate','pr-remarks'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  renderPireps();
+}
+
 </script>
 </body>
 </html>
