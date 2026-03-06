@@ -1,0 +1,3257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual UPS Airlines — Operations</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0e0b09;--surface:#161109;--card:#1c1510;
+  --border:#2e1f12;--border2:#3d2b1a;
+  --gold:#c8920a;--gold-lt:#e8a800;--gold-dim:#7a5500;
+  --text:#d4c4a8;--text-dim:#7a6a52;--text-mute:#4a3a28;
+  --green:#2d9e5f;--green-lt:#35c270;
+  --red:#c0392b;--red-lt:#e74c3c;
+  --blue:#2471a3;--blue-lt:#3498db;
+  --orange:#c0610a;--orange-lt:#e67e22;
+  --purple:#7d3c98;--purple-lt:#a569bd;
+}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;line-height:1.5}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#login-screen.hidden{display:none}
+.login-box{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:2.5rem 2rem;width:340px;text-align:center}
+.login-logo{width:48px;height:48px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:#1a0e06;margin:0 auto 1.25rem}
+.login-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.25rem}
+.login-sub{font-size:.72rem;color:var(--text-mute);margin-bottom:1.5rem;letter-spacing:.05em}
+.login-err{font-size:.72rem;color:var(--red-lt);margin-bottom:.75rem;min-height:1rem}
+
+/* TICKER */
+.ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:28px;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:3rem;animation:tick 40s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-mute)}
+.t-hi{color:var(--gold)}.t-g{color:var(--green-lt)}.t-r{color:var(--red-lt)}.t-b{color:var(--blue-lt)}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* STOCK TICKER BAR */
+.stock-bar{background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);padding:.3rem 1.5rem;display:flex;align-items:center;gap:1.5rem;overflow-x:auto}
+.stock-item{display:flex;align-items:center;gap:.5rem;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.stock-sym{color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.06em}
+.stock-price{color:var(--text)}
+.stock-chg.up{color:var(--green-lt)}.stock-chg.dn{color:var(--red-lt)}
+.stock-divider{color:var(--text-mute);font-size:.7rem}
+
+/* HEADER */
+header{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:#1a0e06;flex-shrink:0}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.logo-name span{color:var(--gold)}
+nav{display:flex;gap:.1rem;margin-left:.5rem}
+.nav-btn{background:none;border:none;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;border-radius:3px;transition:color .15s,background .15s}
+.nav-btn:hover{color:var(--text);background:rgba(200,146,10,.06)}
+.nav-btn.active{color:var(--gold);background:rgba(200,146,10,.1)}
+.admin-only-nav{color:var(--purple-lt) !important}
+.admin-only-nav.active,.admin-only-nav:hover{background:rgba(125,60,152,.15) !important;color:var(--purple-lt) !important}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:.85rem}
+.zulu{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
+.zulu strong{color:var(--gold);font-weight:400}
+.treasury-badge{display:flex;align-items:center;gap:.4rem;background:rgba(200,146,10,.08);border:1px solid var(--border2);border-radius:3px;padding:.25rem .65rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--gold-lt);letter-spacing:.04em}
+.treasury-badge .lbl{color:var(--text-mute);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
+.admin-logout-btn{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--purple-lt);letter-spacing:.08em;cursor:pointer;padding:.25rem .6rem;border-radius:3px;border:1px solid rgba(125,60,152,.3);background:rgba(125,60,152,.08)}
+.admin-logout-btn:hover{background:rgba(125,60,152,.2)}
+
+/* LAYOUT */
+main{padding:1.25rem;max-width:1600px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:.65rem;border-bottom:1px solid var(--border)}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
+.sec-title span{color:var(--gold)}
+.sec-title .adm{color:var(--purple-lt)}
+.sec-actions{display:flex;gap:.5rem;align-items:center}
+
+/* BUTTONS */
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .9rem;border-radius:3px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.btn-primary{background:var(--gold);color:#1a0e06;border-color:var(--gold)}.btn-primary:hover{background:var(--gold-lt)}
+.btn-ghost{background:none;color:var(--text-dim);border-color:var(--border2)}.btn-ghost:hover{color:var(--text);border-color:var(--text-dim)}
+.btn-danger{background:none;color:var(--red-lt);border-color:rgba(192,57,43,.4)}.btn-danger:hover{background:rgba(192,57,43,.1)}
+.btn-purple{background:rgba(125,60,152,.2);color:var(--purple-lt);border-color:rgba(125,60,152,.4)}.btn-purple:hover{background:rgba(125,60,152,.35)}
+.btn-blue{background:rgba(36,113,163,.15);color:var(--blue-lt);border-color:rgba(36,113,163,.35)}.btn-blue:hover{background:rgba(36,113,163,.28)}
+.btn-sm{padding:.2rem .6rem;font-size:.7rem}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.8rem 1rem}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
+.stat-lbl{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem}
+.stat-sub{font-size:.68rem;margin-top:.2rem}
+.pos{color:var(--green-lt)}.neg{color:var(--red-lt)}.warn{color:var(--orange-lt)}.gld{color:var(--gold-lt)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.55rem .75rem;border-bottom:1px solid rgba(46,31,18,.6);font-family:'Share Tech Mono',monospace;font-size:.75rem;vertical-align:middle}
+tr:hover td{background:rgba(200,146,10,.03)}
+tr:last-child td{border-bottom:none}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .45rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.b-green{background:rgba(45,158,95,.12);color:var(--green-lt);border:1px solid rgba(45,158,95,.3)}
+.b-gold{background:rgba(200,146,10,.12);color:var(--gold-lt);border:1px solid rgba(200,146,10,.3)}
+.b-red{background:rgba(192,57,43,.12);color:var(--red-lt);border:1px solid rgba(192,57,43,.3)}
+.b-blue{background:rgba(36,113,163,.12);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
+.b-orange{background:rgba(192,97,10,.12);color:var(--orange-lt);border:1px solid rgba(192,97,10,.3)}
+.b-gray{background:rgba(74,58,40,.3);color:var(--text-dim);border:1px solid var(--border2)}
+.b-purple{background:rgba(125,60,152,.12);color:var(--purple-lt);border:1px solid rgba(125,60,152,.3)}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-g{background:var(--green-lt)}.dot-r{background:var(--red-lt)}.dot-y{background:var(--gold-lt)}.dot-b{background:var(--blue-lt)}
+
+/* BARS */
+.bar-wrap{margin-bottom:.65rem}
+.bar-header{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
+.bar-track{height:5px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.bf-gold{background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
+.bf-green{background:linear-gradient(90deg,#1a6e3e,var(--green-lt))}
+.bf-red{background:linear-gradient(90deg,#7a1a10,var(--red-lt))}
+.bf-blue{background:linear-gradient(90deg,#0f3d5e,var(--blue-lt))}
+
+/* DISPATCH LAYOUT */
+.dispatch-layout{display:grid;grid-template-columns:230px 1fr 220px;gap:1rem}
+.dcol{display:flex;flex-direction:column;gap:.75rem}
+.metar-raw{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--blue-lt);background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;line-height:1.7;margin-bottom:.75rem;word-break:break-all}
+.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.wx-cell{background:rgba(0,0,0,.2);border-radius:3px;padding:.4rem .5rem;text-align:center}
+.wx-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--blue-lt);line-height:1}
+.wx-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem}
+
+/* CREW */
+.crew-layout{display:grid;grid-template-columns:1fr 300px;gap:1rem}
+.crew-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
+.crew-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem;transition:border-color .15s}
+.crew-card:hover{border-color:var(--border2)}
+.crew-card.ai-pilot{border-left:2px solid var(--blue)}
+.crew-card.human-pilot{border-left:2px solid var(--gold-dim)}
+.pilot-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0}
+.av-human{background:rgba(200,146,10,.15);color:var(--gold-lt);border:1px solid var(--border2)}
+.av-ai{background:rgba(36,113,163,.15);color:var(--blue-lt);border:1px solid rgba(36,113,163,.3)}
+.pilot-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;color:var(--text);line-height:1.2}
+.pilot-rank{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}
+.pilot-type-badge{margin-left:auto}
+.pilot-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;padding:.65rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:.65rem;text-align:center}
+.ps-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--text)}
+.ps-lbl{font-size:.58rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
+.xp-bar-wrap{margin-bottom:.5rem}
+.xp-bar-row{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-mute);margin-bottom:.2rem;font-family:'Share Tech Mono',monospace}
+.xp-track{height:3px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt))}
+.xp-fill-blue{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--blue-lt))}
+.pilot-actions{display:flex;gap:.4rem}
+
+/* ECONOMY */
+.eco-layout{display:grid;grid-template-columns:320px 1fr;gap:1rem}
+.ledger-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(46,31,18,.5);font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.ledger-item:last-child{border-bottom:none}
+.li-desc{color:var(--text-dim)}.li-pos{color:var(--green-lt)}.li-neg{color:var(--red-lt)}
+
+/* HUBS */
+.hubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.hub-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem}
+.hub-icao{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:.06em;line-height:1}
+.hub-name{font-size:.8rem;color:var(--text-dim);margin-top:.1rem;margin-bottom:.75rem}
+.hub-detail-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);padding:.25rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace}
+.hub-detail-val{color:var(--text)}
+
+/* AI LOG */
+.ai-activity{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)}
+.ai-line{padding:.28rem 0;border-bottom:1px solid rgba(46,31,18,.3);display:flex;gap:.5rem;align-items:flex-start}
+.ai-line:last-child{border-bottom:none}
+.ai-time{color:var(--text-mute);white-space:nowrap}
+.hi{color:var(--blue-lt)}.earn{color:var(--green-lt)}
+
+/* ── LEADERSHIP / C-SUITE ── */
+.leadership-layout{display:grid;grid-template-columns:1fr 340px;gap:1rem}
+.csuite-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;margin-bottom:1rem}
+.exec-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem;position:relative;overflow:hidden;transition:border-color .2s}
+.exec-card:hover{border-color:var(--border2)}
+.exec-card.ceo-card{border-color:rgba(200,146,10,.4);background:linear-gradient(135deg,rgba(200,146,10,.04) 0%,var(--card) 60%)}
+.exec-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.75rem;border:2px solid var(--border2)}
+.exec-av-gold{background:rgba(200,146,10,.15);color:var(--gold-lt);border-color:rgba(200,146,10,.4)}
+.exec-av-blue{background:rgba(36,113,163,.15);color:var(--blue-lt);border-color:rgba(36,113,163,.35)}
+.exec-av-green{background:rgba(45,158,95,.15);color:var(--green-lt);border-color:rgba(45,158,95,.3)}
+.exec-av-purple{background:rgba(125,60,152,.15);color:var(--purple-lt);border-color:rgba(125,60,152,.3)}
+.exec-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.2}
+.exec-title{font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem;margin-bottom:.6rem}
+.exec-bio{font-size:.75rem;color:var(--text-dim);line-height:1.6}
+.exec-tenure{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute);margin-top:.5rem}
+.retiring-banner{background:rgba(200,146,10,.08);border:1px solid rgba(200,146,10,.25);border-radius:3px;padding:.4rem .65rem;font-size:.7rem;color:var(--gold-lt);margin-top:.6rem;font-family:'Share Tech Mono',monospace}
+
+/* ── NEWS FEED ── */
+.news-feed{display:flex;flex-direction:column;gap:.75rem}
+.news-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem;transition:border-color .2s}
+.news-card:hover{border-color:var(--border2)}
+.news-card.breaking{border-left:3px solid var(--gold)}
+.news-card.retirement{border-left:3px solid var(--purple-lt)}
+.news-card.operational{border-left:3px solid var(--blue-lt)}
+.news-card.financial{border-left:3px solid var(--green-lt)}
+.news-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.5rem}
+.news-category{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
+.news-date{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);white-space:nowrap}
+.news-headline{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);line-height:1.3;margin-bottom:.4rem}
+.news-body{font-size:.78rem;color:var(--text-dim);line-height:1.7}
+.news-author{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)}
+
+/* ── FLEET ACQUISITION ── */
+.fleet-layout{display:grid;grid-template-columns:1fr 280px;gap:1rem}
+.fleet-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.aircraft-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1rem;transition:border-color .2s;cursor:default}
+.aircraft-card:hover{border-color:var(--border2)}
+.aircraft-card.owned{border-left:3px solid var(--green)}
+.ac-model{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);margin-bottom:.2rem}
+.ac-type{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem}
+.ac-specs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-bottom:.75rem}
+.ac-spec{background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem}
+.ac-spec-val{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:600;color:var(--text)}
+.ac-spec-lbl{font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
+.ac-price{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.6rem}
+.ac-owned-count{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);margin-bottom:.5rem}
+
+/* ── QUARTERLY REPORT ── */
+.report-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem}
+.report-stat-big{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:700;line-height:1;margin-bottom:.25rem}
+.report-label{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+.report-change{font-size:.72rem;margin-top:.2rem}
+.qtr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+.qtr-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.8rem}
+.qtr-period{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;color:var(--gold);letter-spacing:.08em;margin-bottom:.4rem}
+
+/* ── ADMIN PAGE ── */
+.admin-wrap{background:rgba(125,60,152,.03);border:1px solid rgba(125,60,152,.15);border-radius:6px;padding:1.25rem;margin-bottom:1rem}
+.admin-warn{display:flex;align-items:center;gap:.75rem;background:rgba(125,60,152,.08);border:1px solid rgba(125,60,152,.2);border-radius:4px;padding:.65rem 1rem;margin-bottom:1.25rem;font-size:.78rem;color:var(--purple-lt)}
+.admin-section{margin-bottom:1.5rem}
+.admin-section-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--purple-lt);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid rgba(125,60,152,.2);display:flex;align-items:center;justify-content:space-between}
+.admin-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:5px;width:460px;max-width:95vw;max-height:88vh;overflow-y:auto;transform:translateY(12px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:.1rem .3rem;border-radius:2px}
+.modal-close:hover{color:var(--text);background:var(--border)}
+.modal-body{padding:1.25rem}
+.form-group{margin-bottom:.9rem}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem}
+.form-input,.form-select,.form-textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:3px;padding:.45rem .7rem;color:var(--text);font-family:'Barlow',sans-serif;font-size:.82rem;outline:none;transition:border-color .15s}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold-dim)}
+.form-select option{background:var(--card)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.form-footer{display:flex;gap:.5rem;justify-content:flex-end;padding-top:.75rem;border-top:1px solid var(--border)}
+.form-note{font-size:.7rem;color:var(--text-mute);margin-top:.3rem;line-height:1.5}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-mute)}
+.empty-state .icon{font-size:2rem;margin-bottom:.75rem;opacity:.4}
+.empty-state p{font-size:.8rem;line-height:1.7}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+
+/* LIVE FLIGHT PROGRESS */
+.flight-progress-wrap{margin:0;padding:0}
+.flight-prog-bar{height:3px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;margin-top:2px}
+.flight-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt));transition:width 1s linear}
+.flight-eta-cell{font-family:'Share Tech Mono',monospace;font-size:.68rem;line-height:1.3}
+.flight-eta-rem{font-size:.6rem;color:var(--text-mute);display:block}
+
+/* RESPONSIVE */
+@media(max-width:1200px){
+  .dispatch-layout{grid-template-columns:1fr 1fr}
+  .dcol:last-child{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .eco-layout,.leadership-layout,.fleet-layout{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .report-layout{grid-template-columns:1fr 1fr}
+  .admin-grid-2{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .dispatch-layout,.crew-layout{grid-template-columns:1fr}
+  .dcol:last-child{grid-column:1;display:flex}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .qtr-grid{grid-template-columns:repeat(2,1fr)}
+  header{padding:0 .75rem;gap:.5rem}
+  .nav-btn{padding:.3rem .45rem;font-size:.7rem}
+  .report-layout{grid-template-columns:1fr}
+}
+
+/* ── Leaflet map sizing fix ── */
+#leaflet-map { height: 520px !important; min-height: 400px; background: #0a0805; }
+.leaflet-container { background: #0a0805 !important; }
+.leaflet-tile-pane { opacity: 1; }
+
+/* ── Leaflet map sizing ── */
+#leaflet-map{height:520px!important;min-height:400px;background:#0a0805}
+.leaflet-container{background:#0a0805!important}
+
+/* ── Leaflet dark theme overrides ── */
+#leaflet-map{height:520px!important;min-height:400px;background:#0a0805}
+.leaflet-container{background:#0a0805!important}
+.leaflet-popup-content-wrapper{background:#120d08;border:1px solid #3d2a14;border-radius:5px;box-shadow:0 4px 24px rgba(0,0,0,.7);color:#d4c4a8}
+.leaflet-popup-tip{background:#120d08}
+.leaflet-popup-close-button{color:#7a6a52!important}
+.leaflet-popup-close-button:hover{color:#c8920a!important}
+.leaflet-control-zoom a{background:#120d08!important;color:#c8920a!important;border-color:#3d2a14!important}
+.leaflet-control-zoom a:hover{background:#1c1510!important}
+.leaflet-control-attribution{background:rgba(12,9,5,.7)!important;color:#4a3828!important;font-size:.6rem!important}
+.leaflet-control-attribution a{color:#6a5840!important}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">UPS</div>
+    <div class="login-title">Operations Portal</div>
+    <div class="login-sub">Virtual UPS Airlines</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" type="text" id="l-user" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="l-pass" placeholder="••••••••">
+    </div>
+    <div style="display:flex;gap:.5rem;margin-top:.25rem">
+      <button class="btn btn-ghost" style="flex:1" onclick="skipLogin()">View Only</button>
+      <button class="btn btn-primary" style="flex:2" onclick="doLogin()">Sign In</button>
+    </div>
+    <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.7">View Only — anyone can browse.<br>Admin — full management access.</div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
+    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
+    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
+    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
+    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
+    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
+    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
+    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
+    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
+    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
+    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
+    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
+  </div>
+</div>
+
+<!-- STOCK BAR -->
+<div class="stock-bar">
+  <div class="stock-item">
+    <span class="stock-sym">VUPS</span>
+    <span class="stock-price" id="stk-vups">$—</span>
+    <span class="stock-chg" id="stk-vups-chg">—</span>
+  </div>
+  <span class="stock-divider">|</span>
+  <div class="stock-item">
+    <span class="stock-sym">UPS</span>
+    <span class="stock-price" id="stk-ups">$—</span>
+    <span class="stock-chg" id="stk-ups-chg">—</span>
+  </div>
+  <span class="stock-divider">|</span>
+  <div class="stock-item">
+    <span class="stock-sym">FDX</span>
+    <span class="stock-price" id="stk-fdx">$—</span>
+    <span class="stock-chg" id="stk-fdx-chg">—</span>
+  </div>
+  <span class="stock-divider">|</span>
+  <div class="stock-item">
+    <span class="stock-sym">Fuel/gal</span>
+    <span class="stock-price" id="stk-fuel">$3.28</span>
+    <span class="stock-chg up" id="stk-fuel-chg">▲ +0.04</span>
+  </div>
+  <span class="stock-divider">|</span>
+  <div class="stock-item" style="margin-left:auto">
+    <span id="stk-source-lbl" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute)">Market — loading…</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#">
+    <div class="logo-mark">UPS</div>
+    <div class="logo-name">Virtual <span>UPS</span> Airlines</div>
+  </a>
+  <nav>
+    <button class="nav-btn active"     onclick="goNav(this,'dispatch')">Dispatch</button>
+    <button class="nav-btn"            onclick="goNav(this,'crew')">Crew</button>
+    <button class="nav-btn"            onclick="goNav(this,'leadership')">Leadership</button>
+    <button class="nav-btn"            onclick="goNav(this,'news')">News</button>
+    <button class="nav-btn"            onclick="goNav(this,'fleet')">Fleet</button>
+    <button class="nav-btn"            onclick="goNav(this,'economy')">Economy</button>
+    <button class="nav-btn"            onclick="goNav(this,'hubs')">Hubs</button>
+    <button class="nav-btn"            onclick="goNav(this,'dispatcher')">✈ Dispatcher</button>
+    <button class="nav-btn"            onclick="goNav(this,'livemap')">🗺 Live Map</button>
+    <button class="nav-btn admin-only-nav" id="admin-nav-btn" onclick="goNav(this,'admin')" style="display:none">⬡ Admin</button>
+  </nav>
+  <div class="header-right">
+    <div class="zulu">ZULU <strong id="zulu">--:--Z</strong></div>
+    <div class="treasury-badge">
+      <span class="lbl">Treasury</span>
+      <span id="treasury-display">$5,900,000,000</span>
+    </div>
+    <div class="admin-logout-btn" id="admin-badge" onclick="logoutAdmin()" style="display:none">⬡ ADMIN · Logout</div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════ DISPATCH ═══════════ -->
+<div id="page-dispatch" class="page active">
+  <div class="sec-header">
+    <div class="sec-title">Dispatch <span>Control</span></div>
+    <div class="sec-actions">
+      <button class="btn btn-ghost btn-sm" onclick="refreshMetar()">↻ METAR</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active Flights</div><div class="stat-sub pos">AI fleet live</div></div>
+    <div class="stat"><div class="stat-val gld">98%</div><div class="stat-lbl">AI On-Time</div><div class="stat-sub pos">Fleet nominal</div></div>
+    <div class="stat"><div class="stat-val" id="s-crew-count">4</div><div class="stat-lbl">AI Pilots Active</div><div class="stat-sub" style="color:var(--blue-lt)">All online</div></div>
+    <div class="stat"><div class="stat-val warn" id="s-human-count">0</div><div class="stat-lbl">Human Crew</div><div class="stat-sub" style="color:var(--text-mute)">Pending enrollment</div></div>
+    <div class="stat"><div class="stat-val pos" id="s-revenue">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI earning</div></div>
+  </div>
+  <div class="dispatch-layout">
+    <div class="dcol">
+      <div class="card">
+        <div class="card-title">KSDF — Worldport WX</div>
+        <div class="metar-raw" id="metar-text">KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180</div>
+        <div class="wx-grid">
+          <div class="wx-cell"><div class="wx-val">CLR</div><div class="wx-lbl">Ceiling</div></div>
+          <div class="wx-cell"><div class="wx-val pos">VFR</div><div class="wx-lbl">Flt Cat</div></div>
+          <div class="wx-cell"><div class="wx-val">8kt</div><div class="wx-lbl">Wind</div></div>
+          <div class="wx-cell"><div class="wx-val">10SM</div><div class="wx-lbl">Visibility</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Shift Summary</div>
+        <div class="ledger-item"><span class="li-desc">AI flights completed</span><span class="li-pos" id="sum-flights">0</span></div>
+        <div class="ledger-item"><span class="li-desc">Human flights</span><span style="color:var(--text-mute);font-family:'Share Tech Mono',monospace">0</span></div>
+        <div class="ledger-item"><span class="li-desc">Freight moved</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace" id="sum-freight">0 lbs</span></div>
+        <div class="ledger-item"><span class="li-desc">AI revenue</span><span class="li-pos" id="sum-ai-rev">$0</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hub Network</div>
+        <table style="font-size:.72rem">
+          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KSDF</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Louisville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-gold">Global</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">EDDK</td><td style="color:var(--text-dim);padding:.3rem .5rem">Cologne</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">VHHH</td><td style="color:var(--text-dim);padding:.3rem .5rem">Hong Kong</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KONT</td><td style="color:var(--text-dim);padding:.3rem .5rem">Ontario CA</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
+          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KHSV</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Huntsville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-green">Feeder</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="dcol">
+      <div class="card">
+        <div class="card-title">Active Flight Board</div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Flight</th><th>Route / Progress</th><th>Aircraft</th><th>Pilot</th><th>Status</th><th>ETA (Z) / Remaining</th><th>Freight lbs</th><th>Load</th></tr></thead>
+          <tbody id="flight-tbody"></tbody></table>
+        </div>
+        <div id="flight-empty" class="empty-state" style="padding:1.5rem 1rem">
+          <div class="icon">✈</div><p>AI pilots spinning up. Flights appear here automatically.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Load Management</div>
+        <div id="load-bars"><div style="font-size:.75rem;color:var(--text-mute);text-align:center;padding:.5rem 0">No active loads yet.</div></div>
+      </div>
+    </div>
+    <div class="dcol">
+      <div class="card">
+        <div class="card-title">AI Pilot Activity</div>
+        <div class="ai-activity" id="ai-log">
+          <div class="ai-line"><span class="ai-time">--:--Z</span><span>Waiting for AI flights...</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hot Spare System</div>
+        <div style="font-size:.75rem;color:var(--text-mute);padding:.5rem 0">All aircraft nominal.</div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:.5rem">+ Flag Aircraft</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CREW ═══════════ -->
+<div id="page-crew" class="page">
+  <div class="sec-header">
+    <div class="sec-title">Crew <span>Roster</span></div>
+    <div class="sec-actions"><span style="font-size:.72rem;color:var(--text-mute);font-family:'Share Tech Mono',monospace">Managed via Admin panel</span></div>
+  </div>
+  <div class="crew-layout">
+    <div>
+      <div id="crew-grid" class="crew-grid"></div>
+      <div id="crew-empty" class="empty-state">
+        <div class="icon">👨‍✈️</div>
+        <p>No human crew enrolled yet.<br>Pilots are added by the admin.<br>Check back once the airline is staffed.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card">
+        <div class="card-title">Rank Progression</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem">
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--green-lt)">Feeder Pilot</span><span style="color:var(--text-mute)">0–249 hrs</span></div>
+          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">C208B · ATR-42 · ATR-72</div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--blue-lt)">Regional F/O</span><span style="color:var(--text-mute)">250–999 hrs</span></div>
+          <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">B757 · B767</div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold-lt)">Global Captain</span><span style="color:var(--text-mute)">1,000+ hrs</span></div>
+          <div style="padding:.2rem 0 0 .75rem;font-size:.65rem;color:var(--text-mute)">B747 · MD-11 · All types</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Jumpseat Board</div>
+        <div id="jumpseat-board"><div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LEADERSHIP ═══════════ -->
+<div id="page-leadership" class="page">
+  <div class="sec-header">
+    <div class="sec-title">C-Suite <span>Leadership</span></div>
+    <div class="sec-actions" id="leadership-actions"></div>
+  </div>
+
+  <!-- Retirement announcement banner -->
+  <div style="background:linear-gradient(135deg,rgba(200,146,10,.08),rgba(125,60,152,.06));border:1px solid rgba(200,146,10,.3);border-radius:5px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem">
+    <div style="font-size:1.5rem">🏆</div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--gold-lt);letter-spacing:.05em">CEO TRANSITION ANNOUNCEMENT</div>
+      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">After 12 years of service, our founding CEO is stepping down. A successor has been named. The handoff takes effect <strong style="color:var(--text)">Q1 2025</strong>. Full statement on the <a href="#" onclick="goNav(document.querySelector('[onclick*=news]'),'news');return false" style="color:var(--gold);text-decoration:none">News page</a>.</div>
+    </div>
+  </div>
+
+  <div id="csuite-grid" class="csuite-grid"></div>
+
+  <div class="sec-header" style="margin-top:.5rem">
+    <div class="sec-title">Board of <span>Directors</span></div>
+  </div>
+  <div id="board-grid" class="csuite-grid"></div>
+</div>
+
+<!-- ═══════════ NEWS ═══════════ -->
+<div id="page-news" class="page">
+  <div class="sec-header">
+    <div class="sec-title">News & <span>Announcements</span></div>
+    <div class="sec-actions" id="news-actions"></div>
+  </div>
+  <div class="leadership-layout">
+    <div id="news-feed" class="news-feed"></div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card">
+        <div class="card-title">Categories</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem">
+          <button class="btn btn-ghost btn-sm" onclick="filterNews('all')" style="text-align:left">📋 All Posts</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterNews('breaking')" style="text-align:left">🔴 Breaking News</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterNews('retirement')" style="text-align:left">🏆 CEO Transition</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterNews('financial')" style="text-align:left">📈 Financial</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterNews('operational')" style="text-align:left">✈ Operational</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Pinned</div>
+        <div style="font-size:.78rem;color:var(--text-dim);line-height:1.7">
+          <div style="color:var(--gold-lt);font-family:'Barlow Condensed',sans-serif;font-weight:600;margin-bottom:.25rem">CEO Retirement</div>
+          Full retirement statement and successor announcement available in the news feed.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FLEET ═══════════ -->
+<div id="page-fleet" class="page">
+  <div class="sec-header">
+    <div class="sec-title">Fleet <span>Acquisition</span></div>
+    <div class="sec-actions">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)">Treasury: <span id="fleet-treasury" class="gld">$5,900,000,000</span></span>
+    </div>
+  </div>
+  <div class="fleet-layout">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.75rem">Aircraft Catalog — Click to Purchase</div>
+      <div id="fleet-catalog" class="fleet-catalog"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card">
+        <div class="card-title">Owned Fleet</div>
+        <div id="owned-fleet-list"><div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No aircraft purchased yet.</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Fleet Value</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold-lt)" id="fleet-value">$0</div>
+        <div style="font-size:.65rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem">Total acquisition cost</div>
+        <div style="margin-top:.75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)" id="fleet-count">0 aircraft owned</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Purchase Log</div>
+        <div id="purchase-log" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)">
+          <div style="color:var(--text-mute)">No purchases yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ECONOMY ═══════════ -->
+<div id="page-economy" class="page">
+  <div class="sec-header">
+    <div class="sec-title">Economy <span>& Finance</span></div>
+    <div class="sec-actions">
+      <button class="btn btn-primary btn-sm" id="profit-share-btn" onclick="distributeProfit()" style="display:none">Distribute Profit Share</button>
+    </div>
+  </div>
+
+  <!-- Quarterly Summary -->
+  <div class="qtr-grid">
+    <div class="qtr-card">
+      <div class="qtr-period">Q1 2024</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$21.7B</div>
+      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
+      <div style="font-size:.65rem;color:var(--red-lt);margin-top:.1rem">▼ -5.3% YoY</div>
+    </div>
+    <div class="qtr-card">
+      <div class="qtr-period">Q2 2024</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$22.1B</div>
+      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
+      <div style="font-size:.65rem;color:var(--green-lt);margin-top:.1rem">▲ +1.8% QoQ</div>
+    </div>
+    <div class="qtr-card">
+      <div class="qtr-period">Q3 2024</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green-lt)">$22.2B</div>
+      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Revenue</div>
+      <div style="font-size:.65rem;color:var(--green-lt);margin-top:.1rem">▲ +5.6% YoY</div>
+    </div>
+    <div class="qtr-card" style="border-color:rgba(200,146,10,.3);background:rgba(200,146,10,.04)">
+      <div class="qtr-period" style="color:var(--gold-lt)">Q4 2024 ★</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold-lt)" id="q4-rev">$0</div>
+      <div style="font-size:.65rem;color:var(--text-mute);margin-top:.15rem">Live Session</div>
+      <div style="font-size:.65rem;color:var(--gold-lt);margin-top:.1rem">Current Quarter</div>
+    </div>
+  </div>
+
+  <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat"><div class="stat-val gld" id="eco-total">$5,900,000,000</div><div class="stat-lbl">Treasury</div><div class="stat-sub pos">Starting balance — UPS Cash on Hand</div></div>
+    <div class="stat"><div class="stat-val neg" id="eco-cost">$0</div><div class="stat-lbl">Session Costs</div><div class="stat-sub" style="color:var(--text-mute)">Fuel + fees</div></div>
+    <div class="stat"><div class="stat-val pos" id="eco-net">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI fleet earning</div></div>
+    <div class="stat"><div class="stat-val gld" id="eco-pool">$413,000,000</div><div class="stat-lbl">Profit Share Pool</div><div class="stat-sub warn">7% of treasury</div></div>
+  </div>
+
+  <div class="eco-layout">
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card">
+        <div class="card-title">Pay Rate Tiers</div>
+        <div class="ledger-item"><span class="li-desc">🔴 Next Day Air</span><span class="li-pos">$18.00/lb</span></div>
+        <div class="ledger-item"><span class="li-desc">🟡 2nd Day Air</span><span style="color:var(--gold-lt);font-family:'Share Tech Mono',monospace">$12.00/lb</span></div>
+        <div class="ledger-item"><span class="li-desc">🟢 3-Day Select</span><span class="li-pos">$8.50/lb</span></div>
+        <div class="ledger-item"><span class="li-desc">⚪ Standard Ground</span><span style="color:var(--text-dim);font-family:'Share Tech Mono',monospace">$4.00/lb</span></div>
+        <div class="ledger-item"><span class="li-desc">⚠ Hazmat Surcharge</span><span class="warn">+$6.00/lb</span></div>
+        <div class="ledger-item"><span class="li-desc">🌙 Night Shift Bonus</span><span class="gld">+15%</span></div>
+        <div class="ledger-item"><span class="li-desc">🤖 AI Pilot Rate</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace">×0.80 base</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Quarterly Report — Full Year 2024</div>
+        <div class="report-layout" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+          <div class="report-card">
+            <div class="report-stat-big pos">$88.0B</div>
+            <div class="report-label">Annual Revenue (2024)</div>
+            <div class="report-change neg">▼ -3.3% YoY</div>
+          </div>
+          <div class="report-card">
+            <div class="report-stat-big" style="color:var(--gold-lt)">9.8%</div>
+            <div class="report-label">Operating Margin</div>
+            <div class="report-change pos">Above guidance</div>
+          </div>
+          <div class="report-card">
+            <div class="report-stat-big" style="color:var(--blue-lt)">22.3M</div>
+            <div class="report-label">Packages / Day</div>
+            <div class="report-change pos">5.7B annually</div>
+          </div>
+          <div class="report-card">
+            <div class="report-stat-big gld">$5.9B</div>
+            <div class="report-label">Cash on Hand</div>
+            <div class="report-change pos">Strong liquidity</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card">
+        <div class="card-title">Crew Earnings</div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Pilot</th><th>Type</th><th>Flights</th><th>Hours</th><th>Gross Pay</th><th>Share</th></tr></thead>
+          <tbody id="earnings-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew enrolled.</td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Transaction Ledger</div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Time (Z)</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
+          <tbody id="ledger-tbody"><tr><td>--:--</td><td>Starting treasury</td><td class="li-pos">+$5,900,000,000</td><td>$5,900,000,000</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ HUBS ═══════════ -->
+<div id="page-hubs" class="page">
+  <div class="sec-header">
+    <div class="sec-title">Hub <span>Network</span></div>
+    <div class="sec-actions" id="hub-actions"></div>
+  </div>
+  <div id="hubs-grid" class="hubs-grid"></div>
+</div>
+
+
+<!-- ═══════════ DISPATCHER ═══════════ -->
+<div id="page-dispatcher" class="page">
+  <div class="sec-header">
+    <div class="sec-title">✈ <span>Dispatcher</span></div>
+    <div class="sec-actions" id="dispatcher-admin-actions"></div>
+  </div>
+
+  <!-- Sync status -->
+  <div id="sync-banner" style="background:rgba(36,113,163,.08);border:1px solid rgba(36,113,163,.25);border-radius:4px;padding:.5rem 1rem;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--blue-lt);display:flex;align-items:center;gap:.6rem">
+    <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mute);flex-shrink:0;display:inline-block"></span>
+    <span id="sync-label">Connecting to live database...</span>
+  </div>
+
+  <!-- ── ROUTE GENERATOR ── -->
+  <div class="card" style="margin-bottom:1.25rem;border-color:rgba(200,146,10,.3)">
+    <div class="card-title" style="color:var(--gold-lt);font-size:1rem">✦ Route Generator</div>
+    <div style="color:var(--text-dim);font-size:.75rem;margin-bottom:1rem">Pick a departure airport, aircraft type, and route length — the system picks a matching real destination automatically.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Departure Region</label>
+        <select class="form-select" id="rg-dep-region" onchange="updateDepAirports()">
+          <option value="US_MIDWEST">🇺🇸 US Midwest</option>
+          <option value="US_EAST">🇺🇸 US East Coast</option>
+          <option value="US_WEST">🇺🇸 US West Coast</option>
+          <option value="US_SOUTH">🇺🇸 US South</option>
+          <option value="EUROPE">🇪🇺 Europe</option>
+          <option value="ASIA_EAST">🌏 East Asia</option>
+          <option value="ASIA_SE">🌏 Southeast Asia</option>
+          <option value="MIDDLE_EAST">🌍 Middle East</option>
+          <option value="ALASKA">🌨 Alaska / Pacific</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Departure Airport</label>
+        <select class="form-select" id="rg-dep-airport"></select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Aircraft Type</label>
+        <select class="form-select" id="rg-aircraft" onchange="updateLengthOptions()">
+          <option value="Airbus A300-600F">Airbus A300-600F</option>
+          <option value="Boeing 727-100F">Boeing 727-100F</option>
+          <option value="Boeing 727-200F">Boeing 727-200F</option>
+          <option value="Boeing 747-100F">Boeing 747-100F</option>
+          <option value="Boeing 747-200F">Boeing 747-200F</option>
+          <option value="Boeing 747-400F">Boeing 747-400F</option>
+          <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+          <option value="Boeing 757-200F">Boeing 757-200F</option>
+          <option value="Boeing 767-300F">Boeing 767-300F</option>
+          <option value="Douglas DC-8F">Douglas DC-8F</option>
+          <option value="McDonnell Douglas MD-11F">McDonnell Douglas MD-11F</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Route Length</label>
+        <select class="form-select" id="rg-length">
+          <option value="feeder">🟢 Short / Feeder (&lt;2h)</option>
+          <option value="domestic" selected>🔵 Medium / Domestic (2–8h)</option>
+          <option value="longhaul">🟡 Long Haul (8h+)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Cruise Altitude</label>
+        <select class="form-select" id="rg-alt">
+          <option value="FL280">FL280</option><option value="FL310">FL310</option>
+          <option value="FL330">FL330</option><option value="FL350" selected>FL350</option>
+          <option value="FL370">FL370</option><option value="FL390">FL390</option><option value="FL410">FL410</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Cost Index</label>
+        <select class="form-select" id="rg-ci">
+          <option value="0">0 — Max Range</option>
+          <option value="20">20 — Economy</option>
+          <option value="52" selected>52 — UPS Standard</option>
+          <option value="80">80 — Time Priority</option>
+          <option value="100">100 — Max Speed</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">SimBrief Username</label>
+        <input class="form-input" id="rg-sbuser" value="VisualLanding112" placeholder="SimBrief username">
+      </div>
+    </div>
+
+    <div id="rg-preview" style="display:none;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.85rem 1rem;margin-bottom:.85rem">
+      <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:.5rem">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold-lt)" id="rg-preview-fn"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text)" id="rg-preview-route"></div>
+      </div>
+      <div id="rg-preview-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.35rem .75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)"></div>
+      <div style="margin-top:.6rem;font-size:.68rem;font-style:italic;color:var(--text-mute)" id="rg-dest-reason"></div>
+    </div>
+
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="generateRoute()">🎲 Generate Route</button>
+      <button class="btn btn-primary" id="rg-dispatch-btn" onclick="dispatchGeneratedRoute()" style="display:none">▶ Dispatch Flight</button>
+      <button class="btn btn-blue" id="rg-simbrief-btn" onclick="openGeneratedSimbrief()" style="display:none">✈ Open SimBrief OFP</button>
+    </div>
+    <div id="cb-simbrief-note" style="display:none;margin-top:.5rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--blue-lt)"></div>
+  </div>
+
+  <input type="hidden" id="cb-origin"><input type="hidden" id="cb-dest">
+  <input type="hidden" id="cb-aircraft"><input type="hidden" id="cb-alt" value="FL350">
+  <input type="hidden" id="cb-ci" value="52"><input type="hidden" id="cb-sbuser" value="VisualLanding112">
+
+    <!-- Pre-made routes -->
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem">
+    Pre-Made Routes
+    <span id="dispatcher-admin-route-btn" style="display:none;margin-left:.75rem"></span>
+  </div>
+  <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
+
+  <!-- Toast -->
+  <div id="dispatch-toast" style="display:none;background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.35);border-radius:4px;padding:.75rem 1.1rem;font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--green-lt);margin-bottom:1rem"></div>
+
+  <!-- Recent dispatches table — LIVE, synced -->
+  <div class="card">
+    <div class="card-title">Live Dispatch Board <span style="color:var(--text-mute);font-weight:400;font-size:.65rem;margin-left:.5rem">— synced across all users</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Time (Z)</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block</th><th>Revenue</th><th>Pilot</th><th>SimBrief</th><th>Status</th></tr></thead>
+        <tbody id="dispatcher-log-tbody"><tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:1.25rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LIVE MAP ═══════════ -->
+<div id="page-livemap" class="page">
+  <div class="sec-header">
+    <div class="sec-title">🗺 Live <span>Flight Map</span></div>
+    <div class="sec-actions">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-mute)" id="map-flight-count">—</span>
+      <button class="btn btn-ghost btn-sm" onclick="refreshMapFlights()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- Leaflet map -->
+  <div id="leaflet-map" style="height:520px;border-radius:6px;border:1px solid var(--border);margin-bottom:1rem;z-index:1"></div>
+
+  <!-- Legend + flights table -->
+  <div style="display:grid;grid-template-columns:180px 1fr;gap:1rem">
+    <div class="card">
+      <div class="card-title">Legend</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;line-height:1.8">
+        <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#c8920a;flex-shrink:0;display:inline-block"></span>Long Haul (8h+)</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#3498db;flex-shrink:0;display:inline-block"></span>Domestic (3–8h)</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#35c270;flex-shrink:0;display:inline-block"></span>Feeder (&lt;3h)</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span style="width:16px;height:3px;background:#c8920a;opacity:.5;flex-shrink:0;display:inline-block"></span>Route arc</div>
+        <div style="margin-top:.5rem;color:var(--text-mute);font-size:.62rem;line-height:1.5">Click any plane for details. Drag &amp; scroll to navigate.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Flights</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Pilot</th><th>Progress</th><th>ETA (Z)</th></tr></thead>
+          <tbody id="map-flights-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1rem">No active flights</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ADMIN ═══════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-wrap">
+    <div class="admin-warn">⬡ Admin Panel — changes here are reflected immediately across the site.</div>
+
+    <!-- CREW -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        Crew Management
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ai')">+ AI Pilot</button>
+          <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-human')">+ Human Crew</button>
+        </div>
+      </div>
+      <div class="admin-grid-2">
+        <div class="card">
+          <div class="card-title">Human Roster</div>
+          <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Base</th><th>Hours</th><th>Actions</th></tr></thead><tbody id="admin-human-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">AI Pilot Roster</div>
+          <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Route</th><th>Flights</th><th>Actions</th></tr></thead><tbody id="admin-ai-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERSHIP -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        Leadership Management
+        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-exec')">+ Add Executive</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Title</th><th>Type</th><th>Since</th><th>Actions</th></tr></thead><tbody id="admin-exec-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        News & Announcements
+        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-news')">+ Post Announcement</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Headline</th><th>Category</th><th>Author</th><th>Actions</th></tr></thead><tbody id="admin-news-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- HUBS -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        Hub Management
+        <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-hub')">+ Add Hub</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap"><table><thead><tr><th>ICAO</th><th>Name</th><th>Type</th><th>Aircraft</th><th>Actions</th></tr></thead><tbody id="admin-hub-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- TREASURY -->
+    <div class="admin-section">
+      <div class="admin-section-title">Treasury Controls</div>
+      <div class="card">
+        <div class="form-row" style="align-items:flex-end">
+          <div class="form-group" style="margin-bottom:0"><label class="form-label">Amount ($)</label><input class="form-input" type="number" id="treasury-adj" placeholder="50000"></div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-primary btn-sm" onclick="adjustTreasury(1)">+ Add</button>
+            <button class="btn btn-danger btn-sm" onclick="adjustTreasury(-1)">− Deduct</button>
+          </div>
+        </div>
+        <div class="form-note">Current treasury: <strong id="admin-treasury-val" style="color:var(--gold-lt)">$5,900,000,000</strong></div>
+        <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(125,60,152,.2)">
+          <button class="btn btn-danger btn-sm" onclick="hardReset()">⚠ Reset All Saved Data</button>
+          <div class="form-note" style="margin-top:.3rem">Clears treasury, crew, fleet, and all session data.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add Dispatcher Route -->
+<div class="modal-overlay" id="modal-add-disp-route">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Create Dispatch Route</div><button class="modal-close" onclick="closeModal('modal-add-disp-route')">X</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Origin ICAO</label><input class="form-input" placeholder="KSDF" id="dr-origin" style="text-transform:uppercase" maxlength="4"></div>
+        <div class="form-group"><label class="form-label">Destination ICAO</label><input class="form-input" placeholder="VHHH" id="dr-dest" style="text-transform:uppercase" maxlength="4"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Aircraft Type</label>
+          <select class="form-select" id="dr-aircraft">
+            <option value="Boeing 757-200F">Boeing 757-200F</option>
+            <option value="Boeing 757-300F">Boeing 757-300F</option>
+            <option value="Boeing 767-300F">Boeing 767-300F</option>
+            <option value="Boeing 767-300ERF">Boeing 767-300ERF</option>
+            <option value="Airbus A300-600RF">Airbus A300-600RF</option>
+            <option value="Boeing 747-400F">Boeing 747-400F</option>
+            <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+            <option value="McDonnell MD-11F">McDonnell MD-11F</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Category</label>
+          <select class="form-select" id="dr-category">
+            <option value="longhaul">Long Haul</option>
+            <option value="domestic">Domestic</option>
+            <option value="feeder">Feeder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-note">Block time is calculated automatically. Unknown ICAO pairs default to 3h.</div>
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-disp-route')">Cancel</button>
+        <button class="btn btn-primary" onclick="addDispatchRoute()">Add Route</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Human -->
+<div class="modal-overlay" id="modal-add-human">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Add Crew Member</div><button class="modal-close" onclick="closeModal('modal-add-human')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="James" id="h-first"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Walker" id="h-last"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
+        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option><option>KHSV</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Starting Hours</label><input class="form-input" type="number" placeholder="0" id="h-hours" value="0"></div>
+      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-human')">Cancel</button><button class="btn btn-primary" onclick="addHuman()">Add Member</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add AI -->
+<div class="modal-overlay" id="modal-add-ai">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Add AI Pilot</div><button class="modal-close" onclick="closeModal('modal-add-ai')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">AI pilots fly autonomously, earn at 80% base rate, and rank up over time.</p>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Callsign</label><input class="form-input" placeholder="Martinez" id="ai-name"></div>
+        <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="ai-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="ai-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
+        <div class="form-group"><label class="form-label">Route Preference</label><select class="form-select" id="ai-route"><option value="longhaul">Long Haul</option><option value="domestic">Domestic</option><option value="feeder">Feeder</option><option value="any">Any</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Flights Per Cycle</label><select class="form-select" id="ai-freq"><option value="1">1 per cycle</option><option value="2" selected>2 per cycle</option><option value="3">3 per cycle</option></select></div>
+      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-ai')">Cancel</button><button class="btn btn-primary" onclick="addAI()">Deploy</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Executive -->
+<div class="modal-overlay" id="modal-add-exec">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Add Executive / Board Member</div><button class="modal-close" onclick="closeModal('modal-add-exec')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" placeholder="Ben Hoffman" id="ex-name"></div>
+        <div class="form-group"><label class="form-label">Initials</label><input class="form-input" placeholder="CT" id="ex-initials" maxlength="3"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Title</label><input class="form-input" placeholder="Chief Executive Officer" id="ex-title"></div>
+        <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ex-type"><option value="csuite">C-Suite</option><option value="board">Board of Directors</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tenure / Since</label><input class="form-input" placeholder="2021" id="ex-tenure"></div>
+        <div class="form-group"><label class="form-label">Avatar Color</label><select class="form-select" id="ex-color"><option value="exec-av-gold">Gold</option><option value="exec-av-blue">Blue</option><option value="exec-av-green">Green</option><option value="exec-av-purple">Purple</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Bio / Description</label><textarea class="form-textarea" placeholder="Brief description of role and background..." id="ex-bio"></textarea></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="ex-status"><option value="active">Active</option><option value="retiring">Retiring</option><option value="incoming">Incoming / Successor</option></select></div>
+      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-exec')">Cancel</button><button class="btn btn-primary" onclick="addExec()">Add Executive</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Post News -->
+<div class="modal-overlay" id="modal-add-news">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Post Announcement</div><button class="modal-close" onclick="closeModal('modal-add-news')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Headline</label><input class="form-input" placeholder="Virtual UPS Expands to Tokyo" id="nw-headline"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="nw-cat"><option value="breaking">Breaking News</option><option value="retirement">CEO Transition</option><option value="financial">Financial</option><option value="operational">Operational</option></select></div>
+        <div class="form-group"><label class="form-label">Author</label><input class="form-input" placeholder="Office of the CEO" id="nw-author"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Full Statement</label><textarea class="form-textarea" style="min-height:120px" placeholder="Write the full announcement here..." id="nw-body"></textarea></div>
+      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-news')">Cancel</button><button class="btn btn-primary" onclick="addNews()">Publish</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Hub -->
+<div class="modal-overlay" id="modal-add-hub">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Add Hub / Base</div><button class="modal-close" onclick="closeModal('modal-add-hub')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">ICAO Code</label><input class="form-input" placeholder="KLAX" id="hub-icao" style="text-transform:uppercase"></div>
+        <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="hub-type"><option>Global</option><option>Regional</option><option>Feeder</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">City / Name</label><input class="form-input" placeholder="Los Angeles International" id="hub-name"></div>
+      <div class="form-group"><label class="form-label">Aircraft Based Here</label><input class="form-input" placeholder="B747-400F, B767-300F" id="hub-ac"></div>
+      <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-hub')">Cancel</button><button class="btn btn-primary" onclick="addHub()">Add Hub</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  CREDENTIALS — change ADMIN_PASS before uploading!
+// ════════════════════════════════════════════════
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'ups5yops';
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+const S = {
+  isAdmin: false,
+  treasury: 5900000000,
+  sessionRevenue: 0,
+  sessionCosts: 0,
+  totalFlights: 0,
+  totalFreight: 0,
+  nextId: 20,
+  stockPrice: 142.80,
+  stockBase: 142.80,
+
+  pilots: [
+    { id:1, type:'ai', name:'AI Chen',   rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:2241, flights:401, ontime:98, earned:55000, xp:100 },
+    { id:2, type:'ai', name:'AI Patel',  rank:'Regional F/O',   base:'EDDK', route:'domestic', freq:2, hours:580,  flights:96,  ontime:96, earned:16000, xp:58  },
+    { id:3, type:'ai', name:'AI Torres', rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:1910, flights:344, ontime:99, earned:51000, xp:100 },
+    { id:4, type:'ai', name:'AI Kim',    rank:'Feeder Pilot',   base:'KSDF', route:'feeder',   freq:1, hours:88,   flights:22,  ontime:91, earned:1800,  xp:18  },
+  ],
+
+  hubs: [
+    // ── Real UPS Hub Network ──────────────────────────────────────────────────
+    { icao:'KSDF', name:'Louisville Intl — Worldport',       type:'Global',    aircraft:'Boeing 747-8F, MD-11F, B767-300F, A300-600RF', ramp:115, active:24 },
+    { icao:'EDDK', name:'Cologne/Bonn — UPS Europe Hub',     type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, B747-8F',          ramp:62,  active:10 },
+    { icao:'VHHH', name:'Hong Kong Intl — UPS Asia Hub',     type:'Regional',  aircraft:'Boeing 747-8F, MD-11F',                        ramp:70,  active:8  },
+    { icao:'KPHL', name:'Philadelphia Intl — East Hub',      type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, A300-600RF',        ramp:55,  active:9  },
+    { icao:'KONT', name:'Ontario Intl — West Coast Hub',     type:'Regional',  aircraft:'Boeing 757-200F, B767-300F, A300-600RF',        ramp:48,  active:7  },
+    { icao:'KRFD', name:'Chicago Rockford — Midwest Hub',    type:'Regional',  aircraft:'Boeing 757-200F, A300-600RF',                  ramp:40,  active:6  },
+    { icao:'KMIA', name:'Miami Intl — Latin America Hub',    type:'Regional',  aircraft:'Boeing 767-300F, B757-200F',                   ramp:38,  active:5  },
+    { icao:'PANC', name:'Ted Stevens Anchorage — Pacific Relay', type:'Relay', aircraft:'Boeing 747-8F, MD-11F',                        ramp:30,  active:4  },
+    { icao:'EGSS', name:'London Stansted — UK Gateway',      type:'Gateway',   aircraft:'Boeing 767-300F, B757-200F',                   ramp:25,  active:3  },
+    { icao:'ZPBH', name:'Shenzhen Baoan — China Hub',      type:'Regional',  aircraft:'Boeing 747-8F',                                ramp:30,  active:4  },
+    { icao:'OMDB', name:'Dubai Intl — Middle East Gateway',  type:'Gateway',   aircraft:'Boeing 747-8F, MD-11F',                        ramp:22,  active:3  },
+  ],
+
+  executives: [
+    { id:1, name:'David P. Abney', initials:'DA', title:'Chief Executive Officer', type:'csuite', tenure:'2014', color:'exec-av-gold',   bio:'Founding CEO of Virtual UPS Airlines. Led the airline from a single route to a global operation with 6 hubs on 3 continents. Retiring after 12 years of distinguished service.', status:'retiring' },
+    { id:2, name:'Ben Hoffman',  initials:'BH', title:'Chief Executive Officer (Designate)', type:'csuite', tenure:'2025', color:'exec-av-purple', bio:'Named successor to the founding CEO. A trusted confidant of David Abney and a core member of the founding team, Ben has been instrumental in shaping the airline\'s culture and operations from the ground up. The Board unanimously selected him to carry the airline into its next chapter. Takes the CEO role effective Q1 2025.', status:'incoming' },
+    { id:3, name:'Brian Newman',   initials:'BN', title:'Chief Financial Officer',   type:'csuite', tenure:'2018', color:'exec-av-blue',   bio:'Oversees all financial operations, treasury management, profit share distribution, and quarterly earnings reporting.', status:'active' },
+    { id:4, name:'Kate Gutmann',   initials:'KG', title:'Chief Commercial Officer',  type:'csuite', tenure:'2019', color:'exec-av-green',  bio:'Leads network expansion, route strategy, and hub development. Architected the VHHH and EDDK regional hub buildout.', status:'active' },
+    { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet maintenance scheduling, and the AI pilot program.', status:'active' },
+    { id:6, name:'Scott Price',    initials:'SP', title:'Independent Director',      type:'board',  tenure:'2020', color:'exec-av-gray',   bio:'Former logistics executive. Chairs the Audit and Finance Committee.', status:'active' },
+    { id:7, name:'Angela Hwang',   initials:'AH', title:'Independent Director',      type:'board',  tenure:'2021', color:'exec-av-gray',   bio:'Aviation industry veteran. Member of the Safety and Operations Committee.', status:'active' },
+    { id:8, name:'Rodney Adkins',  initials:'RA', title:'Independent Director',      type:'board',  tenure:'2019', color:'exec-av-gray',   bio:'Technology and innovation specialist. Championed the AI pilot program initiative.', status:'active' },
+  ],
+
+  news: [
+    {
+      id:1, category:'retirement', date:'December 18, 2024',
+      headline:'Founding CEO David Abney Announces Retirement After 12 Years',
+      body:`After more than a decade at the helm of Virtual UPS Airlines, Chief Executive Officer David P. Abney has announced his intention to retire effective Q1 2025.\n\n"Leading this airline from a single route out of Louisville to a global operation spanning three continents has been the honor of my career," Abney said in a statement issued to all crew and stakeholders. "We built something real here — not just a virtual airline, but a community of professionals who take pride in every ton of freight we move."\n\nAbney joined the airline at its founding and oversaw the expansion to six hubs, the introduction of the AI pilot program, and consecutive years of record revenue. Under his leadership, Virtual UPS achieved a 98% on-time delivery rate — a figure he called his proudest accomplishment.\n\nThe Board of Directors has named Ben Hoffman as his successor. Hoffman, a trusted member of the founding team, was described by Abney as \"the only person I ever considered for this role.\"`,
+      author:'Office of the CEO — Corporate Communications'
+    },
+    {
+      id:2, category:'retirement', date:'December 18, 2024',
+      headline:'Board Names Ben Hoffman as Incoming CEO — Effective Q1 2025',
+      body:`The Virtual UPS Airlines Board of Directors has unanimously confirmed Ben Hoffman as the next Chief Executive Officer, effective Q1 2025 following a formal leadership transition.\n\nHoffman has been a core member of the founding team since day one, helping shape every major decision the airline has made. The Board cited his deep operational knowledge and his vision for expansion to new international routes as central to the unanimous selection.\n\n"We built this together," Hoffman said. "I am not stepping into a new role — I am stepping up in one I have always been part of. We will push this further than anyone thought possible."\n\nAbney will remain available in an advisory capacity through the end of Q2 2025 to ensure a smooth transition.`,
+      author:'Board of Directors — Virtual UPS Airlines'
+    },
+    {
+      id:3, category:'financial', date:'December 15, 2024',
+      headline:'Q3 2024 Earnings: Revenue Up 10.3%, Margin Reaches Record 62%',
+      body:`Virtual UPS Airlines reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The AI pilot program continued to be the primary revenue driver, completing 344 flights across the long-haul network.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "The AI program runs at 80% of standard rate with zero downtime."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
+      author:'Brian Newman — Chief Financial Officer'
+    },
+    {
+      id:4, category:'operational', date:'December 10, 2024',
+      headline:'Virtual UPS Expands AI Pilot Fleet — Two New Captains Added',
+      body:`Chief Operations Officer Juan Perez announced the deployment of two additional AI Global Captains to the long-haul fleet, bringing total AI capacity to four active pilots.\n\nThe expansion is expected to increase daily freight volume by approximately 35% across the KSDF–EDDK and KSDF–VHHH corridors. Both new pilots have been assigned B747-400F type ratings.\n\n"The AI fleet is the backbone of our operation," Perez said. "They fly around the clock, they don't call in sick, and they consistently deliver at 98% on-time. We're going to keep scaling this."`,
+      author:'Juan Perez — Chief Operations Officer'
+    },
+    {
+      id:5, category:'breaking', date:'December 5, 2024',
+      headline:'VUPS Stock Reaches All-Time High of $84.20 — Up 142% Since Launch',
+      body:`Shares of Virtual UPS Airlines (ticker: VUPS) closed at $142.80 on Friday, matching the real UPS share price — a symbolic milestone for the virtual airline as it mirrors its real-world counterpart. Analysts cited the consistent profitability of the AI fleet, the upcoming CEO transition, and the planned international expansion as key drivers.\n\n"The market is pricing in a lot of good news here," noted one analyst. "The fundamentals are strong — revenue growth is consistent, margins are elite, and the leadership transition appears orderly."\n\nThe stock has now outperformed both real-world UPS (NYSE: UPS) and FedEx (NYSE: FDX) over the trailing 12 months.`,
+      author:'Corporate Communications'
+    },
+  ],
+
+  fleet: [],
+  ownedFleet: {},
+  loadBars: {},
+  activeFlights: 0,
+  dispatcherRoutes: [
+    // ── International Long Haul ──
+    { id:1,  origin:'KSDF', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Louisville → Hong Kong',         category:'longhaul' },
+    { id:2,  origin:'VHHH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Hong Kong → Louisville',         category:'longhaul' },
+    { id:3,  origin:'KSDF', dest:'EDDK', aircraft:'Boeing 747-8F', label:'Louisville → Cologne',           category:'longhaul' },
+    { id:4,  origin:'EDDK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Cologne → Louisville',           category:'longhaul' },
+    { id:5,  origin:'KSDF', dest:'ZPBH', aircraft:'Boeing 747-8F', label:'Louisville → Shenzhen',          category:'longhaul' },
+    { id:6,  origin:'ZPBH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Shenzhen → Louisville',          category:'longhaul' },
+    { id:7,  origin:'KSDF', dest:'ZSPD', aircraft:'McDonnell MD-11F',    label:'Louisville → Shanghai',          category:'longhaul' },
+    { id:8,  origin:'ZSPD', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Shanghai → Louisville',          category:'longhaul' },
+    { id:9,  origin:'KSDF', dest:'OMDB', aircraft:'Boeing 747-8F', label:'Louisville → Dubai',             category:'longhaul' },
+    { id:10, origin:'OMDB', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Dubai → Louisville',             category:'longhaul' },
+    { id:11, origin:'KSDF', dest:'PANC', aircraft:'Boeing 747-8F', label:'Louisville → Anchorage (relay)', category:'longhaul' },
+    { id:12, origin:'PANC', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Anchorage → Hong Kong',          category:'longhaul' },
+    { id:13, origin:'KPHL', dest:'EDDK', aircraft:'Boeing 767-300F', label:'Philadelphia → Cologne',         category:'longhaul' },
+    { id:14, origin:'KPHL', dest:'EGSS', aircraft:'Boeing 767-300F', label:'Philadelphia → London Stansted', category:'longhaul' },
+    { id:15, origin:'EDDK', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Cologne → Hong Kong',            category:'longhaul' },
+    { id:16, origin:'WMKK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Kuala Lumpur → Louisville',      category:'longhaul' },
+    // ── Domestic Hub Routes ──
+    { id:17, origin:'KSDF', dest:'KPHL', aircraft:'Boeing 767-300F', label:'Louisville → Philadelphia',      category:'domestic' },
+    { id:18, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:19, origin:'KSDF', dest:'KONT', aircraft:'Boeing 757-200F', label:'Louisville → Ontario CA',        category:'domestic' },
+    { id:20, origin:'KONT', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Ontario CA → Louisville',        category:'domestic' },
+    { id:21, origin:'KSDF', dest:'KRFD', aircraft:'Boeing 757-200F', label:'Louisville → Rockford IL',       category:'domestic' },
+    { id:22, origin:'KRFD', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Rockford → Louisville',          category:'domestic' },
+    { id:23, origin:'KSDF', dest:'KMIA', aircraft:'Boeing 767-300F', label:'Louisville → Miami',             category:'domestic' },
+    { id:24, origin:'KMIA', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Miami → Louisville',             category:'domestic' },
+    { id:25, origin:'KSDF', dest:'KCLT', aircraft:'Boeing 757-200F', label:'Louisville → Charlotte',         category:'domestic' },
+    { id:26, origin:'KSDF', dest:'KDFW', aircraft:'Boeing 757-200F', label:'Louisville → Dallas/Fort Worth',  category:'domestic' },
+    { id:27, origin:'KSDF', dest:'KSEA', aircraft:'Boeing 767-300F', label:'Louisville → Seattle',           category:'domestic' },
+    { id:28, origin:'KSDF', dest:'KATL', aircraft:'Boeing 757-200F', label:'Louisville → Atlanta',           category:'domestic' },
+    { id:29, origin:'KSDF', dest:'KPIT', aircraft:'McDonnell MD-11F',    label:'Louisville → Pittsburgh',        category:'domestic' },
+    { id:30, origin:'KPIT', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Pittsburgh → Louisville',        category:'domestic' },
+    { id:31, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:32, origin:'KSDF', dest:'PANC', aircraft:'Boeing 767-300F', label:'Louisville → Anchorage',         category:'domestic' },
+    // ── Feeder / Regional ──
+    { id:33, origin:'KSDF', dest:'KLEX', aircraft:'Boeing 757-200F', label:'Louisville → Lexington',         category:'feeder' },
+    { id:34, origin:'KSDF', dest:'KHSV', aircraft:'Boeing 757-200F',   label:'Louisville → Huntsville',        category:'feeder' },
+    { id:35, origin:'KSDF', dest:'KBNA', aircraft:'Boeing 757-200F', label:'Louisville → Nashville',         category:'feeder' },
+    { id:36, origin:'KSDF', dest:'KIND', aircraft:'Boeing 757-200F', label:'Louisville → Indianapolis',      category:'feeder' },
+    { id:37, origin:'KSDF', dest:'KCVG', aircraft:'Boeing 757-200F', label:'Louisville → Cincinnati',        category:'feeder' },
+  ],
+};
+
+
+const AIRCRAFT_CATALOG = [
+  // ── Full UPS Airlines Fleet (historic + active) ────────────────────────────
+  { model:'Douglas DC-8F',           type:'Classic Jet Freighter',  qty:0,   price:8000000,   maxPayload:95000,  range:'3,800 nm', crew:3, icon:'✈',  note:'Historic UPS workhorse. The DC-8 built UPS air freight from the ground up.' },
+  { model:'Boeing 727-100F',         type:'Classic Trijet',         qty:0,   price:5000000,   maxPayload:44000,  range:'1,800 nm', crew:3, icon:'✈',  note:'Original UPS jet. Short-field capable, served small spoke airports.' },
+  { model:'Boeing 727-200F',         type:'Classic Trijet',         qty:0,   price:6500000,   maxPayload:60000,  range:'2,200 nm', crew:3, icon:'✈',  note:'Stretched 727. Backbone of UPS domestic network through the 1990s.' },
+  { model:'Boeing 747-100F',         type:'Classic Jumbo Freighter',qty:0,   price:18000000,  maxPayload:220000, range:'4,000 nm', crew:3, icon:'🛫', note:'First UPS 747. Opened transcontinental freight capacity.' },
+  { model:'Boeing 747-200F',         type:'Classic Jumbo Freighter',qty:0,   price:22000000,  maxPayload:230000, range:'4,500 nm', crew:3, icon:'🛫', note:'Extended-range 747. Served major international routes.' },
+  { model:'Airbus A300-600F',        type:'Widebody Freighter',     qty:52,  price:35000000,  maxPayload:140000, range:'4,000 nm', crew:2, icon:'✈',  note:'High-capacity widebody. Major domestic hub-to-hub workhorse.' },
+  { model:'Boeing 757-200F',         type:'Narrowbody Freighter',   qty:75,  price:22000000,  maxPayload:116000, range:'3,500 nm', crew:2, icon:'✈',  note:'Backbone domestic workhorse. Serves most US spoke routes.' },
+  { model:'Boeing 767-300F',         type:'Widebody Freighter',     qty:84,  price:38000000,  maxPayload:116000, range:'3,255 nm', crew:2, icon:'✈',  note:'Primary widebody. Transatlantic and long domestic routes.' },
+  { model:'Boeing 747-400F',         type:'Heavy Freighter',        qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
+  { model:'Boeing 747-8F',           type:'Super Heavy Freighter',  qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
+  { model:'McDonnell Douglas MD-11F', type:'Heavy Trijet Freighter', qty:40,  price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
+];
+
+// ════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════
+document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('l-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogin() {
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value;
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    S.isAdmin=true;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-nav-btn').style.display='';
+    document.getElementById('admin-badge').style.display='';
+    document.getElementById('profit-share-btn').style.display='';
+    document.getElementById('leadership-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-exec\')">+ Add Executive</button>';
+    document.getElementById('news-actions').innerHTML='<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-news\')">+ Post Announcement</button>';
+    document.getElementById('hub-actions').innerHTML='<button class="btn btn-primary btn-sm" onclick="openModal(\'modal-add-hub\')">+ Add Hub</button>';
+    updateAdminTreasury();
+  } else {
+    document.getElementById('login-err').textContent='Invalid credentials.';
+    document.getElementById('l-pass').value='';
+  }
+}
+
+function skipLogin(){
+  document.getElementById('login-screen').classList.add('hidden');
+}
+
+function logoutAdmin(){
+  S.isAdmin=false;
+  document.getElementById('admin-nav-btn').style.display='none';
+  document.getElementById('admin-badge').style.display='none';
+  document.getElementById('profit-share-btn').style.display='none';
+  document.getElementById('leadership-actions').innerHTML='';
+  document.getElementById('news-actions').innerHTML='';
+  document.getElementById('hub-actions').innerHTML='';
+  if(document.getElementById('page-admin').classList.contains('active')){
+    goNav(document.querySelector('.nav-btn'),'dispatch');
+    document.querySelector('.nav-btn').classList.add('active');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════════
+function tick(){
+  const n=new Date();
+  const p=x=>String(x).padStart(2,'0');
+  document.getElementById('zulu').textContent=`${p(n.getUTCHours())}:${p(n.getUTCMinutes())}Z`;
+}
+tick(); setInterval(tick,10000);
+
+// ════════════════════════════════════════════════
+//  TREASURY
+// ════════════════════════════════════════════════
+function refreshTreasury(){
+  const fmt='$'+S.treasury.toLocaleString();
+  document.getElementById('treasury-display').textContent=fmt;
+  document.getElementById('eco-total').textContent=fmt;
+  document.getElementById('eco-net').textContent='$'+S.sessionRevenue.toLocaleString();
+  document.getElementById('eco-cost').textContent='$'+S.sessionCosts.toLocaleString();
+  document.getElementById('eco-pool').textContent='$'+Math.round(S.treasury*.07).toLocaleString();
+  document.getElementById('s-revenue').textContent='$'+S.sessionRevenue.toLocaleString();
+  document.getElementById('q4-rev').textContent='$'+S.sessionRevenue.toLocaleString();
+  document.getElementById('fleet-treasury').textContent=fmt;
+  updateAdminTreasury();
+}
+function updateAdminTreasury(){
+  const el=document.getElementById('admin-treasury-val');
+  if(el) el.textContent='$'+S.treasury.toLocaleString();
+}
+function adjustTreasury(sign){
+  const amt=parseInt(document.getElementById('treasury-adj').value);
+  if(!amt||isNaN(amt)) return alert('Enter a valid amount.');
+  S.treasury+=sign*Math.abs(amt);
+  if(sign<0) S.sessionCosts+=Math.abs(amt); else S.sessionRevenue+=Math.abs(amt);
+  refreshTreasury();
+  document.getElementById('treasury-adj').value='';
+  addLedgerRow(sign>0?'Admin: Funds added':'Admin: Funds deducted',sign*Math.abs(amt));
+  saveState();
+}
+
+// ════════════════════════════════════════════════
+//  STOCK — YAHOO FINANCE (no API key needed)
+// ════════════════════════════════════════════════
+function initFinnhubBanner(){ /* no banner */ }
+function saveFinnhubKey(){}
+function dismissFinnhub(){}
+
+// ════════════════════════════════════════════════
+//  STOCK TICKER — FINNHUB OR SIMULATED
+// ════════════════════════════════════════════════
+let stockState = {
+  ups:  { price: 142.80, prevClose: 142.80 },
+  fdx:  { price: 228.15, prevClose: 228.15 },
+  fuel: { price: 3.28 },
+};
+
+function renderStockBar(){
+  const ups  = stockState.ups;
+  const fdx  = stockState.fdx;
+  const vups = ups.price * 1.15;
+  const vupsBase = ups.prevClose * 1.15;
+
+  const fmt = (p, base, id, chgId) => {
+    const diff = (p - base).toFixed(2);
+    const pct  = ((p - base) / base * 100).toFixed(2);
+    const up   = p >= base;
+    document.getElementById(id).textContent    = '$' + p.toFixed(2);
+    const el = document.getElementById(chgId);
+    el.textContent  = `${up?'▲':'▼'} ${up?'+':''}${diff} (${up?'+':''}${pct}%)`;
+    el.className    = 'stock-chg ' + (up?'up':'dn');
+  };
+
+  fmt(vups, vupsBase, 'stk-vups', 'stk-vups-chg');
+  fmt(ups.price, ups.prevClose, 'stk-ups', 'stk-ups-chg');
+  fmt(fdx.price, fdx.prevClose, 'stk-fdx', 'stk-fdx-chg');
+
+  document.getElementById('stk-fuel').textContent = '$' + stockState.fuel.price.toFixed(2);
+  S.stockPrice = vups;
+  S.stockBase  = vupsBase;
+}
+
+// ════════════════════════════════════════════════
+//  STOCK — REALISTIC MARKET SIMULATION
+//  (No external API — CORS proxies are unreliable on GitHub Pages)
+// ════════════════════════════════════════════════
+
+// Seed from realistic recent values; persisted so they drift across sessions
+function loadStockState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('vups_stocks') || 'null');
+    if(saved && saved.ups && saved.fdx){
+      stockState.ups  = saved.ups;
+      stockState.fdx  = saved.fdx;
+      stockState.fuel = saved.fuel || stockState.fuel;
+      return;
+    }
+  } catch(e){}
+  // First-run realistic seeds (approximate real values)
+  stockState.ups  = { price: 104.82, prevClose: 103.61 };
+  stockState.fdx  = { price: 248.55, prevClose: 246.90 };
+  stockState.fuel = { price: 3.28 };
+}
+
+function saveStockState(){
+  try { localStorage.setItem('vups_stocks', JSON.stringify(stockState)); } catch(e){}
+}
+
+// Realistic tick: Gaussian-ish moves, mean-reverting, market-hours aware
+function marketTick(){
+  const now = new Date();
+  const utcH = now.getUTCHours();
+  // NYSE: 14:30–21:00 UTC — higher volatility during market hours
+  const marketOpen = utcH >= 14 && utcH < 21;
+  const vol = marketOpen ? 0.0018 : 0.0004; // ~0.18% vs 0.04% per tick
+
+  const tick = (s, meanPrice) => {
+    const drift = (meanPrice - s.price) * 0.002; // gentle mean reversion
+    const shock = (Math.random() + Math.random() - 1) * s.price * vol; // Box-Muller approx
+    s.price = Math.max(s.price * 0.85, s.price + drift + shock);
+    s.price = Math.round(s.price * 100) / 100;
+  };
+
+  tick(stockState.ups, 104.00);
+  tick(stockState.fdx, 248.00);
+  stockState.fuel.price = Math.max(2.50, Math.min(5.50,
+    stockState.fuel.price + (Math.random() - 0.5) * 0.04));
+  stockState.fuel.price = Math.round(stockState.fuel.price * 100) / 100;
+
+  renderStockBar();
+  saveStockState();
+
+  const now2 = new Date();
+  const label = marketOpen ? 'Market hours' : 'After hours';
+  document.getElementById('stk-source-lbl').textContent =
+    `${label} · sim · ${String(now2.getUTCHours()).padStart(2,'0')}:${String(now2.getUTCMinutes()).padStart(2,'0')}Z`;
+}
+
+async function fetchLiveStocks(){
+  // Initialize from saved state then start ticking
+  loadStockState();
+  renderStockBar();
+  const now = new Date();
+  document.getElementById('stk-source-lbl').textContent =
+    `Sim · ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
+}
+
+function startSimulatedStocks(){
+  loadStockState();
+  renderStockBar();
+}
+
+// (market tick handled by setInterval above)
+
+// Tick every 60s
+setInterval(()=>{ marketTick(); }, 60000);
+
+// Nudge VUPS on AI revenue (existing hook)
+// S.stockPrice updated via renderStockBar()
+
+
+
+// ════════════════════════════════════════════════
+//  NAV
+// ════════════════════════════════════════════════
+
+// DISPATCHER PAGE
+const categoryMeta = {
+  longhaul: { label:'Long Haul', badge:'b-gold',  icon:'\u{1F310}' },
+  domestic: { label:'Domestic',  badge:'b-blue',  icon:'\u2708'  },
+  feeder:   { label:'Feeder',    badge:'b-green', icon:'\u{1F6E9}' },
+};
+
+function renderDispatcher(){
+  const grid = document.getElementById('dispatcher-route-grid');
+  const adminActions = document.getElementById('dispatcher-admin-actions');
+  if(adminActions){
+    adminActions.innerHTML = S.isAdmin
+      ? '<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-disp-route\')">+ Create Route</button>'
+      : '';
+  }
+  const banner = document.getElementById('dispatcher-public-banner');
+  if(banner) banner.style.display = S.isAdmin ? 'none' : '';
+  if(!S.dispatcherRoutes.length){
+    grid.innerHTML = '<div class="empty-state"><div class="icon">\u{1F5FA}</div><p>No routes configured yet.</p></div>';
+    return;
+  }
+  grid.innerHTML = S.dispatcherRoutes.map(route => {
+    const bt = blockTime(route.origin, route.dest);
+    const btStr = bt >= 1 ? bt + 'h block' : Math.round(bt*60) + 'min block';
+    const cat = categoryMeta[route.category] || categoryMeta.domestic;
+    const borderCol = route.category==='longhaul'?'var(--gold)':route.category==='domestic'?'var(--blue-lt)':'var(--green-lt)';
+    const [fmin, fmax] = freightMap[route.aircraft] || [10000, 100000];
+    const estRev = Math.round(((fmin+fmax)/2) * 8 * 0.80);
+    return `<div class="card" style="border-left:2px solid ${borderCol}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.65rem">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text)">${route.icon||cat.icon} ${route.origin} <span style="color:var(--text-mute)">&#8594;</span> ${route.dest}</div>
+          <div style="font-size:.72rem;color:var(--text-dim);margin-top:.1rem">${route.label}</div>
+        </div>
+        <span class="badge ${cat.badge}">${cat.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem;margin-bottom:.75rem">
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--text)">${route.aircraft}</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Aircraft</div>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--blue-lt)">${btStr}</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Block Time</div>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:3px;padding:.35rem .5rem;text-align:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--green-lt)">~$${Math.round(estRev/1000)}K</div>
+          <div style="font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em">Est. Rev</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:.3rem" onclick="dispatchRoute(${route.id})">&#9654; Dispatch Flight</button>
+      <button class="btn btn-blue btn-sm" style="width:100%;margin-bottom:.3rem" onclick="openSimbrief(null,'${route.origin}','${route.dest}','${route.aircraft}')">&#9992; SimBrief OFP</button>
+      ${S.isAdmin ? `<button class="btn btn-danger btn-sm" style="width:100%" onclick="removeDispatchRoute(${route.id})">Remove Route</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function dispatchRoute(routeId, routeOverride, sbUserOverride){
+  const route = routeOverride || S.dispatcherRoutes.find(r=>r.id===routeId);
+  if(!route) return;
+  const sbUser = sbUserOverride || (document.getElementById("cb-sbuser")?document.getElementById("cb-sbuser").value:"VisualLanding112");
+  const aiPilots = S.pilots.filter(p=>p.type==='ai');
+  let pilot = aiPilots[Math.floor(Math.random()*aiPilots.length)];
+  if(!pilot) pilot = {id:0,type:'ai',name:'AI Dispatch',rank:'Regional F/O',route:'any',freq:1,hours:500,flights:50,ontime:97,earned:0,xp:50};
+  const [fmin,fmax] = freightMap[route.aircraft] || [10000,100000];
+  const freight = Math.floor(Math.random()*(fmax-fmin)+fmin);
+  const baseRate = pilot.rank==='Global Captain'?12:pilot.rank==='Regional F/O'?8.5:4;
+  const revenue = Math.round(freight * baseRate * 0.80);
+  const fuelCost = Math.round(revenue * 0.18);
+  const fn = '5Y' + (Math.floor(Math.random()*900)+100);
+  const blockHours = blockTime(route.origin, route.dest);
+  if(pilot.id!==0){ pilot.flights++; pilot.hours+=Math.round(blockHours); pilot.earned+=revenue; pilot.xp=Math.min(100,pilot.xp+2); checkRankUp(pilot); }
+  S.treasury += revenue - fuelCost;
+  S.sessionRevenue += revenue;
+  S.sessionCosts += fuelCost;
+  S.totalFreight += freight;
+  refreshTreasury();
+  document.getElementById('sum-ai-rev').textContent = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  const flightObj = {fn, origin:route.origin, dest:route.dest, ac:route.aircraft, pilot:pilot.name, startTime:Date.now(), blockHours, freight, revenue};
+  liveFlights.push(flightObj);
+  addFlightRow(flightObj, true);
+  addAILog(pilot.name, fn, route.origin, route.dest, revenue);
+  addLedgerRow(fn + ' Revenue — ' + pilot.name, revenue);
+  updateLoadBar(route.aircraft, freight);
+  saveState();
+  const toast = document.getElementById('dispatch-toast');
+  if(toast){ toast.style.display=''; toast.innerHTML='&#10004; <strong>'+fn+'</strong> dispatched &mdash; '+route.origin+'&#8594;'+route.dest+' &middot; '+route.aircraft+' &middot; '+pilot.name+' &middot; est. <span style="color:var(--green-lt)">+$'+revenue.toLocaleString()+'</span> &middot; '+blockHours+'h block'; setTimeout(()=>{toast.style.display='none';},8000); }
+  const tbody = document.getElementById('dispatcher-log-tbody');
+  const now = new Date();
+  const t = String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0')+'Z';
+  const bt = blockHours>=1?blockHours+'h':Math.round(blockHours*60)+'min';
+  const placeholder = tbody.querySelector('td[colspan]');
+  if(placeholder) tbody.innerHTML='';
+  const tr = document.createElement('tr');
+  const sbAc2 = SIMBRIEF_AC_MAP[route.aircraft]||'B744';
+  const sbParams = new URLSearchParams({orig:route.origin,dest:route.dest,type:sbAc2,airline:'UPS',fltnum:fn.replace('5Y',''),units:'LBS'});
+  const sbUrl = 'https://dispatch.simbrief.com/options/custom?'+sbParams.toString()+'&userid='+sbUser;
+  tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td>'+pilot.name.replace('AI ','')+'</td><td><a href="'+sbUrl+'" target="_blank" style="color:var(--blue-lt);font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.7rem;text-decoration:none;border:1px solid rgba(36,113,163,.4);border-radius:2px;padding:.1rem .4rem">OFP</a></td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
+  tbody.prepend(tr);
+  while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
+}
+
+
+// ── Route Generator ─────────────────────────────────────────────────────────
+
+const SIMBRIEF_AC_MAP = {
+  'Airbus A300-600F':          'A306',
+  'Boeing 727-100F':           'B721',
+  'Boeing 727-200F':           'B722',
+  'Boeing 747-100F':           'B741',
+  'Boeing 747-200F':           'B742',
+  'Boeing 747-400F':           'B744',
+  'Boeing 747-8F':             'B748',
+  'Boeing 757-200F':           'B752',
+  'Boeing 757-300F':           'B753',
+  'Boeing 767-300F':           'B763',
+  'Boeing 767-300ERF':         'B763',
+  'Airbus A300-600RF':         'A306',
+  'Douglas DC-8F':             'DC86',
+  'McDonnell Douglas MD-11F':  'MD11',
+  'McDonnell MD-11F':          'MD11',
+};
+
+// All UPS-served airports, tagged by region and type
+// type: feeder=<2h, domestic=2-8h, longhaul=8h+
+const ALL_AIRPORTS = [
+  // US Midwest
+  {icao:'KSDF', name:'Louisville (Worldport)',  region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
+  {icao:'KRFD', name:'Rockford IL',             region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KIND', name:'Indianapolis',            region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KCVG', name:'Cincinnati',              region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KORD', name:'Chicago OHare',           region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KMDW', name:'Chicago Midway',          region:'US_MIDWEST', types:['feeder']},
+  {icao:'KSTL', name:'St. Louis',               region:'US_MIDWEST', types:['feeder','domestic']},
+  // US East
+  {icao:'KPHL', name:'Philadelphia',            region:'US_EAST',    types:['domestic','longhaul']},
+  {icao:'KJFK', name:'New York JFK',            region:'US_EAST',    types:['domestic','longhaul']},
+  {icao:'KBOS', name:'Boston',                  region:'US_EAST',    types:['domestic']},
+  {icao:'KIAD', name:'Washington Dulles',       region:'US_EAST',    types:['domestic']},
+  {icao:'KBWI', name:'Baltimore',               region:'US_EAST',    types:['domestic']},
+  {icao:'KEWR', name:'Newark',                  region:'US_EAST',    types:['domestic']},
+  // US West
+  {icao:'KONT', name:'Ontario CA',              region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KLAX', name:'Los Angeles',             region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KSFO', name:'San Francisco',           region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KSEA', name:'Seattle',                 region:'US_WEST',    types:['domestic','longhaul']},
+  {icao:'KLAS', name:'Las Vegas',               region:'US_WEST',    types:['domestic']},
+  {icao:'KPHX', name:'Phoenix',                 region:'US_WEST',    types:['domestic']},
+  // US South
+  {icao:'KMIA', name:'Miami',                   region:'US_SOUTH',   types:['domestic','longhaul']},
+  {icao:'KATL', name:'Atlanta',                 region:'US_SOUTH',   types:['domestic']},
+  {icao:'KDFW', name:'Dallas/Fort Worth',       region:'US_SOUTH',   types:['domestic']},
+  {icao:'KHOU', name:'Houston',                 region:'US_SOUTH',   types:['domestic']},
+  {icao:'KBNA', name:'Nashville',               region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KCLT', name:'Charlotte',               region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KHSV', name:'Huntsville',              region:'US_SOUTH',   types:['feeder']},
+  {icao:'KLEX', name:'Lexington',               region:'US_SOUTH',   types:['feeder']},
+  {icao:'KMEM', name:'Memphis',                 region:'US_SOUTH',   types:['feeder','domestic']},
+  {icao:'KPIT', name:'Pittsburgh',              region:'US_SOUTH',   types:['domestic']},
+  // Europe
+  {icao:'EDDK', name:'Cologne/Bonn',            region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'EGSS', name:'London Stansted',         region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'LFPG', name:'Paris CDG',               region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'EHAM', name:'Amsterdam',               region:'EUROPE',     types:['domestic','longhaul']},
+  {icao:'LEMD', name:'Madrid',                  region:'EUROPE',     types:['domestic']},
+  {icao:'LIRF', name:'Rome Fiumicino',          region:'EUROPE',     types:['domestic']},
+  {icao:'EDDM', name:'Munich',                  region:'EUROPE',     types:['domestic']},
+  {icao:'EPWA', name:'Warsaw',                  region:'EUROPE',     types:['domestic']},
+  // East Asia
+  {icao:'VHHH', name:'Hong Kong',               region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZPBH', name:'Shenzhen',                region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZSPD', name:'Shanghai Pudong',         region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'RJAA', name:'Tokyo Narita',            region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'RKSI', name:'Seoul Incheon',           region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'ZBAA', name:'Beijing Capital',         region:'ASIA_EAST',  types:['longhaul']},
+  // SE Asia
+  {icao:'WMKK', name:'Kuala Lumpur',            region:'ASIA_SE',    types:['longhaul']},
+  {icao:'WSSS', name:'Singapore Changi',        region:'ASIA_SE',    types:['longhaul']},
+  {icao:'VTBS', name:'Bangkok Suvarnabhumi',    region:'ASIA_SE',    types:['longhaul']},
+  {icao:'RPLL', name:'Manila',                  region:'ASIA_SE',    types:['longhaul']},
+  // Middle East
+  {icao:'OMDB', name:'Dubai',                   region:'MIDDLE_EAST',types:['longhaul']},
+  {icao:'OERK', name:'Riyadh',                  region:'MIDDLE_EAST',types:['longhaul']},
+  {icao:'OTHH', name:'Doha',                    region:'MIDDLE_EAST',types:['longhaul']},
+  // Alaska
+  {icao:'PANC', name:'Anchorage',               region:'ALASKA',     types:['domestic','longhaul']},
+  {icao:'PAFA', name:'Fairbanks',               region:'ALASKA',     types:['feeder','domestic']},
+];
+
+// Aircraft capability limits: [minBlockH, maxBlockH]
+const AC_CAPABILITY = {
+  'Boeing 727-100F':           [0.3, 4.0],
+  'Boeing 727-200F':           [0.3, 5.0],
+  'Douglas DC-8F':             [0.5, 8.0],
+  'Airbus A300-600F':          [0.5, 9.0],
+  'Boeing 757-200F':           [0.5, 8.0],
+  'Boeing 767-300F':           [1.0, 11.0],
+  'Boeing 747-100F':           [1.0, 12.0],
+  'Boeing 747-200F':           [1.0, 13.0],
+  'Boeing 747-400F':           [1.0, 16.0],
+  'Boeing 747-8F':             [1.0, 18.0],
+  'McDonnell Douglas MD-11F':  [1.0, 14.0],
+};
+
+// Why this destination was chosen — shown in preview
+const DEST_REASONS = {
+  feeder:   'Short feeder route — high-frequency, small regional package volume.',
+  domestic: 'Domestic trunk route — overnight hub-to-hub freight run.',
+  longhaul: 'Long-haul international — high-value, time-sensitive cargo.',
+};
+
+const AC_CRUISE_ALT = {
+  'Boeing 727-100F':'FL310','Boeing 727-200F':'FL330','Douglas DC-8F':'FL330',
+  'Boeing 747-100F':'FL350','Boeing 747-200F':'FL350','Boeing 747-400F':'FL350',
+  'Boeing 747-8F':'FL390','Boeing 757-200F':'FL350','Boeing 767-300F':'FL370',
+  'Airbus A300-600F':'FL330','McDonnell Douglas MD-11F':'FL370',
+};
+
+const UPS_FN_POOL = ['5X3','5X4','5X7','5X8','5X15','5X16','5X17','5X18','5X31','5X32',
+  '5X37','5X38','5X63','5X64','5X101','5X102','5X201','5X202','5X271','5X272',
+  '5X301','5X401','5X501','5X601','5X701','5X801','5X901','5X911'];
+
+let _generatedRoute = null;
+
+function populate(selectId, items){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = items.map(([v,l])=>`<option value="${v}">${v} — ${l}</option>`).join('');
+}
+
+function updateDepAirports(){
+  const region = document.getElementById('rg-dep-region').value;
+  const airports = ALL_AIRPORTS.filter(a=>a.region===region);
+  const sel = document.getElementById('rg-dep-airport');
+  if(!sel) return;
+  sel.innerHTML = airports.map(a=>`<option value="${a.icao}">${a.icao} — ${a.name}</option>`).join('');
+}
+
+function updateArrAirports(){} // no-op, kept for compatibility
+
+// When aircraft changes, disable length options the plane cant fly
+function updateLengthOptions(){
+  const ac = document.getElementById('rg-aircraft').value;
+  const cap = AC_CAPABILITY[ac] || [0.3, 18];
+  const sel = document.getElementById('rg-length');
+  if(!sel) return;
+  // feeder = <2h, domestic = 2-8h, longhaul = 8h+
+  sel.options[0].disabled = cap[1] < 0.5;   // feeder
+  sel.options[1].disabled = cap[1] < 2.0;   // domestic
+  sel.options[2].disabled = cap[1] < 8.0;   // longhaul
+  // auto-select first available
+  for(let i=0;i<sel.options.length;i++){
+    if(!sel.options[i].disabled){ sel.selectedIndex=i; break; }
+  }
+  // Also update cruise alt to match aircraft default
+  const altSel = document.getElementById('rg-alt');
+  if(altSel){
+    const defaultAlt = AC_CRUISE_ALT[ac]||'FL350';
+    for(let i=0;i<altSel.options.length;i++){
+      if(altSel.options[i].value===defaultAlt){ altSel.selectedIndex=i; break; }
+    }
+  }
+}
+
+function generateRoute(){
+  const orig     = document.getElementById('rg-dep-airport').value;
+  const aircraft = document.getElementById('rg-aircraft').value;
+  const length   = document.getElementById('rg-length').value;
+  const alt      = document.getElementById('rg-alt').value;
+  const ci       = document.getElementById('rg-ci').value;
+
+  if(!orig){ alert('Select a departure airport first.'); return; }
+
+  const cap = AC_CAPABILITY[aircraft] || [0.3, 18];
+  const lengthRange = { feeder:[0,2.5], domestic:[2,8.5], longhaul:[7.5,99] };
+  const [minH, maxH] = lengthRange[length] || [0,99];
+  const effectiveMax = Math.min(maxH, cap[1]);
+
+  // Build candidates with real or estimated block times
+  let candidates = ALL_AIRPORTS
+    .filter(a => a.icao !== orig)
+    .map(a => {
+      const known = blockTimeMap[orig+'-'+a.icao] || blockTimeMap[a.icao+'-'+orig];
+      const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao);
+      return { ...a, bt };
+    })
+    .filter(a => a.bt >= minH && a.bt <= effectiveMax);
+
+  const heavyAC = ['Boeing 747-8F','Boeing 747-400F','Boeing 747-200F','Boeing 747-100F','McDonnell Douglas MD-11F','Boeing 767-300F'];
+  const isHeavy = heavyAC.includes(aircraft);
+  const isNarrow = ['Boeing 727-100F','Boeing 727-200F','Douglas DC-8F','Boeing 757-200F','Airbus A300-600F'].includes(aircraft);
+
+  let pool = [...candidates];
+  if(isHeavy && length==='longhaul'){
+    const intl = candidates.filter(a=>['ASIA_EAST','ASIA_SE','EUROPE','MIDDLE_EAST'].includes(a.region));
+    if(intl.length) pool = intl;
+  } else if(isNarrow && length==='feeder'){
+    const dom = candidates.filter(a=>['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'].includes(a.region));
+    if(dom.length) pool = dom;
+  } else if(isNarrow && length==='longhaul'){
+    const shortIntl = candidates.filter(a=>['EUROPE','US_EAST','US_WEST','ALASKA'].includes(a.region));
+    if(shortIntl.length) pool = shortIntl;
+  }
+
+  pool = pool.sort(()=>Math.random()-0.5);
+
+  if(!pool.length){
+    const fallback = ALL_AIRPORTS
+      .filter(a=>a.icao!==orig)
+      .map(a=>({...a,bt:blockTimeMap[orig+'-'+a.icao]||blockTimeMap[a.icao+'-'+orig]||calcBlockTime(orig,a.icao)}))
+      .filter(a=>a.bt<=cap[1])
+      .sort(()=>Math.random()-0.5);
+    if(!fallback.length){ alert('No valid route found for this aircraft and route length combination.'); return; }
+    pool = fallback;
+  }
+
+  const dest = pool[0];
+  const bt = dest.bt;
+  const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
+  const btDisplay = btH>0 ? btH+'h '+btM+'m' : btM+'m';
+  const fn = UPS_FN_POOL[Math.floor(Math.random()*UPS_FN_POOL.length)];
+  const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
+  const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
+  const fRange = getFreightRange(aircraft);
+  const freight = Math.floor(Math.random()*(fRange[1]-fRange[0])+fRange[0]);
+  const revenuePerLb = bt>=8?0.70:bt>=3?0.55:0.45;
+  const revenue = Math.round(freight*revenuePerLb/1000)*1000;
+
+  _generatedRoute = {fn,orig,dest:dest.icao,destName:dest.name,aircraft,alt:cruiseAlt,ci,bt,freight,revenue,sbAc,length};
+
+  document.getElementById('rg-preview-fn').textContent = fn;
+  document.getElementById('rg-preview-route').textContent = orig+' → '+dest.icao+'  ('+dest.name+')';
+  document.getElementById('rg-preview-body').innerHTML = [
+    '<div><span style="color:var(--text-mute)">Aircraft</span><br>'+aircraft+'</div>',
+    '<div><span style="color:var(--text-mute)">Block Time</span><br>'+btDisplay+'</div>',
+    '<div><span style="color:var(--text-mute)">Cruise Alt</span><br>'+cruiseAlt+' · CI '+ci+'</div>',
+    '<div><span style="color:var(--text-mute)">Payload</span><br>'+freight.toLocaleString()+' lbs</div>',
+    '<div><span style="color:var(--text-mute)">Est. Revenue</span><br>$'+revenue.toLocaleString()+'</div>',
+  ].join('');
+  document.getElementById('rg-dest-reason').textContent = '↳ '+DEST_REASONS[length];
+  document.getElementById('rg-preview').style.display='';
+  document.getElementById('rg-dispatch-btn').style.display='';
+  document.getElementById('rg-simbrief-btn').style.display='';
+}
+
+function calcBlockTime(orig, dest){
+  const c1=AIRPORT_COORDS[orig], c2=AIRPORT_COORDS[dest];
+  if(!c1||!c2) return 3.0;
+  // Check lookup table first
+  const lookup = blockTimeMap[orig+'-'+dest] || blockTimeMap[dest+'-'+orig];
+  if(lookup) return lookup;
+  // Otherwise compute from distance
+  const R=6371, toR=Math.PI/180;
+  const dlat=(c2[0]-c1[0])*toR, dlon=(c2[1]-c1[1])*toR;
+  const a=Math.sin(dlat/2)**2+Math.cos(c1[0]*toR)*Math.cos(c2[0]*toR)*Math.sin(dlon/2)**2;
+  const dist=2*R*Math.asin(Math.sqrt(a));
+  return Math.max(0.4, dist/850+0.5);
+}
+
+function getFreightRange(aircraft){
+  const fm=freightMap[aircraft];
+  if(fm) return fm;
+  if(aircraft.includes('747-8')) return [150000,295000];
+  if(aircraft.includes('747')) return [90000,248000];
+  if(aircraft.includes('MD-11')) return [90000,200000];
+  if(aircraft.includes('767')) return [65000,116000];
+  if(aircraft.includes('757')) return [50000,116000];
+  if(aircraft.includes('727')) return [20000,60000];
+  if(aircraft.includes('DC-8')) return [35000,95000];
+  if(aircraft.includes('A300')) return [80000,140000];
+  return [40000,100000];
+}
+
+function dispatchGeneratedRoute(){
+  if(!_generatedRoute){ alert('Generate a route first.'); return; }
+  const r=_generatedRoute;
+  const route={id:-1,origin:r.orig,dest:r.dest,aircraft:r.aircraft,label:r.orig+' to '+r.dest,category:r.length};
+  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  dispatchRoute(-1,route,sbUser);
+}
+
+function openGeneratedSimbrief(){
+  if(!_generatedRoute){ alert('Generate a route first.'); return; }
+  const r=_generatedRoute;
+  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  const params=new URLSearchParams({orig:r.orig,dest:r.dest,type:r.sbAc,airline:'UPS',
+    fltnum:r.fn.replace('5X',''),cruisealt:r.alt.replace('FL','')+'00',ci:r.ci,units:'LBS'});
+  const url='https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser;
+  const note=document.getElementById('cb-simbrief-note');
+  if(note){note.style.display='';note.textContent='Opening SimBrief for '+r.fn+' '+r.orig+'→'+r.dest+' ...';}
+  window.open(url,'_blank');
+}
+
+// Legacy compat for pre-made route card SimBrief buttons
+function openSimbrief(fnOverride,originOverride,destOverride,acOverride){
+  const sbUser=(document.getElementById('rg-sbuser')||{value:'VisualLanding112'}).value||'VisualLanding112';
+  const origin=originOverride||''; const dest=destOverride||'';
+  const aircraft=acOverride||'Boeing 747-8F';
+  const fn=fnOverride||('5X'+(Math.floor(Math.random()*900)+100));
+  const sbAc=SIMBRIEF_AC_MAP[aircraft]||'B744';
+  if(!origin||!dest){alert('No origin/destination.');return;}
+  const params=new URLSearchParams({orig:origin,dest:dest,type:sbAc,airline:'UPS',fltnum:fn.replace(/5[XY]/,''),units:'LBS'});
+  window.open('https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser,'_blank');
+}
+
+function getCustomFields(){
+  return {origin:'',dest:'',aircraft:'Boeing 747-8F',alt:'FL350',ci:52,sbUser:'VisualLanding112'};
+}
+function dispatchCustomFlight(){ dispatchGeneratedRoute(); }
+
+
+function removeDispatchRoute(id){
+  if(!confirm('Remove this route?')) return;
+  S.dispatcherRoutes = S.dispatcherRoutes.filter(r=>r.id!==id);
+  renderDispatcher(); saveState();
+}
+
+function addDispatchRoute(){
+  const origin   = document.getElementById('dr-origin').value.trim().toUpperCase();
+  const dest     = document.getElementById('dr-dest').value.trim().toUpperCase();
+  const aircraft = document.getElementById('dr-aircraft').value;
+  const category = document.getElementById('dr-category').value;
+  if(!origin||!dest){ alert('Origin and destination required.'); return; }
+  const label = origin + ' to ' + dest;
+  S.dispatcherRoutes.push({id:S.nextId++, origin, dest, aircraft, label, category});
+  document.getElementById('dr-origin').value='';
+  document.getElementById('dr-dest').value='';
+  closeModal('modal-add-disp-route');
+  renderDispatcher(); saveState();
+}
+// END DISPATCHER
+
+function goNav(btn,page){
+  if(page==='admin'&&!S.isAdmin) return;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('page-'+page).classList.add('active');
+  if(page==='crew')       renderCrew();
+  if(page==='leadership') renderLeadership();
+  if(page==='news')       renderNews('all');
+  if(page==='fleet')      renderFleet();
+  if(page==='economy')    renderEconomy();
+  if(page==='hubs')       renderHubs();
+  if(page==='dispatcher'){ renderDispatcher(); setTimeout(()=>{ updateDepAirports(); updateArrAirports(); },50); }
+  if(page==='livemap')    onMapPageOpen();
+  if(page==='admin')      renderAdmin();
+}
+
+// ════════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});
+});
+
+// ════════════════════════════════════════════════
+//  CREW RENDER
+// ════════════════════════════════════════════════
+function rankColor(r){return r==='Global Captain'?'var(--gold-lt)':r==='Regional F/O'?'var(--blue-lt)':'var(--green-lt)'}
+function rankNext(r){return r==='Global Captain'?'Max Rank':r==='Regional F/O'?'→ Captain':'→ Regional'}
+
+function renderCrew(){
+  const grid=document.getElementById('crew-grid');
+  const empty=document.getElementById('crew-empty');
+  if(!S.pilots.length){grid.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  grid.innerHTML=S.pilots.map(p=>{
+    const isAI=p.type==='ai';
+    const name=isAI?p.name:`${p.first} ${p.last}`;
+    const init=isAI?'AI':(p.first[0]+p.last[0]);
+    return `<div class="crew-card ${isAI?'ai-pilot':'human-pilot'}">
+      <div class="pilot-header">
+        <div class="avatar ${isAI?'av-ai':'av-human'}">${init}</div>
+        <div><div class="pilot-name">${name}</div><div class="pilot-rank" style="color:${rankColor(p.rank)}">${p.rank}</div></div>
+        <div class="pilot-type-badge">${isAI?'<span class="badge b-blue">AI</span>':'<span class="badge b-gray">Human</span>'}</div>
+      </div>
+      <div class="pilot-stats">
+        <div><div class="ps-val">${p.hours.toLocaleString()}</div><div class="ps-lbl">Hours</div></div>
+        <div><div class="ps-val">${p.ontime}%</div><div class="ps-lbl">On-Time</div></div>
+        <div><div class="ps-val">$${Math.round(p.earned/1000)}K</div><div class="ps-lbl">Earned</div></div>
+      </div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-row"><span>${p.rank}</span><span>${p.xp}% — ${rankNext(p.rank)}</span></div>
+        <div class="xp-track"><div class="${isAI?'xp-fill-blue':'xp-fill'}" style="width:${p.xp}%"></div></div>
+      </div>
+      ${isAI?`<div class="pilot-actions"><button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly Now</button></div>`:''}
+    </div>`;
+  }).join('');
+
+  // Jumpseat
+  const jsb=document.getElementById('jumpseat-board');
+  const routes=[['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF']];
+  const flying=S.pilots.filter(p=>p.type==='ai').slice(0,3);
+  jsb.innerHTML=flying.length
+    ?flying.map((p,i)=>{const r=routes[i%routes.length];return `<div class="ledger-item"><span class="li-desc">${p.name}</span><span style="color:var(--text-dim)">${r[0]}→${r[1]}</span><span style="color:var(--green-lt)">1 seat</span></div>`}).join('')
+    :'<div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div>';
+}
+
+// ════════════════════════════════════════════════
+//  LEADERSHIP
+// ════════════════════════════════════════════════
+const statusLabel={active:'',retiring:'<span class="badge b-gold" style="margin-left:.5rem">Retiring</span>',incoming:'<span class="badge b-purple" style="margin-left:.5rem">Incoming CEO</span>'};
+const avGray='background:rgba(74,58,40,.2);color:var(--text-dim);border:1px solid var(--border2)';
+
+function execAvatarStyle(color){
+  const map={
+    'exec-av-gold':'background:rgba(200,146,10,.15);color:var(--gold-lt);border:2px solid rgba(200,146,10,.4)',
+    'exec-av-blue':'background:rgba(36,113,163,.15);color:var(--blue-lt);border:2px solid rgba(36,113,163,.35)',
+    'exec-av-green':'background:rgba(45,158,95,.15);color:var(--green-lt);border:2px solid rgba(45,158,95,.3)',
+    'exec-av-purple':'background:rgba(125,60,152,.15);color:var(--purple-lt);border:2px solid rgba(125,60,152,.3)',
+    'exec-av-gray':avGray,
+  };
+  return map[color]||avGray;
+}
+
+function renderLeadership(){
+  const csuite=S.executives.filter(e=>e.type==='csuite');
+  const board=S.executives.filter(e=>e.type==='board');
+
+  document.getElementById('csuite-grid').innerHTML=csuite.map(e=>`
+    <div class="exec-card ${e.title.includes('CEO')?'ceo-card':''}">
+      <div class="exec-avatar" style="${execAvatarStyle(e.color)}">${e.initials}</div>
+      <div class="exec-name">${e.name}${statusLabel[e.status]||''}</div>
+      <div class="exec-title">${e.title}</div>
+      <div class="exec-bio">${e.bio}</div>
+      <div class="exec-tenure">Since ${e.tenure}</div>
+      ${e.status==='retiring'?'<div class="retiring-banner">🏆 Retirement effective Q1 2025</div>':''}
+    </div>`).join('');
+
+  document.getElementById('board-grid').innerHTML=board.map(e=>`
+    <div class="exec-card">
+      <div class="exec-avatar" style="${execAvatarStyle(e.color)}">${e.initials}</div>
+      <div class="exec-name">${e.name}</div>
+      <div class="exec-title">${e.title}</div>
+      <div class="exec-bio">${e.bio}</div>
+      <div class="exec-tenure">Director since ${e.tenure}</div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  NEWS
+// ════════════════════════════════════════════════
+const catLabel={breaking:'🔴 Breaking',retirement:'🏆 CEO Transition',financial:'📈 Financial',operational:'✈ Operational'};
+const catColor={breaking:'var(--gold-lt)',retirement:'var(--purple-lt)',financial:'var(--green-lt)',operational:'var(--blue-lt)'};
+
+function renderNews(filter){
+  const feed=document.getElementById('news-feed');
+  const items=filter==='all'?S.news:S.news.filter(n=>n.category===filter);
+  if(!items.length){feed.innerHTML='<div class="empty-state"><div class="icon">📰</div><p>No posts in this category yet.</p></div>';return}
+  feed.innerHTML=items.map(n=>`
+    <div class="news-card ${n.category}">
+      <div class="news-header">
+        <span class="news-category" style="color:${catColor[n.category]}">${catLabel[n.category]}</span>
+        <span class="news-date">${n.date}</span>
+      </div>
+      <div class="news-headline">${n.headline}</div>
+      <div class="news-body">${n.body.replace(/\n\n/g,'<br><br>')}</div>
+      <div class="news-author">— ${n.author}</div>
+    </div>`).join('');
+}
+
+function filterNews(cat){renderNews(cat)}
+
+// ════════════════════════════════════════════════
+//  FLEET
+// ════════════════════════════════════════════════
+function renderFleet(){
+  const catalog=document.getElementById('fleet-catalog');
+  catalog.innerHTML=AIRCRAFT_CATALOG.map(ac=>{
+    const owned=S.ownedFleet[ac.model]||0;
+    const canAfford=S.treasury>=ac.price;
+    return `<div class="aircraft-card ${owned>0?'owned':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.2rem">
+        <div>
+          <div class="ac-model">${ac.icon} ${ac.model}</div>
+          <div class="ac-type">${ac.type}</div>
+        </div>
+        <div style="text-align:right">
+          ${owned>0?`<span class="badge b-green">×${owned} Owned</span>`:''}
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">UPS Fleet: ${ac.qty||'—'}</div>
+        </div>
+      </div>
+      ${ac.note?`<div style="font-size:.67rem;color:var(--text-dim);margin-bottom:.5rem;line-height:1.4;font-style:italic">${ac.note}</div>`:''}
+      <div class="ac-specs">
+        <div class="ac-spec"><div class="ac-spec-val">${ac.maxPayload.toLocaleString()}</div><div class="ac-spec-lbl">Max Payload (lbs)</div></div>
+        <div class="ac-spec"><div class="ac-spec-val">${ac.range}</div><div class="ac-spec-lbl">Range</div></div>
+        <div class="ac-spec"><div class="ac-spec-val">${ac.crew}</div><div class="ac-spec-lbl">Crew Req.</div></div>
+        <div class="ac-spec"><div class="ac-spec-val">${owned}</div><div class="ac-spec-lbl">VA Owned</div></div>
+      </div>
+      <div class="ac-price ${canAfford?'li-pos':'li-neg'}">$${(ac.price/1000000).toFixed(1)}M</div>
+      <button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>
+        ${canAfford?'Purchase':'Insufficient Funds'}
+      </button>
+    </div>`;
+  }).join('');
+  renderOwnedFleet();
+}
+
+function purchaseAircraft(model,price){
+  if(S.treasury<price){alert('Insufficient treasury funds.');return}
+  if(!confirm(`Purchase ${model} for $${(price/1000000).toFixed(1)}M?`)) return;
+  S.treasury-=price;
+  S.sessionCosts+=price;
+  S.ownedFleet[model]=(S.ownedFleet[model]||0)+1;
+  refreshTreasury();
+  addLedgerRow(`Fleet acquisition: ${model}`,-price);
+  // Log purchase
+  const log=document.getElementById('purchase-log');
+  const now=new Date();
+  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
+  const entry=document.createElement('div');
+  entry.style.cssText='padding:.25rem 0;border-bottom:1px solid rgba(46,31,18,.3)';
+  entry.innerHTML=`<span style="color:var(--text-mute)">${t}</span> <span style="color:var(--green-lt)">${model}</span> purchased`;
+  const placeholder=log.querySelector('div[style*="color:var(--text-mute)"]');
+  if(placeholder) log.innerHTML='';
+  log.prepend(entry);
+  renderFleet();
+  saveState();
+}
+
+function renderOwnedFleet(){
+  const list=document.getElementById('owned-fleet-list');
+  const vc=document.getElementById('fleet-value');
+  const fc=document.getElementById('fleet-count');
+  const entries=Object.entries(S.ownedFleet).filter(([,q])=>q>0);
+  if(!entries.length){
+    list.innerHTML='<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No aircraft purchased yet.</div>';
+    vc.textContent='$0';fc.textContent='0 aircraft owned';return;
+  }
+  let totalVal=0,totalCount=0;
+  entries.forEach(([m,q])=>{
+    const ac=AIRCRAFT_CATALOG.find(a=>a.model===m);
+    if(ac){totalVal+=ac.price*q;totalCount+=q;}
+  });
+  list.innerHTML=entries.map(([m,q])=>`
+    <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace;font-size:.72rem">
+      <span style="color:var(--text)">${m}</span><span class="gld">×${q}</span>
+    </div>`).join('');
+  vc.textContent='$'+(totalVal/1000000).toFixed(1)+'M';
+  fc.textContent=totalCount+' aircraft owned';
+}
+
+// ════════════════════════════════════════════════
+//  ECONOMY
+// ════════════════════════════════════════════════
+function renderEconomy(){
+  const humans=S.pilots.filter(p=>p.type==='human');
+  const totalE=humans.reduce((a,p)=>a+p.earned,0)||1;
+  const pool=Math.round(S.treasury*.07);
+  document.getElementById('earnings-tbody').innerHTML=humans.length
+    ?humans.map(p=>`<tr><td>${p.first} ${p.last}</td><td><span class="badge b-gray">Human</span></td><td>${p.flights}</td><td>${p.hours.toLocaleString()}</td><td class="li-pos">$${p.earned.toLocaleString()}</td><td class="li-pos">+$${Math.round((p.earned/totalE)*pool).toLocaleString()}</td></tr>`).join('')
+    :`<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1.5rem">No human crew enrolled. AI earnings go to treasury.</td></tr>`;
+}
+
+// ════════════════════════════════════════════════
+//  HUBS
+// ════════════════════════════════════════════════
+function renderHubs(){
+  const cls={Global:'b-gold',Regional:'b-blue',Feeder:'b-green'};
+  const bf={Global:'bf-gold',Regional:'bf-blue',Feeder:'bf-green'};
+  document.getElementById('hubs-grid').innerHTML=S.hubs.map(h=>`
+    <div class="hub-card">
+      <div class="hub-icao">${h.icao}</div>
+      <div class="hub-name">${h.name}</div>
+      <div class="hub-detail-row"><span>Type</span><span class="hub-detail-val"><span class="badge ${cls[h.type]}">${h.type}</span></span></div>
+      <div class="hub-detail-row"><span>Aircraft</span><span class="hub-detail-val" style="font-size:.65rem;text-align:right;max-width:150px">${h.aircraft}</span></div>
+      <div class="hub-detail-row"><span>Active</span><span class="hub-detail-val pos">${h.active}</span></div>
+      <div class="hub-detail-row" style="border:none"><span>Ramp</span><span class="hub-detail-val">${h.ramp}%</span></div>
+      <div class="bar-wrap" style="margin-top:.5rem;margin-bottom:0"><div class="bar-track"><div class="bar-fill ${h.ramp>80?'bf-red':bf[h.type]}" style="width:${h.ramp}%"></div></div></div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  ADMIN RENDER
+// ════════════════════════════════════════════════
+function renderAdmin(){
+  const humans=S.pilots.filter(p=>p.type==='human');
+  document.getElementById('admin-human-tbody').innerHTML=humans.length
+    ?humans.map(p=>`<tr>
+      <td>${p.first} ${p.last}</td>
+      <td><span class="badge ${p.rank==='Global Captain'?'b-gold':p.rank==='Regional F/O'?'b-blue':'b-green'}">${p.rank}</span></td>
+      <td>${p.base}</td><td>${p.hours}</td>
+      <td style="display:flex;gap:.35rem">
+        <button class="btn btn-ghost btn-sm" onclick="editHours(${p.id})">Edit Hrs</button>
+        <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
+      </td></tr>`).join('')
+    :`<tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr>`;
+
+  document.getElementById('admin-ai-tbody').innerHTML=S.pilots.filter(p=>p.type==='ai').map(p=>`<tr>
+    <td>${p.name}</td><td><span class="badge b-blue">${p.rank.split(' ')[0]}</span></td>
+    <td>${p.route}</td><td>${p.flights}</td>
+    <td style="display:flex;gap:.35rem">
+      <button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly</button>
+      <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
+    </td></tr>`).join('');
+
+  document.getElementById('admin-exec-tbody').innerHTML=S.executives.map(e=>`<tr>
+    <td>${e.name}</td><td style="color:var(--text-dim);font-size:.7rem">${e.title}</td>
+    <td><span class="badge ${e.type==='csuite'?'b-gold':'b-gray'}">${e.type==='csuite'?'C-Suite':'Board'}</span></td>
+    <td>${e.tenure}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeExec(${e.id})">Remove</button></td></tr>`).join('');
+
+  document.getElementById('admin-news-tbody').innerHTML=S.news.map(n=>`<tr>
+    <td style="white-space:nowrap">${n.date}</td>
+    <td style="font-size:.7rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.headline}</td>
+    <td><span class="badge" style="color:${catColor[n.category]};border-color:${catColor[n.category]};background:transparent">${catLabel[n.category]}</span></td>
+    <td style="font-size:.68rem;color:var(--text-dim)">${n.author.split('—')[0].trim()}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeNews(${n.id})">Remove</button></td></tr>`).join('');
+
+  document.getElementById('admin-hub-tbody').innerHTML=S.hubs.map((h,i)=>`<tr>
+    <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold)">${h.icao}</td>
+    <td>${h.name}</td>
+    <td><span class="badge ${h.type==='Global'?'b-gold':h.type==='Regional'?'b-blue':'b-green'}">${h.type}</span></td>
+    <td style="font-size:.68rem;color:var(--text-dim)">${h.aircraft}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeHub(${i})">Remove</button></td></tr>`).join('');
+
+  updateAdminTreasury();
+}
+
+// ════════════════════════════════════════════════
+//  ADD / REMOVE
+// ════════════════════════════════════════════════
+function addHuman(){
+  const first=document.getElementById('h-first').value.trim();
+  const last=document.getElementById('h-last').value.trim();
+  if(!first||!last){alert('Enter first and last name.');return}
+  S.pilots.push({id:S.nextId++,type:'human',first,last,rank:document.getElementById('h-rank').value,base:document.getElementById('h-base').value,hours:parseInt(document.getElementById('h-hours').value)||0,flights:0,ontime:100,earned:0,xp:0});
+  ['h-first','h-last'].forEach(id=>{document.getElementById(id).value=''});
+  document.getElementById('h-hours').value='0';
+  closeModal('modal-add-human');
+  updateCrewCounts();renderAdmin();saveState();
+}
+
+function addAI(){
+  const raw=document.getElementById('ai-name').value.trim();
+  if(!raw){alert('Enter a callsign.');return}
+  const name=raw.startsWith('AI ')?raw:'AI '+raw;
+  S.pilots.push({id:S.nextId++,type:'ai',name,rank:document.getElementById('ai-rank').value,base:document.getElementById('ai-base').value,route:document.getElementById('ai-route').value,freq:parseInt(document.getElementById('ai-freq').value),hours:0,flights:0,ontime:100,earned:0,xp:0});
+  document.getElementById('ai-name').value='';
+  closeModal('modal-add-ai');
+  updateCrewCounts();renderAdmin();saveState();
+}
+
+function removePilot(id){
+  if(!confirm('Remove this crew member?')) return;
+  S.pilots=S.pilots.filter(p=>p.id!==id);
+  updateCrewCounts();renderAdmin();saveState();
+}
+
+function editHours(id){
+  const p=S.pilots.find(x=>x.id===id);
+  if(!p) return;
+  const val=prompt(`Hours for ${p.first} ${p.last} (current: ${p.hours}):`,p.hours);
+  if(val!==null&&!isNaN(parseInt(val))){p.hours=parseInt(val);renderAdmin();}
+}
+
+function updateCrewCounts(){
+  document.getElementById('s-crew-count').textContent=S.pilots.filter(p=>p.type==='ai').length;
+  document.getElementById('s-human-count').textContent=S.pilots.filter(p=>p.type==='human').length;
+}
+
+function addExec(){
+  const name=document.getElementById('ex-name').value.trim();
+  const title=document.getElementById('ex-title').value.trim();
+  if(!name||!title){alert('Name and title required.');return}
+  S.executives.push({id:S.nextId++,name,initials:document.getElementById('ex-initials').value.trim()||name.split(' ').map(w=>w[0]).join('').slice(0,2),title,type:document.getElementById('ex-type').value,tenure:document.getElementById('ex-tenure').value||new Date().getFullYear(),color:document.getElementById('ex-color').value,bio:document.getElementById('ex-bio').value,status:document.getElementById('ex-status').value});
+  ['ex-name','ex-initials','ex-title','ex-tenure','ex-bio'].forEach(id=>{document.getElementById(id).value=''});
+  closeModal('modal-add-exec');renderAdmin();saveState();
+}
+
+function removeExec(id){
+  if(!confirm('Remove this executive?')) return;
+  S.executives=S.executives.filter(e=>e.id!==id);renderAdmin();saveState();
+}
+
+function addNews(){
+  const headline=document.getElementById('nw-headline').value.trim();
+  const body=document.getElementById('nw-body').value.trim();
+  if(!headline||!body){alert('Headline and body required.');return}
+  const now=new Date();
+  S.news.unshift({id:S.nextId++,category:document.getElementById('nw-cat').value,date:now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),headline,body,author:document.getElementById('nw-author').value||'Office of the CEO'});
+  ['nw-headline','nw-body','nw-author'].forEach(id=>{document.getElementById(id).value=''});
+  closeModal('modal-add-news');renderAdmin();saveState();
+  if(document.getElementById('page-news').classList.contains('active')) renderNews('all');
+}
+
+function removeNews(id){
+  if(!confirm('Remove this announcement?')) return;
+  S.news=S.news.filter(n=>n.id!==id);renderAdmin();saveState();
+}
+
+function addHub(){
+  const icao=document.getElementById('hub-icao').value.trim().toUpperCase();
+  const name=document.getElementById('hub-name').value.trim();
+  if(!icao||!name){alert('ICAO and name required.');return}
+  S.hubs.push({icao,name,type:document.getElementById('hub-type').value,aircraft:document.getElementById('hub-ac').value||'TBD',ramp:0,active:0});
+  ['hub-icao','hub-name','hub-ac'].forEach(id=>{document.getElementById(id).value=''});
+  closeModal('modal-add-hub');renderHubs();renderAdmin();saveState();
+}
+
+function removeHub(i){
+  if(!confirm('Remove this hub?')) return;
+  S.hubs.splice(i,1);renderHubs();renderAdmin();saveState();
+}
+
+// ════════════════════════════════════════════════
+//  FLIGHT BOARD — LIVE BLOCK TIME TRACKING
+// ════════════════════════════════════════════════
+function addFlightRow(flt, isAI){
+  const tbody=document.getElementById('flight-tbody');
+  document.getElementById('flight-empty').style.display='none';
+  const {fn, origin, dest, ac, pilot, startTime, blockHours, freight} = flt;
+  const durationMs = blockHours * 3600 * 1000;
+  const etaMs = startTime + durationMs;
+
+  function etaStr(ms){
+    const d=new Date(ms);
+    return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`;
+  }
+  function remStr(ms){
+    const rem = ms - Date.now();
+    if(rem<=0) return 'Arrived';
+    const h=Math.floor(rem/3600000);
+    const m=Math.floor((rem%3600000)/60000);
+    return h>0?`${h}h ${m}m rem`:`${m}m rem`;
+  }
+  function progPct(){
+    const elapsed = Date.now() - startTime;
+    return Math.min(100, Math.round(elapsed/durationMs*100));
+  }
+
+  const pCell = isAI ? `<span class="badge b-blue">AI</span> ${pilot.replace('AI ','')}` : pilot;
+  const pct = progPct();
+  const barId = 'fprog-' + fn;
+  const remId = 'frem-'  + fn;
+  const etaId = 'feta-'  + fn;
+
+  const tr = document.createElement('tr');
+  tr.id = 'frow-' + fn;
+  tr.innerHTML = `
+    <td>${fn}</td>
+    <td><strong style="color:var(--gold)">${origin}</strong><span style="color:var(--text-mute)">→</span><strong style="color:var(--gold)">${dest}</strong>
+      <div class="flight-prog-bar"><div class="flight-prog-fill" id="${barId}" style="width:${pct}%"></div></div>
+    </td>
+    <td>${ac}</td>
+    <td>${pCell}</td>
+    <td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>
+    <td class="flight-eta-cell" id="${etaId}">${etaStr(etaMs)}<span class="flight-eta-rem" id="${remId}">${remStr(etaMs)}</span></td>
+    <td>${freight.toLocaleString()}</td>
+    <td>${Math.round(freight/210000*100)}%</td>`;
+  tbody.prepend(tr);
+  while(tbody.children.length>12) tbody.removeChild(tbody.lastChild);
+  S.totalFlights++;
+  document.getElementById('s-active').textContent = liveFlights.filter(f=>Date.now()<f.startTime+f.blockHours*3600000).length;
+  document.getElementById('sum-flights').textContent = S.totalFlights;
+}
+
+// Update all live flight progress every 30 seconds
+setInterval(()=>{
+  const now = Date.now();
+  liveFlights.forEach(flt=>{
+    const durationMs = flt.blockHours * 3600000;
+    const etaMs = flt.startTime + durationMs;
+    const pct = Math.min(100, Math.round((now - flt.startTime)/durationMs*100));
+    const bar = document.getElementById('fprog-' + flt.fn);
+    const rem = document.getElementById('frem-'  + flt.fn);
+    const row = document.getElementById('frow-'  + flt.fn);
+    if(bar) bar.style.width = pct + '%';
+    if(rem){
+      const r = etaMs - now;
+      if(r<=0){
+        rem.textContent = 'Arrived';
+        if(row) row.querySelector('.badge').className='badge b-gray';
+      } else {
+        const h=Math.floor(r/3600000); const m=Math.floor((r%3600000)/60000);
+        rem.textContent = h>0?`${h}h ${m}m rem`:`${m}m rem`;
+      }
+    }
+  });
+  // Prune finished flights from liveFlights array after 2h past ETA
+  const cutoff = now - 7200000;
+  while(liveFlights.length && liveFlights[0].startTime + liveFlights[0].blockHours*3600000 < cutoff) liveFlights.shift();
+  document.getElementById('s-active').textContent = liveFlights.filter(f=>now < f.startTime+f.blockHours*3600000).length;
+}, 30000);
+
+
+
+function updateLoadBar(ac,freight){
+  S.loadBars[ac]=(S.loadBars[ac]||0)+freight;
+  const maxMap={'Boeing 747-400F':228000,'McDonnell MD-11F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
+  const max=maxMap[ac]||200000;
+  const pct=Math.min(99,Math.round(S.loadBars[ac]/max*100));
+  const key=ac.replace(/[^a-z0-9]/gi,'');
+  const container=document.getElementById('load-bars');
+  const placeholder=container.querySelector('div[style*="color:var(--text-mute)"]');
+  if(placeholder) container.innerHTML='';
+  let wrap=document.getElementById('lb-'+key);
+  if(!wrap){
+    wrap=document.createElement('div');wrap.className='bar-wrap';wrap.id='lb-'+key;
+    wrap.innerHTML=`<div class="bar-header"><span>${ac}</span><span id="lbv-${key}">${S.loadBars[ac].toLocaleString()} lbs — ${pct}%</span></div><div class="bar-track"><div class="bar-fill bf-gold" id="lbf-${key}" style="width:${pct}%"></div></div>`;
+    container.appendChild(wrap);
+  } else {
+    const v=document.getElementById('lbv-'+key),f=document.getElementById('lbf-'+key);
+    if(v) v.textContent=`${S.loadBars[ac].toLocaleString()} lbs — ${pct}%`;
+    if(f){f.style.width=pct+'%';f.className='bar-fill '+(pct>85?'bf-red':pct>65?'bf-gold':'bf-green');}
+  }
+}
+
+// ════════════════════════════════════════════════
+//  AI FLIGHT ENGINE — REAL BLOCK TIMES
+// ════════════════════════════════════════════════
+
+// ── Real UPS block times (hours) ──────────────────────────────────────────────
+const blockTimeMap = {
+  // International — Transatlantic
+  'KSDF-EDDK':9.5,  'EDDK-KSDF':9.5,
+  'KPHL-EDDK':8.5,  'EDDK-KPHL':8.5,
+  'KPHL-EGSS':7.5,  'EGSS-KPHL':7.5,
+  'KSDF-OMDB':14.5, 'OMDB-KSDF':14.5,
+  // International — Transpacific
+  'KSDF-VHHH':16.5, 'VHHH-KSDF':16.5,
+  'KSDF-ZPBH':16.0, 'ZPBH-KSDF':16.0,
+  'KSDF-ZSPD':15.5, 'ZSPD-KSDF':15.5,
+  'KSDF-WMKK':18.5, 'WMKK-KSDF':18.5,
+  'EDDK-VHHH':11.5, 'VHHH-EDDK':11.5,
+  // Via Anchorage relay
+  'KSDF-PANC':8.0,  'PANC-KSDF':8.5,
+  'PANC-VHHH':9.0,  'VHHH-PANC':9.5,
+  'PANC-ZPBH':8.5,  'ZPBH-PANC':9.0,
+  // Domestic hub routes
+  'KSDF-KPHL':1.5,  'KPHL-KSDF':1.5,
+  'KSDF-KONT':4.5,  'KONT-KSDF':4.5,
+  'KSDF-KRFD':1.25, 'KRFD-KSDF':1.25,
+  'KSDF-KMIA':2.5,  'KMIA-KSDF':2.5,
+  'KSDF-KCLT':1.5,  'KCLT-KSDF':1.5,
+  'KSDF-KDFW':2.5,  'KDFW-KSDF':2.5,
+  'KSDF-KSEA':5.0,  'KSEA-KSDF':5.0,
+  'KSDF-KATL':1.5,  'KATL-KSDF':1.5,
+  'KSDF-KPIT':1.25, 'KPIT-KSDF':1.25,
+  'KSDF-PANC':8.0,
+  'KPHL-KSDF':1.5,
+  // Feeder / regional
+  'KSDF-KLEX':0.75, 'KLEX-KSDF':0.75,
+  'KSDF-KHSV':1.25, 'KHSV-KSDF':1.25,
+  'KSDF-KBNA':0.75, 'KBNA-KSDF':0.75,
+  'KSDF-KIND':0.75, 'KIND-KSDF':0.75,
+  'KSDF-KCVG':0.5,  'KCVG-KSDF':0.5,
+};
+function blockTime(o,d){
+  return blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o] || 3.0;
+}
+
+// ── Real UPS scheduled flights (UTC departure hour, flight number, route, aircraft) ──
+// Based on actual UPS Airlines published operations. Times in UTC.
+const UPS_SCHEDULE = [
+  // ── Nightly bank from KSDF (approx 05:00-10:00 UTC = 1am-6am EST) ──
+  { fn:'5X3',   dep:6,  orig:'KSDF', dest:'EDDK', ac:'Boeing 747-8F' },
+  { fn:'5X4',   dep:19, orig:'EDDK', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X7',   dep:7,  orig:'KSDF', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X8',   dep:14, orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X17',  dep:7,  orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },
+  { fn:'5X18',  dep:14, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X37',  dep:8,  orig:'KSDF', dest:'PANC', ac:'Boeing 747-8F' },
+  { fn:'5X38',  dep:18, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X15',  dep:8,  orig:'KSDF', dest:'ZSPD', ac:'McDonnell MD-11F'    },
+  { fn:'5X16',  dep:15, orig:'ZSPD', dest:'KSDF', ac:'McDonnell MD-11F'    },
+  { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },
+  { fn:'5X748', dep:22, orig:'OMDB', dest:'KSDF', ac:'Boeing 747-8F' },
+  { fn:'5X63',  dep:9,  orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },
+  { fn:'5X64',  dep:20, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X31',  dep:9,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },
+  { fn:'5X32',  dep:19, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X271', dep:9,  orig:'EDDK', dest:'VHHH', ac:'Boeing 747-8F' },
+  { fn:'5X272', dep:22, orig:'VHHH', dest:'EDDK', ac:'Boeing 747-8F' },
+  // ── Domestic overnight (approx 05:00-12:00 UTC) ──
+  { fn:'5X101', dep:6,  orig:'KSDF', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'5X102', dep:10, orig:'KPHL', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X201', dep:5,  orig:'KSDF', dest:'KONT', ac:'Boeing 757-200F' },
+  { fn:'5X202', dep:9,  orig:'KONT', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X301', dep:6,  orig:'KSDF', dest:'KRFD', ac:'Boeing 757-200F' },
+  { fn:'5X302', dep:8,  orig:'KRFD', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X401', dep:5,  orig:'KSDF', dest:'KMIA', ac:'Boeing 767-300F' },
+  { fn:'5X402', dep:9,  orig:'KMIA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X501', dep:6,  orig:'KSDF', dest:'KDFW', ac:'Boeing 757-200F' },
+  { fn:'5X601', dep:5,  orig:'KSDF', dest:'KSEA', ac:'Boeing 767-300F' },
+  { fn:'5X602', dep:14, orig:'KSEA', dest:'KSDF', ac:'Boeing 767-300F' },
+  { fn:'5X701', dep:6,  orig:'KSDF', dest:'KATL', ac:'Boeing 757-200F' },
+  { fn:'5X702', dep:10, orig:'KATL', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X801', dep:6,  orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
+  { fn:'5X802', dep:14, orig:'KPIT', dest:'KSDF', ac:'McDonnell MD-11F'    },
+  { fn:'5X803', dep:19, orig:'KSDF', dest:'KPIT', ac:'McDonnell MD-11F'    },
+  { fn:'5X805', dep:5,  orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
+  // ── Feeder / regional ──
+  { fn:'5X901', dep:6,  orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'5X902', dep:9,  orig:'KLEX', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X911', dep:7,  orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F'   },
+  { fn:'5X912', dep:10, orig:'KHSV', dest:'KSDF', ac:'Boeing 757-200F'   },
+  { fn:'5X921', dep:6,  orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'5X922', dep:8,  orig:'KBNA', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X931', dep:6,  orig:'KSDF', dest:'KIND', ac:'Boeing 757-200F' },
+  { fn:'5X932', dep:8,  orig:'KIND', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'5X941', dep:5,  orig:'KSDF', dest:'KCVG', ac:'Boeing 757-200F' },
+  { fn:'5X942', dep:7,  orig:'KCVG', dest:'KSDF', ac:'Boeing 757-200F' },
+];
+
+// Which scheduled flights should currently be airborne?
+function getActiveScheduledFlights(){
+  const now = Date.now();
+  const utcH = new Date().getUTCHours();
+  const active = [];
+  UPS_SCHEDULE.forEach(sched => {
+    const bt = blockTime(sched.orig, sched.dest);
+    const depMs = sched.dep * 3600000;
+    const dayMs = 86400000;
+    // Check today's and yesterday's departure
+    [-1, 0].forEach(dayOffset => {
+      const midnight = new Date();
+      midnight.setUTCHours(0,0,0,0);
+      const startTime = midnight.getTime() + dayOffset*dayMs + depMs;
+      const eta = startTime + bt*3600000;
+      // Is this flight currently airborne? (departed but not arrived, within +2h window)
+      if(now >= startTime && now < eta + 7200000){
+        active.push({
+          fn: sched.fn,
+          origin: sched.orig,
+          dest: sched.dest,
+          ac: sched.ac,
+          pilot: 'AI — ' + sched.fn,
+          startTime,
+          blockHours: bt,
+          freight: Math.floor(Math.random()*50000+50000),
+          revenue: 0,
+          scheduled: true,
+        });
+      }
+    });
+  });
+  // deduplicate by fn
+  const seen = new Set();
+  return active.filter(f=>{ if(seen.has(f.fn)) return false; seen.add(f.fn); return true; });
+}
+
+// routeMap kept for legacy AI trigger compatibility
+const routeMap={
+  longhaul:[['KSDF','EDDK','B747-400F'],['KSDF','VHHH','B747-400F'],['KSDF','OMDB','B747-400F'],['KPHL','EDDK','B767-300F']],
+  domestic:[['KSDF','KPHL','B767-300F'],['KSDF','KONT','B757-200F'],['KSDF','KPIT','MD-11F'],['KSDF','KMIA','B767-300F']],
+  feeder:[['KSDF','KLEX','B757-200F'],['KSDF','KHSV','ATR-72F'],['KSDF','KBNA','B757-200F']],
+  any:[['KSDF','EDDK','B747-400F'],['KSDF','KPHL','B767-300F'],['KSDF','KLEX','B757-200F']]
+};
+const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,248000],'Boeing 747-200F':[100000,230000],'Boeing 747-100F':[90000,220000],'McDonnell Douglas MD-11F':[90000,200000],'McDonnell MD-11F':[90000,200000],'Boeing 767-300F':[65000,116000],'Boeing 767-300ERF':[65000,116000],'Airbus A300-600F':[80000,140000],'Airbus A300-600RF':[80000,140000],'Boeing 757-200F':[50000,116000],'Boeing 757-300F':[60000,124000],'Boeing 727-200F':[30000,60000],'Boeing 727-100F':[20000,44000],'Douglas DC-8F':[35000,95000],'B747-400F':[120000,248000],'MD-11F':[90000,200000],'B767-300F':[65000,116000],'B757-200F':[50000,116000]};
+
+// Active live flights: { fn, origin, dest, ac, pilot, startTime, blockHours, freight, revenue }
+const liveFlights = [];
+
+function triggerAI(id){
+  const p=S.pilots.find(x=>x.id===id);if(!p) return;
+  const pool=routeMap[p.route]||routeMap.any;
+  const [origin,dest,ac]=pool[Math.floor(Math.random()*pool.length)];
+  const [fmin,fmax]=freightMap[ac]||[50000,150000];
+  const freight=Math.floor(Math.random()*(fmax-fmin)+fmin);
+  const baseRate=p.rank==='Global Captain'?12:p.rank==='Regional F/O'?8.5:4;
+  const revenue=Math.round(freight*baseRate*.80);
+  const fn='5Y'+(Math.floor(Math.random()*900)+100);
+  const fuelCost=Math.round(revenue*.18);
+  const blockHours=blockTime(origin,dest);
+
+  p.flights++;p.hours+=Math.round(blockHours);p.earned+=revenue;
+  p.xp=Math.min(100,p.xp+Math.floor(Math.random()*3)+1);
+  checkRankUp(p);
+
+  S.treasury+=revenue-fuelCost;
+  S.sessionRevenue+=revenue;
+  S.sessionCosts+=fuelCost;
+  S.totalFreight+=freight;
+
+  refreshTreasury();
+  document.getElementById('sum-ai-rev').textContent='$'+S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent=S.totalFreight.toLocaleString()+' lbs';
+
+  // Add to live flights array for real tracking
+  const startTime = Date.now();
+  const flightObj = { fn, origin, dest, ac, pilot: p.name, startTime, blockHours, freight, revenue };
+  liveFlights.push(flightObj);
+
+  addFlightRow(flightObj, true);
+  addAILog(p.name,fn,origin,dest,revenue);
+  addLedgerRow(`${fn} Revenue — ${p.name}`,revenue);
+  updateLoadBar(ac,freight);
+  saveState();
+}
+
+
+function checkRankUp(p){
+  const old=p.rank;
+  if(p.hours>=1000&&p.rank!=='Global Captain'){p.rank='Global Captain';p.xp=10;}
+  else if(p.hours>=250&&p.rank==='Feeder Pilot'){p.rank='Regional F/O';p.xp=5;}
+  if(p.rank!==old) addAILog(p.name,'—','—','—',0,`promoted to <span style="color:var(--gold-lt)">${p.rank}</span> 🎖`);
+}
+
+// ── Leader election (only one tab fires scheduled flights) ───────────────────
+const CYCLE_KEY = 'vups_cycle_leader';
+const CYCLE_TTL = 70000;
+const _tabId = Math.random().toString(36).slice(2);
+
+function amLeader(){
+  try {
+    const raw = localStorage.getItem(CYCLE_KEY);
+    if(!raw) return true;
+    const {ts,id} = JSON.parse(raw);
+    if(Date.now()-ts > CYCLE_TTL) return true;
+    return id === _tabId;
+  } catch(e){ return true; }
+}
+function claimLeadership(){
+  try{ localStorage.setItem(CYCLE_KEY, JSON.stringify({ts:Date.now(),id:_tabId})); }catch(e){}
+}
+
+// ── Seed live flights from UPS schedule on load ───────────────────────────────
+function seedScheduledFlights(){
+  if(!amLeader()) return;
+  const scheduled = getActiveScheduledFlights();
+  scheduled.forEach(f => {
+    // Only add if not already tracked
+    const alreadyTracked = liveFlights.some(lf => lf.fn === f.fn);
+    if(!alreadyTracked){
+      liveFlights.push(f);
+      addFlightRow(f, true);
+      const now = new Date();
+      const t = String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0')+'Z';
+      addAILog('Scheduled', f.fn, f.origin, f.dest, 0, f.fn+' departed '+f.origin+' at scheduled time');
+    }
+  });
+  document.getElementById('s-active').textContent = liveFlights.filter(f=>Date.now()<f.startTime+f.blockHours*3600000).length;
+  saveState();
+}
+
+// ── Auto-cycle: check for new scheduled departures every 5 minutes ───────────
+setInterval(()=>{
+  if(!amLeader()) return;
+  claimLeadership();
+  seedScheduledFlights();
+  // Also allow manual AI pilots to fly extra routes
+  S.pilots.filter(p=>p.type==='ai').forEach(p=>{
+    if(Math.random()<0.15) triggerAI(p.id); // much lower rate — scheduled flights carry the load
+  });
+}, 300000); // every 5 min
+
+// Heartbeat
+setInterval(()=>{ if(amLeader()) claimLeadership(); }, 20000);
+
+// ════════════════════════════════════════════════
+//  LOGGING
+// ════════════════════════════════════════════════
+function addAILog(name,fn,origin,dest,revenue,customMsg){
+  const log=document.getElementById('ai-log');if(!log) return;
+  const now=new Date();
+  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
+  const msg=customMsg||`completed ${fn} ${origin}→${dest} <span class="earn">+$${revenue.toLocaleString()}</span>`;
+  if(log.children.length===1&&log.children[0].querySelector('.ai-time')?.textContent==='--:--Z') log.innerHTML='';
+  const div=document.createElement('div');div.className='ai-line';
+  div.innerHTML=`<span class="ai-time">${t}</span><span><span class="hi">${name}</span> ${msg}</span>`;
+  log.prepend(div);
+  while(log.children.length>8) log.removeChild(log.lastChild);
+}
+
+function addLedgerRow(desc,amount){
+  const tbody=document.getElementById('ledger-tbody');if(!tbody) return;
+  const now=new Date();
+  const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}`;
+  const isPos=amount>=0;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${t}</td><td>${desc}</td><td class="${isPos?'li-pos':'li-neg'}">${isPos?'+':'-'}$${Math.abs(amount).toLocaleString()}</td><td>$${S.treasury.toLocaleString()}</td>`;
+  tbody.prepend(tr);
+  while(tbody.children.length>15) tbody.removeChild(tbody.lastChild);
+}
+
+// ════════════════════════════════════════════════
+//  SUPABASE — REAL-TIME SHARED STATE
+//  All users see the same data, live.
+// ════════════════════════════════════════════════
+const SUPA_URL  = 'https://mpmvfqkmvvbnsqvtvlnu.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0';
+const SAVE_KEY  = 'vups_state_v2'; // local cache key
+
+const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let _supaConnected = false;
+let _saveTimeout = null;
+
+function setSyncStatus(connected, label){
+  _supaConnected = connected;
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if(dot) dot.style.background = connected ? 'var(--green-lt)' : 'var(--red-lt)';
+  if(lbl) lbl.textContent = label || (connected ? 'Live — synced' : 'Offline — local only');
+}
+
+// ── Snapshot helpers ──────────────────────────────
+function buildSnap(){
+  return {
+    treasury:        S.treasury,
+    sessionRevenue:  S.sessionRevenue,
+    sessionCosts:    S.sessionCosts,
+    totalFlights:    S.totalFlights,
+    totalFreight:    S.totalFreight,
+    nextId:          S.nextId,
+    pilots:          S.pilots,
+    hubs:            S.hubs,
+    executives:      S.executives,
+    news:            S.news,
+    ownedFleet:      S.ownedFleet,
+    dispatcherRoutes:S.dispatcherRoutes,
+    liveFlightsSnap: liveFlights.map(f=>({...f})),
+  };
+}
+
+function applySnap(snap){
+  if(!snap) return;
+  if(snap.treasury          !== undefined) S.treasury          = snap.treasury;
+  if(snap.sessionRevenue    !== undefined) S.sessionRevenue    = snap.sessionRevenue;
+  if(snap.sessionCosts      !== undefined) S.sessionCosts      = snap.sessionCosts;
+  if(snap.totalFlights      !== undefined) S.totalFlights      = snap.totalFlights;
+  if(snap.totalFreight      !== undefined) S.totalFreight      = snap.totalFreight;
+  if(snap.nextId            !== undefined) S.nextId            = snap.nextId;
+  if(snap.pilots            && snap.pilots.length)          S.pilots          = snap.pilots;
+  if(snap.hubs              && snap.hubs.length)            S.hubs            = snap.hubs;
+  if(snap.executives        && snap.executives.length)      S.executives      = snap.executives;
+  if(snap.news              && snap.news.length)            S.news            = snap.news;
+  if(snap.ownedFleet)       S.ownedFleet      = snap.ownedFleet;
+  if(snap.dispatcherRoutes) S.dispatcherRoutes = snap.dispatcherRoutes;
+  if(snap.liveFlightsSnap){
+    liveFlights.length = 0;
+    snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
+  }
+}
+
+function refreshAllUI(){
+  refreshTreasury();
+  updateCrewCounts();
+  renderHubs();
+  document.getElementById('sum-ai-rev').textContent  = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  document.getElementById('sum-flights').textContent = S.totalFlights;
+  // Re-render whichever page is active
+  const active = document.querySelector('.page.active');
+  if(active){
+    const id = active.id.replace('page-','');
+    if(id==='crew')       renderCrew();
+    if(id==='leadership') renderLeadership();
+    if(id==='news')       renderNews('all');
+    if(id==='fleet')      renderFleet();
+    if(id==='economy')    renderEconomy();
+    if(id==='hubs')       renderHubs();
+    if(id==='admin')      renderAdmin();
+    if(id==='dispatcher') renderDispatcher();
+    if(id==='livemap')    onMapPageOpen();
+  }
+}
+
+// ── Save to Supabase (debounced 800ms) ────────────────────────────────────
+function saveState(){
+  // Always write to local cache immediately
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(buildSnap())); } catch(e){}
+  // Debounce remote write
+  clearTimeout(_saveTimeout);
+  _saveTimeout = setTimeout(async ()=>{
+    try {
+      const snap = buildSnap();
+      const { error } = await _supa.from('state').upsert(
+        { key: 'main', value: snap, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if(error) throw error;
+      setSyncStatus(true, 'Saved · ' + new Date().toLocaleTimeString());
+    } catch(e){
+      console.warn('Supabase save error:', e);
+      setSyncStatus(false, 'Save failed — local only');
+    }
+  }, 800);
+}
+
+// ── Load from Supabase (or localStorage fallback) ─────────────────────────
+async function loadState(){
+  // Supabase is source of truth — fetch it first, only fall back to localStorage if offline
+  try {
+    setSyncStatus(false, 'Connecting...');
+    const { data, error } = await _supa.from('state').select('value,updated_at').eq('key','main').single();
+    if(error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows (fresh start)
+
+    if(data && data.value){
+      // Supabase has data — use it, update local cache
+      applySnap(data.value);
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(data.value)); } catch(e){}
+      setSyncStatus(true, 'Live — synced');
+    } else {
+      // No Supabase data — fresh start, clear local cache too so old data doesnt persist
+      try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+      setSyncStatus(true, 'Live — fresh start');
+    }
+    refreshAllUI();
+  } catch(e){
+    // Offline fallback — use localStorage only
+    console.warn('Supabase load error:', e);
+    setSyncStatus(false, 'Offline — using local data');
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(raw) { applySnap(JSON.parse(raw)); refreshAllUI(); }
+    } catch(e2){}
+  }
+}
+
+// ── Real-time subscription — push changes to all connected browsers ────────
+function subscribeRealtime(){
+  _supa
+    .channel('state-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'state', filter: 'key=eq.main' },
+      (payload) => {
+        if(!payload.new || !payload.new.value) return;
+        applySnap(payload.new.value);
+        try { localStorage.setItem(SAVE_KEY, JSON.stringify(payload.new.value)); } catch(e){}
+        refreshAllUI();
+        setSyncStatus(true, 'Live · updated ' + new Date().toLocaleTimeString());
+      }
+    )
+    .subscribe((status)=>{
+      if(status === 'SUBSCRIBED') setSyncStatus(true, 'Live — real-time active');
+      if(status === 'CLOSED' || status === 'CHANNEL_ERROR') setSyncStatus(false, 'Reconnecting...');
+    });
+}
+
+// Auto-save every 60s as heartbeat
+setInterval(saveState, 60000);
+window.addEventListener('beforeunload', saveState);
+
+// (no _origRefreshTreasury stub needed)
+
+async function hardReset(){
+  if(!confirm('Reset ALL data to defaults for ALL users?\n\nThis wipes Supabase + local cache and cannot be undone.')) return;
+  const btn = event.target;
+  btn.textContent = 'Resetting...';
+  btn.disabled = true;
+  try {
+    // 1. Delete from Supabase
+    await _supa.from('state').delete().eq('key','main');
+    // 2. Wipe all localStorage keys for this app
+    ['vups_state_v2','vups_stocks','vups_cycle_leader'].forEach(k=>{
+      try{ localStorage.removeItem(k); }catch(e){}
+    });
+    // 3. Reload — page will start fresh with default state
+    location.reload();
+  } catch(e){
+    alert('Reset failed: ' + e.message + '\n\nTry running this in Supabase SQL Editor:\ndelete from state where key = \'main\';');
+    btn.textContent = '⚠ Reset All Saved Data';
+    btn.disabled = false;
+  }
+}
+
+async function hardReset(){
+  if(!confirm('Reset ALL data to defaults for ALL users? This wipes Supabase + local cache and cannot be undone.')) return;
+  const btn = document.querySelector('[onclick="hardReset()"]');
+  if(btn){ btn.textContent='Resetting...'; btn.disabled=true; }
+  try {
+    await _supa.from('state').delete().eq('key','main');
+    ['vups_state_v2','vups_stocks','vups_cycle_leader'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} });
+    location.reload();
+  } catch(e){
+    alert('Reset failed: '+e.message);
+    if(btn){ btn.textContent='Reset All Saved Data'; btn.disabled=false; }
+  }
+}
+
+function distributeProfit(){
+  const humans=S.pilots.filter(p=>p.type==='human');
+  if(!humans.length){alert('No human crew enrolled yet. Add crew first.');return}
+  const pool=Math.round(S.treasury*.07);
+  const totalH=humans.reduce((a,p)=>a+Math.max(p.hours,1),0);
+  humans.forEach(p=>{p.earned+=Math.round((Math.max(p.hours,1)/totalH)*pool)});
+  S.treasury-=pool;refreshTreasury();
+  addLedgerRow('Profit share distributed',-pool);
+  alert(`$${pool.toLocaleString()} distributed across ${humans.length} crew member${humans.length!==1?'s':''}.`);
+  renderEconomy();
+  saveState();
+}
+
+// ════════════════════════════════════════════════
+//  METAR
+// ════════════════════════════════════════════════
+const metarPool=['KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180','KSDF 012054Z 22012KT 6SM FEW018 BKN040 09/06 A2985 RMK AO2','KSDF 012354Z 19015G22KT 3SM -TSRA OVC008 07/06 A2978 RMK AO2','KSDF 020054Z 21010KT 10SM SCT025 BKN060 11/05 A2990 RMK AO2'];
+let metarIdx=0;
+function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getElementById('metar-text').textContent=metarPool[metarIdx];}
+
+
+// ════════════════════════════════════════════════
+//  LIVE FLIGHT MAP — Leaflet
+// ════════════════════════════════════════════════
+
+// Airport coordinates: [lat, lon]
+const AIRPORT_COORDS = {
+  // UPS Primary Hubs
+  KSDF:[38.1744,-85.7364],  // Louisville — Worldport
+  KPHL:[39.8729,-75.2437],  // Philadelphia — East Coast Hub
+  KONT:[34.0560,-117.6009], // Ontario CA — West Coast Hub
+  KRFD:[42.1954,-89.0972],  // Rockford IL — Midwest Hub
+  KMIA:[25.7959,-80.2870],  // Miami — Latin America Hub
+  EDDK:[50.8659,7.1427],    // Cologne — Europe Hub
+  VHHH:[22.3080,113.9145],  // Hong Kong — Asia Hub
+  ZPBH:[22.6393,113.8107],  // Shenzhen — China Hub
+  ZSPD:[31.1443,121.8083],  // Shanghai Pudong
+  WMKK:[2.7456,101.7099],   // Kuala Lumpur
+  OMDB:[25.2528,55.3657],   // Dubai
+  PANC:[61.1744,-149.9964], // Anchorage — Pacific relay
+  EGSS:[51.8850,0.2350],    // London Stansted
+  // Domestic spokes
+  KPIT:[40.4915,-80.2329],  // Pittsburgh
+  KSTL:[38.7487,-90.3700],  // St. Louis
+  KEWR:[40.6895,-74.1745],  // Newark
+  KPHX:[33.4373,-112.0078], // Phoenix
+  KHOU:[29.6454,-95.2789],  // Houston
+  KMEM:[35.0424,-89.9767],  // Memphis
+  EPWA:[52.1657,20.9671],   // Warsaw
+  ZBAA:[40.0799,116.5850],  // Beijing Capital
+  RKSI:[37.4692,126.4505],  // Seoul Incheon
+  KATL:[33.6407,-84.4277],  // Atlanta
+  KDFW:[32.8998,-97.0403],  // Dallas/Fort Worth
+  KSEA:[47.4502,-122.3088], // Seattle
+  KCLT:[35.2140,-80.9431],  // Charlotte
+  KLEX:[38.0366,-84.6059],  // Lexington
+  KHSV:[34.6372,-86.7752],  // Huntsville
+  KBNA:[36.1245,-86.6782],  // Nashville
+  KIND:[39.7173,-86.2944],  // Indianapolis
+  KCVG:[39.0489,-84.6678],  // Cincinnati
+  KJFK:[40.6398,-73.7789],  // New York JFK
+  KLAX:[33.9425,-118.4085], // Los Angeles
+  KORD:[41.9742,-87.9073],  // Chicago OHare
+  CYYZ:[43.6777,-79.6248],  // Toronto
+  LFPG:[49.0097,2.5479],    // Paris CDG
+  RJAA:[35.7653,140.3864],  // Tokyo Narita
+};
+function getCoords(icao){ return AIRPORT_COORDS[icao]||null; }
+
+function flightColor(origin,dest){
+  const bt=blockTime(origin,dest);
+  return bt>=8?'#c8920a':bt>=3?'#3498db':'#35c270';
+}
+
+// Great-circle interpolation
+function gcPoint(lat1,lon1,lat2,lon2,t){
+  const R=Math.PI/180,D=180/Math.PI;
+  const p1=lat1*R,l1=lon1*R,p2=lat2*R,l2=lon2*R;
+  const d=2*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin((l2-l1)/2)**2));
+  if(d<0.0001) return [lat1,lon1];
+  const A=Math.sin((1-t)*d)/Math.sin(d), B=Math.sin(t*d)/Math.sin(d);
+  const x=A*Math.cos(p1)*Math.cos(l1)+B*Math.cos(p2)*Math.cos(l2);
+  const y=A*Math.cos(p1)*Math.sin(l1)+B*Math.cos(p2)*Math.sin(l2);
+  const z=A*Math.sin(p1)+B*Math.sin(p2);
+  return [Math.atan2(z,Math.sqrt(x*x+y*y))*D, Math.atan2(y,x)*D];
+}
+
+function gcPolyline(lat1,lon1,lat2,lon2,steps=80){
+  // Split into multiple segments at antimeridian to prevent wrap-around lines
+  const pts=[];
+  let segment=[];
+  let prevLon=null;
+  for(let i=0;i<=steps;i++){
+    const p=gcPoint(lat1,lon1,lat2,lon2,i/steps);
+    if(prevLon!==null && Math.abs(p[1]-prevLon)>180){
+      // Crossed antimeridian — start new segment
+      pts.push(segment);
+      segment=[];
+    }
+    segment.push(p);
+    prevLon=p[1];
+  }
+  pts.push(segment);
+  return pts; // array of arrays
+}
+
+// Draw a possibly-split polyline (handles antimeridian)
+function addGcPolyline(pts, opts){
+  const layers=[];
+  pts.forEach(seg=>{
+    if(seg.length>1){
+      const l=L.polyline(seg,opts).addTo(_leafletMap);
+      layers.push(l);
+      _mapLayers.push(l);
+    }
+  });
+  return layers;
+}
+
+// ── Leaflet map instance ──────────────────────────────────────────────────
+let _leafletMap = null;
+let _mapLayers  = [];   // active flight layers
+let _mapHubLayers = []; // hub markers
+let _mapInterval = null;
+
+const PLANE_SVG = (color) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
+  <circle cx="12" cy="12" r="11" fill="rgba(14,11,9,0.7)" stroke="${color}" stroke-width="1.5"/>
+  <text x="12" y="16" text-anchor="middle" font-size="13" fill="${color}">✈</text>
+</svg>`;
+
+const HUB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20">
+  <polygon points="10,1 13,7 19,8 14.5,12.5 15.5,19 10,16 4.5,19 5.5,12.5 1,8 7,7" fill="#c8920a" stroke="#1a0e06" stroke-width="1"/>
+</svg>`;
+
+function initLeafletMap(){
+  if(_leafletMap) return;
+
+  _leafletMap = L.map('leaflet-map', {
+    center: [35, -20],
+    zoom: 2,
+    zoomControl: true,
+    attributionControl: true,
+    worldCopyJump: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 18,
+    minZoom: 2,
+  }).addTo(_leafletMap);
+
+  // Hub markers added when flights render
+}
+
+function clearMapLayers(){
+  _mapLayers.forEach(l => { if(_leafletMap) _leafletMap.removeLayer(l); });
+  _mapLayers = [];
+}
+
+function renderLiveMap(){
+  onMapPageOpen();
+}
+
+function refreshMapFlights(){
+  if(!_leafletMap){ renderLiveMap(); return; }
+  clearMapLayers();
+
+  const now = Date.now();
+  const active = liveFlights.filter(f=>{
+    const c1=getCoords(f.origin), c2=getCoords(f.dest);
+    return c1 && c2 && now < f.startTime + f.blockHours*3600000 + 7200000;
+  });
+
+  const flying = active.filter(f=>now < f.startTime+f.blockHours*3600000);
+  const cntEl = document.getElementById('map-flight-count');
+  if(cntEl) cntEl.textContent = flying.length + ' active flight'+(flying.length!==1?'s':'');
+
+  active.forEach(f=>{
+    const c1=getCoords(f.origin), c2=getCoords(f.dest);
+    if(!c1||!c2) return;
+    const elapsed = now - f.startTime;
+    const totalMs = f.blockHours*3600000;
+    const frac    = Math.min(1, Math.max(0, elapsed/totalMs));
+    const arrived = frac >= 1;
+    const col     = flightColor(f.origin, f.dest);
+
+    // Full great-circle arc (faint, antimeridian-safe)
+    addGcPolyline(gcPolyline(c1[0],c1[1],c2[0],c2[1]), {
+      color: col, weight: 1.2, opacity: 0.2, dashArray: '6,6'
+    });
+
+    // Traveled portion (solid, brighter)
+    if(!arrived && frac>0.01){
+      addGcPolyline(gcPolyline(c1[0],c1[1],c2[0],c2[1], Math.max(3,Math.round(frac*80))).map(seg=>seg.slice(0, Math.ceil(seg.length*frac)+1)), {
+        color: col, weight: 2.5, opacity: 0.75
+      });
+    }
+
+    // Origin airport circle
+    const originCirc = L.circleMarker(c1, {
+      radius:5, color:col, fillColor:col, fillOpacity:0.8, weight:1.5
+    }).bindTooltip(f.origin, {permanent:false, direction:'top'})
+      .addTo(_leafletMap);
+    _mapLayers.push(originCirc);
+
+    // Dest airport circle
+    const destCirc = L.circleMarker(c2, {
+      radius:4, color:col, fillColor:'#1c1510', fillOpacity:0.9, weight:1.5
+    }).bindTooltip(f.dest, {permanent:false, direction:'top'})
+      .addTo(_leafletMap);
+    _mapLayers.push(destCirc);
+
+    // Plane marker at current position
+    if(!arrived){
+      const pos  = gcPoint(c1[0],c1[1],c2[0],c2[1],frac);
+      const icon = L.divIcon({
+        html: PLANE_SVG(col),
+        className: '',
+        iconSize: [28,28],
+        iconAnchor: [14,14],
+      });
+      const rem    = Math.max(0, totalMs-elapsed);
+      const hRem   = Math.floor(rem/3600000);
+      const mRem   = Math.floor((rem%3600000)/60000);
+      const pct    = Math.round(frac*100);
+      const etaD   = new Date(f.startTime+totalMs);
+      const etaStr = String(etaD.getUTCHours()).padStart(2,'0')+':'+String(etaD.getUTCMinutes()).padStart(2,'0')+'Z';
+
+      const plane = L.marker(pos, {icon})
+        .bindPopup(`
+<div style="font-family:'Barlow Condensed',sans-serif;min-width:180px">
+  <div style="font-size:1.1rem;font-weight:700;color:${col};border-bottom:1px solid #2e1f12;padding-bottom:.3rem;margin-bottom:.4rem">${f.fn}</div>
+  <div style="font-size:.85rem;color:#d4c4a8"><strong>${f.origin}</strong> → <strong>${f.dest}</strong></div>
+  <div style="font-size:.78rem;color:#7a6a52;margin-top:.2rem">${f.ac} · ${f.pilot.replace('AI ','')}</div>
+  <div style="margin-top:.5rem;height:4px;background:#1c1510;border-radius:2px;overflow:hidden">
+    <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:.7rem;color:#7a6a52;margin-top:.2rem">
+    <span>${pct}% complete</span>
+    <span>ETA ${etaStr}</span>
+  </div>
+  <div style="font-size:.72rem;color:#35c270;margin-top:.3rem">${hRem>0?hRem+'h ':''} ${mRem}m remaining</div>
+</div>`, {maxWidth:240})
+        .addTo(_leafletMap);
+      _mapLayers.push(plane);
+    }
+  });
+
+  // Draw hub markers
+  S.hubs.forEach(h=>{
+    const coords=getCoords(h.icao);
+    if(!coords) return;
+    const icon=L.divIcon({html:HUB_SVG,className:'',iconSize:[20,20],iconAnchor:[10,10]});
+    const m=L.marker(coords,{icon})
+      .bindPopup('<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:1rem;color:#c8920a">'+h.icao+'</div><div style="font-size:.78rem;color:#7a6a52">'+h.name+'</div>')
+      .addTo(_leafletMap);
+    _mapLayers.push(m);
+  });
+
+  // Also mark all active airports
+  const shownAirports=new Set();
+  active.forEach(f=>{
+    [f.origin,f.dest].forEach(icao=>{
+      if(shownAirports.has(icao)) return;
+      shownAirports.add(icao);
+      const coords=getCoords(icao);
+      if(!coords) return;
+      const dot=L.circleMarker(coords,{radius:4,color:'#c8920a',fillColor:'#c8920a',fillOpacity:0.6,weight:1})
+        .bindTooltip(icao,{permanent:false,direction:'top',className:'leaflet-dark-tooltip'})
+        .addTo(_leafletMap);
+      _mapLayers.push(dot);
+    });
+  });
+
+  // Hub markers
+  S.hubs.forEach(h=>{
+    const coords=getCoords(h.icao); if(!coords) return;
+    const icon=L.divIcon({html:HUB_SVG,className:'',iconSize:[20,20],iconAnchor:[10,10]});
+    const m=L.marker(coords,{icon}).bindTooltip('<strong>'+h.icao+'</strong> '+h.name,{direction:'top'}).addTo(_leafletMap);
+    _mapLayers.push(m);
+  });
+
+  // Airport dots for all active routes
+  const shownAP=new Set();
+  active.forEach(f=>{[f.origin,f.dest].forEach(icao=>{
+    if(shownAP.has(icao)) return; shownAP.add(icao);
+    const coords=getCoords(icao); if(!coords) return;
+    const d=L.circleMarker(coords,{radius:4,color:'#c8920a',fillColor:'#c8920a',fillOpacity:0.5,weight:1})
+      .bindTooltip(icao,{permanent:false,direction:'top'}).addTo(_leafletMap);
+    _mapLayers.push(d);
+  });});
+
+  // Update flights table
+  updateMapTable(active, now);
+}
+
+function updateMapTable(active, now){
+  const tbody = document.getElementById('map-flights-tbody');
+  if(!tbody) return;
+  const flying = active.filter(f=>now < f.startTime+f.blockHours*3600000);
+  if(!flying.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:1rem">No active flights</td></tr>';
+    return;
+  }
+  tbody.innerHTML = flying.map(f=>{
+    const elapsed=now-f.startTime, totalMs=f.blockHours*3600000;
+    const pct=Math.min(100,Math.round(elapsed/totalMs*100));
+    const rem=Math.max(0,totalMs-elapsed);
+    const h=Math.floor(rem/3600000), m=Math.floor((rem%3600000)/60000);
+    const eta=new Date(f.startTime+totalMs);
+    const etaStr=String(eta.getUTCHours()).padStart(2,'0')+':'+String(eta.getUTCMinutes()).padStart(2,'0')+'Z';
+    const col=flightColor(f.origin,f.dest);
+    return `<tr>
+      <td style="color:${col};font-family:'Barlow Condensed',sans-serif;font-weight:700">${f.fn}</td>
+      <td><strong style="color:var(--gold)">${f.origin}</strong>→<strong style="color:var(--gold)">${f.dest}</strong></td>
+      <td>${f.ac}</td>
+      <td>${f.pilot.replace('AI ','')}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <div style="flex:1;height:4px;background:rgba(0,0,0,.4);border-radius:2px;min-width:60px">
+            <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
+          </div>
+          <span style="font-size:.65rem;color:var(--text-mute);white-space:nowrap">${pct}%</span>
+        </div>
+      </td>
+      <td style="white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.72rem">
+        ${etaStr}<br><span style="color:var(--text-mute);font-size:.62rem">${h>0?h+'h ':''} ${m}m rem</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// Refresh plane positions every 30s when map is open
+setInterval(()=>{
+  if(document.getElementById('page-livemap').classList.contains('active')){
+    refreshMapFlights();
+  }
+}, 30000);
+
+// Invalidate Leaflet size when map page becomes visible (fixes grey tiles)
+function onMapPageOpen(){
+  // Must wait for the page to be visible before Leaflet can measure the div
+  setTimeout(()=>{
+    const mapDiv = document.getElementById('leaflet-map');
+    if(!mapDiv) return;
+    if(!_leafletMap){
+      initLeafletMap();
+      setTimeout(()=>{ 
+        _leafletMap.invalidateSize(true);
+        refreshMapFlights();
+      }, 400);
+    } else {
+      _leafletMap.invalidateSize(true);
+      refreshMapFlights();
+    }
+  }, 150);
+}
+
+
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+
+// 1. Render with defaults immediately so page isn't blank
+refreshTreasury();
+renderHubs();
+initFinnhubBanner();
+updateCrewCounts();
+
+// 1b. Seed scheduled flights (real UPS operations)
+setTimeout(seedScheduledFlights, 2000);
+
+// 2. Load from Supabase (async — will update UI when ready)
+loadState().then(() => {
+  // Restore live flight rows after state loads
+  const now = Date.now();
+  liveFlights.forEach(f => {
+    if(now < f.startTime + f.blockHours * 3600000 + 7200000){
+      addFlightRow(f, true);
+    }
+  });
+  document.getElementById('s-active').textContent = liveFlights.filter(f => now < f.startTime + f.blockHours * 3600000).length;
+  document.getElementById('sum-ai-rev').textContent  = '$' + S.sessionRevenue.toLocaleString();
+  document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
+  document.getElementById('sum-flights').textContent = S.totalFlights;
+});
+
+// 3. Subscribe to real-time updates
+subscribeRealtime();
+
+// 4. Stock simulation
+fetchLiveStocks();
+</script>
+</body>
+</html>
