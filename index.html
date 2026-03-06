@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 /* ── TICKER ── */
 .ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:26px;display:flex;align-items:center;position:sticky;top:0;z-index:200}
-.ticker-track{display:flex;gap:3rem;animation:tick 55s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--text-mute);padding:0 2rem}
+.ticker-track{display:flex;gap:3rem;animation:tick 90s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--text-mute);padding:0 2rem}
 .ticker-track:hover{animation-play-state:paused}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .t-g{color:var(--green-lt)}.t-gold{color:var(--gold)}.t-b{color:var(--blue-lt)}
@@ -51,7 +51,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);height:48px;
 .mobile-nav .nav-link{padding:.65rem .5rem;font-size:.9rem}
 
 /* ── HERO ── */
-.hero{min-height:calc(100vh - 74px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 1.5rem 3rem;position:relative;overflow:hidden}
+.hero{min-height:calc(100vh - 74px);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:5rem 1.5rem 3rem;position:relative;overflow:hidden}
 .hero-bg-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(200,146,10,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(200,146,10,.035) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,black 10%,transparent 100%)}
 .hero-bg-scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px)}
 .hero-glow{position:absolute;top:15%;left:50%;transform:translateX(-50%);width:700px;height:450px;max-width:100vw;background:radial-gradient(ellipse,rgba(200,146,10,.1) 0%,transparent 70%);pointer-events:none}
@@ -171,7 +171,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:1.75
 @media(max-width:768px){
   .nav-links,.nav-right{display:none}
   .hamburger{display:flex}
-  .hero{min-height:auto;padding:3rem 1.25rem 2.5rem}
+  .hero{min-height:auto;padding:2.5rem 1.25rem 2.5rem}
   .hero-title{font-size:3.8rem}
   .cd-num{width:60px;height:56px;font-size:1.85rem}
   .cd-sep{font-size:1.85rem}
@@ -195,13 +195,13 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:1.75
 <div class="ticker">
   <div class="ticker-track" id="ticker-track">
     <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>
-    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-g">OPEN FOR RECRUITMENT</span></span>
+    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-r">CLOSED FOR RECRUITMENT</span></span>
     <span>Worldport — <span class="t-gold">KSDF</span> Louisville, KY</span>
     <span>Asia Hub — <span class="t-gold">VHHH</span> Hong Kong</span>
     <span>Europe Hub — <span class="t-gold">EDDK</span> Cologne/Bonn</span>
     <span>11 aircraft types &nbsp;·&nbsp; <span class="t-b">Real-time sync</span></span>
     <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>
-    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-g">OPEN FOR RECRUITMENT</span></span>
+    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-r">CLOSED FOR RECRUITMENT</span></span>
     <span>Worldport — <span class="t-gold">KSDF</span> Louisville, KY</span>
     <span>Asia Hub — <span class="t-gold">VHHH</span> Hong Kong</span>
     <span>Europe Hub — <span class="t-gold">EDDK</span> Cologne/Bonn</span>
