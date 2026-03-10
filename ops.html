@@ -336,16 +336,33 @@ tr:last-child td{border-bottom:none}
     <div class="login-title">Operations Portal</div>
     <div class="login-sub">Virtual UPS Airlines</div>
 
-    <!-- Tab switcher -->
+    <!-- Tab switcher: Admin | Crew | Apply -->
     <div style="display:flex;gap:0;margin-bottom:1.25rem;border:1px solid var(--border2);border-radius:3px;overflow:hidden">
-      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem;cursor:pointer">Sign In</button>
-      <button id="tab-signup-btn" onclick="showSignup()" style="flex:1;background:none;color:var(--text-dim);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem;cursor:pointer;border-left:1px solid var(--border2)">Apply</button>
+      <button id="tab-admin-btn" onclick="showAdminLogin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">&#x2B21; Admin</button>
+      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:none;color:var(--text-dim);border:none;border-left:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Crew</button>
+      <button id="tab-signup-btn" onclick="showSignup()" style="flex:1;background:none;color:var(--text-dim);border:none;border-left:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Apply</button>
     </div>
 
     <div class="login-err" id="login-err"></div>
 
-    <!-- Sign In -->
-    <div id="auth-signin">
+    <!-- Admin login — hardcoded credentials -->
+    <div id="auth-admin">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" id="a-user" placeholder="admin" autocomplete="off" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="a-pass" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.25rem">
+        <button class="btn btn-ghost" style="flex:1" onclick="guestAccess()">View Only</button>
+        <button class="btn btn-primary" style="flex:2" onclick="doAdminLogin()">Sign In</button>
+      </div>
+    </div>
+
+    <!-- Crew sign in — Supabase Auth -->
+    <div id="auth-signin" style="display:none">
       <div class="form-group">
         <label class="form-label">Email</label>
         <input class="form-input" type="email" id="l-email" placeholder="crew@vups.app" autocomplete="email">
@@ -358,12 +375,12 @@ tr:last-child td{border-bottom:none}
         <button class="btn btn-ghost" style="flex:1" onclick="guestAccess()">View Only</button>
         <button class="btn btn-primary" style="flex:2" id="signin-btn" onclick="doLogin()">Sign In</button>
       </div>
-      <div style="font-size:.63rem;color:var(--text-mute);margin-top:.9rem;line-height:1.7;text-align:center">
-        <span style="cursor:pointer;color:var(--text-mute);text-decoration:underline;text-underline-offset:2px" onclick="showReset()">Forgot password?</span>
+      <div style="font-size:.63rem;color:var(--text-mute);margin-top:.9rem;text-align:center">
+        <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="showReset()">Forgot password?</span>
       </div>
     </div>
 
-    <!-- Sign Up / Apply -->
+    <!-- Apply / Sign Up -->
     <div id="auth-signup" style="display:none">
       <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.15);border-radius:3px;padding:.55rem .75rem">
         Create an account — admin approval required before access is granted.
@@ -383,13 +400,13 @@ tr:last-child td{border-bottom:none}
       <button class="btn btn-primary" style="width:100%;margin-top:.25rem" id="signup-btn" onclick="doSignup()">Submit Application</button>
     </div>
 
-    <!-- Pending approval screen -->
+    <!-- Pending approval -->
     <div id="auth-pending" style="display:none;text-align:center;padding:.5rem 0">
-      <div style="font-size:1.5rem;margin-bottom:.75rem">⏳</div>
+      <div style="font-size:1.5rem;margin-bottom:.75rem">&#x23F3;</div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.08em;color:var(--text);margin-bottom:.4rem">Application Submitted</div>
       <div style="font-size:.75rem;color:var(--text-dim);line-height:1.7;margin-bottom:1rem">Your account is pending admin approval. You'll be able to sign in once approved.</div>
       <button class="btn btn-ghost" style="width:100%;margin-bottom:.5rem" onclick="guestAccess()">Continue as Guest</button>
-      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout();showSignin()">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout();showAdminLogin()">Sign Out</button>
     </div>
 
     <!-- Reset password -->
@@ -1316,7 +1333,7 @@ tr:last-child td{border-bottom:none}
 //  SUPABASE AUTH — roles: guest | member | admin
 //  Admin email set in ADMIN_EMAILS list below
 // ════════════════════════════════════════════════
-const ADMIN_EMAILS = [bencos0722@gmail.com']; // ← add your email here
+const ADMIN_EMAILS = ['ben@vups.app']; // ← add your email here
 const _sb = supabase.createClient(
   'https://mpmvfqkmvvbnsqvtvlnu.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0'
@@ -1553,10 +1570,12 @@ async function handleSession(session){
 
 function showPending(){
   // Hide all auth panels, show pending
-  ['auth-signin','auth-signup','auth-reset'].forEach(id=>{
+  ['auth-admin','auth-signin','auth-signup','auth-reset'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('auth-pending').style.display='';
+  // Reset tab highlights
+  ['tab-admin-btn','tab-signin-btn','tab-signup-btn'].forEach(id=>{ const b=document.getElementById(id); if(b){ b.style.background='none'; b.style.color='var(--text-dim)'; } });
   document.getElementById('login-err').textContent='';
   // Make sure login screen is visible
   document.getElementById('login-screen').classList.remove('hidden');
@@ -1567,7 +1586,7 @@ function clearSession(){
   S.isMember    = false;
   S.isAdmin     = false;
   document.getElementById('login-screen').classList.remove('hidden');
-  showSignin();
+  showAdminLogin();
   applyRoleUI();
 }
 
@@ -1579,7 +1598,7 @@ function applyRoleUI(){
   const mb = document.getElementById('member-badge');
   mb.style.display = (S.isMember && !S.isAdmin) ? '' : 'none';
   if(S.currentUser){
-    const name = S.currentUser.email.split('@')[0].toUpperCase();
+    const name = S.currentUser.email === 'admin' ? 'ADMIN' : S.currentUser.email.split('@')[0].toUpperCase();
     const el = document.getElementById('member-badge-name');
     if(el) el.textContent = name;
   }
@@ -1650,28 +1669,45 @@ async function doLogout(){
 }
 
 // ── UI tab switching ─────────────────────────────────────────────────────────
-function showSignin(){
-  ['auth-signup','auth-reset','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  document.getElementById('auth-signin').style.display='';
+// ── Tab switching helpers ────────────────────────────────────────────────────
+function _setTab(activeId, activeTabId){
+  ['auth-admin','auth-signin','auth-signup','auth-reset','auth-pending'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById(activeId).style.display='';
   document.getElementById('login-err').textContent='';
-  document.getElementById('tab-signin-btn').style.background='var(--gold)';
-  document.getElementById('tab-signin-btn').style.color='#1a0e06';
-  document.getElementById('tab-signup-btn').style.background='none';
-  document.getElementById('tab-signup-btn').style.color='var(--text-dim)';
+  // Reset all tab buttons
+  ['tab-admin-btn','tab-signin-btn','tab-signup-btn'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.style.background='none'; b.style.color='var(--text-dim)';
+  });
+  if(activeTabId){
+    const ab=document.getElementById(activeTabId);
+    if(ab){ ab.style.background='var(--gold)'; ab.style.color='#1a0e06'; }
+  }
 }
-function showSignup(){
-  ['auth-signin','auth-reset','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  document.getElementById('auth-signup').style.display='';
-  document.getElementById('login-err').textContent='';
-  document.getElementById('tab-signup-btn').style.background='var(--gold)';
-  document.getElementById('tab-signup-btn').style.color='#1a0e06';
-  document.getElementById('tab-signin-btn').style.background='none';
-  document.getElementById('tab-signin-btn').style.color='var(--text-dim)';
-}
-function showReset(){
-  ['auth-signin','auth-signup','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  document.getElementById('auth-reset').style.display='';
-  document.getElementById('login-err').textContent='';
+function showAdminLogin(){ _setTab('auth-admin','tab-admin-btn'); }
+function showSignin(){ _setTab('auth-signin','tab-signin-btn'); }
+function showSignup(){ _setTab('auth-signup','tab-signup-btn'); }
+function showReset(){ _setTab('auth-reset', null); }
+
+// ── Admin login — hardcoded, bypasses Supabase ───────────────────────────────
+function doAdminLogin(){
+  const u = document.getElementById('a-user').value.trim();
+  const p = document.getElementById('a-pass').value;
+  const err = document.getElementById('login-err');
+  if(u === 'admin' && p === 'ups5yops'){
+    S.isAdmin  = true;
+    S.isMember = true;
+    S.currentUser = { email:'admin', user_metadata:{} };
+    document.getElementById('login-screen').classList.add('hidden');
+    applyRoleUI();
+    loadData();
+    refreshApprovals();
+  } else {
+    err.textContent = 'Invalid credentials.';
+    document.getElementById('a-pass').value = '';
+  }
 }
 
 async function doReset(){
