@@ -331,12 +331,20 @@ tr:last-child td{border-bottom:none}
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
+  <div class="login-box" style="width:360px">
     <div class="login-logo">UPS</div>
     <div class="login-title">Operations Portal</div>
     <div class="login-sub">Virtual UPS Airlines</div>
+
+    <!-- Tab switcher -->
+    <div style="display:flex;gap:0;margin-bottom:1.25rem;border:1px solid var(--border2);border-radius:3px;overflow:hidden">
+      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem;cursor:pointer">Sign In</button>
+      <button id="tab-signup-btn" onclick="showSignup()" style="flex:1;background:none;color:var(--text-dim);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem;cursor:pointer;border-left:1px solid var(--border2)">Apply</button>
+    </div>
+
     <div class="login-err" id="login-err"></div>
 
+    <!-- Sign In -->
     <div id="auth-signin">
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -350,9 +358,41 @@ tr:last-child td{border-bottom:none}
         <button class="btn btn-ghost" style="flex:1" onclick="guestAccess()">View Only</button>
         <button class="btn btn-primary" style="flex:2" id="signin-btn" onclick="doLogin()">Sign In</button>
       </div>
-      <div style="font-size:.65rem;color:var(--text-mute);margin-top:1rem;line-height:1.7">Accounts are created by admin only.<br><span style="cursor:pointer;color:var(--blue-lt)" onclick="showReset()">Forgot password? Reset via email</span></div>
+      <div style="font-size:.63rem;color:var(--text-mute);margin-top:.9rem;line-height:1.7;text-align:center">
+        <span style="cursor:pointer;color:var(--text-mute);text-decoration:underline;text-underline-offset:2px" onclick="showReset()">Forgot password?</span>
+      </div>
     </div>
 
+    <!-- Sign Up / Apply -->
+    <div id="auth-signup" style="display:none">
+      <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.15);border-radius:3px;padding:.55rem .75rem">
+        Create an account — admin approval required before access is granted.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="su-email" placeholder="crew@vups.app" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="su-pass" placeholder="Min. 8 characters">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" type="password" id="su-pass2" placeholder="Repeat password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:.25rem" id="signup-btn" onclick="doSignup()">Submit Application</button>
+    </div>
+
+    <!-- Pending approval screen -->
+    <div id="auth-pending" style="display:none;text-align:center;padding:.5rem 0">
+      <div style="font-size:1.5rem;margin-bottom:.75rem">⏳</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.08em;color:var(--text);margin-bottom:.4rem">Application Submitted</div>
+      <div style="font-size:.75rem;color:var(--text-dim);line-height:1.7;margin-bottom:1rem">Your account is pending admin approval. You'll be able to sign in once approved.</div>
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:.5rem" onclick="guestAccess()">Continue as Guest</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout();showSignin()">Sign Out</button>
+    </div>
+
+    <!-- Reset password -->
     <div id="auth-reset" style="display:none">
       <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">Enter your email and we'll send a password reset link.</div>
       <div class="form-group">
@@ -931,6 +971,22 @@ tr:last-child td{border-bottom:none}
   <div class="admin-wrap">
     <div class="admin-warn">⬡ Admin Panel — changes here are reflected immediately across the site.</div>
 
+    <!-- CREW APPROVALS -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        Crew Applications
+        <span id="pending-count-badge" style="background:rgba(192,57,43,.15);color:var(--red-lt);border:1px solid rgba(192,57,43,.3);border-radius:2px;font-size:.62rem;padding:.1rem .45rem;font-family:'Share Tech Mono',monospace;display:none"></span>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Email</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="approvals-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No applications yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- CREW -->
     <div class="admin-section">
       <div class="admin-section-title">
@@ -1425,54 +1481,108 @@ const AIRCRAFT_CATALOG = [
 const MEMBER_PAGES = ['crew','economy','pirep','dispatcher'];
 const ADMIN_PAGES  = ['admin'];
 
-// Check session on page load
-async function initAuth(){
-  const { data:{ session } } = await _sb.auth.getSession();
-  if(session) await applySession(session);
-  // Listen for auth changes (e.g. after password reset redirect)
-  _sb.auth.onAuthStateChange(async(_evt, sess)=>{
-    if(sess) await applySession(sess);
-    else clearSession();
-  });
-  // If no session at startup, still load public data
-  const { data:{ session:initSess }} = await _sb.auth.getSession();
-  if(!initSess) loadData();
+// ── Profiles table helpers (stores pending/approved/rejected + role) ─────────
+// Table: profiles (id uuid PK refs auth.users, email text, status text, role text, created_at timestamptz)
+async function getProfile(userId){
+  const { data } = await _sb.from('profiles').select('*').eq('id', userId).single();
+  return data;
+}
+async function upsertProfile(userId, email, fields){
+  await _sb.from('profiles').upsert({ id: userId, email, ...fields }, { onConflict: 'id' });
+}
+async function fetchPendingProfiles(){
+  const { data } = await _sb.from('profiles').select('*').order('created_at', { ascending: true });
+  return data || [];
 }
 
-async function applySession(session){
-  const email = session.user.email;
-  S.currentUser = session.user;
+// ── initAuth — called once on page load ──────────────────────────────────────
+async function initAuth(){
+  _sb.auth.onAuthStateChange(async(_evt, sess)=>{
+    if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
+    if(sess) await handleSession(sess);
+  });
+  const { data:{ session } } = await _sb.auth.getSession();
+  if(session) await handleSession(session);
+  else loadData(); // guest — still load public data
+}
+
+async function handleSession(session){
+  const user = session.user;
+  S.currentUser = user;
+  const profile = await getProfile(user.id);
+  const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+  if(isAdmin){
+    // Admins always get in — ensure profile exists
+    if(!profile) await upsertProfile(user.id, user.email, { status:'approved', role:'admin' });
+    S.isAdmin  = true;
+    S.isMember = true;
+    document.getElementById('login-screen').classList.add('hidden');
+    applyRoleUI();
+    loadData();
+    refreshApprovals();
+    return;
+  }
+
+  if(!profile){
+    // First sign-in after signup — create pending profile
+    await upsertProfile(user.id, user.email, { status:'pending', role:'member' });
+    showPending();
+    return;
+  }
+
+  if(profile.status === 'pending'){
+    showPending();
+    return;
+  }
+
+  if(profile.status === 'rejected'){
+    const err = document.getElementById('login-err');
+    err.textContent = 'Your application was not approved. Contact admin.';
+    await _sb.auth.signOut();
+    return;
+  }
+
+  // Approved member
   S.isMember = true;
-  S.isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+  S.isAdmin  = false;
   document.getElementById('login-screen').classList.add('hidden');
   applyRoleUI();
   loadData();
 }
 
+function showPending(){
+  // Hide all auth panels, show pending
+  ['auth-signin','auth-signup','auth-reset'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById('auth-pending').style.display='';
+  document.getElementById('login-err').textContent='';
+  // Make sure login screen is visible
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+
 function clearSession(){
   S.currentUser = null;
-  S.isMember = false;
-  S.isAdmin  = false;
+  S.isMember    = false;
+  S.isAdmin     = false;
   document.getElementById('login-screen').classList.remove('hidden');
+  showSignin();
   applyRoleUI();
 }
 
 function applyRoleUI(){
-  const role = _role();
-  // Nav visibility
-  document.getElementById('admin-nav-btn').style.display  = S.isAdmin  ? '' : 'none';
-  document.getElementById('pirep-nav-btn').style.display  = S.isMember ? '' : 'none';
+  document.getElementById('admin-nav-btn').style.display   = S.isAdmin  ? '' : 'none';
+  document.getElementById('pirep-nav-btn').style.display   = S.isMember ? '' : 'none';
   document.getElementById('profit-share-btn').style.display = S.isAdmin ? '' : 'none';
-  // Badges
-  document.getElementById('admin-badge').style.display  = S.isAdmin  ? '' : 'none';
+  document.getElementById('admin-badge').style.display    = S.isAdmin            ? '' : 'none';
   const mb = document.getElementById('member-badge');
   mb.style.display = (S.isMember && !S.isAdmin) ? '' : 'none';
   if(S.currentUser){
-    const name = S.currentUser.user_metadata?.display_name || S.currentUser.email.split('@')[0].toUpperCase();
+    const name = S.currentUser.email.split('@')[0].toUpperCase();
     const el = document.getElementById('member-badge-name');
     if(el) el.textContent = name;
   }
-  // Admin action buttons
   document.getElementById('leadership-actions').innerHTML = S.isAdmin
     ? '<button class="btn btn-purple btn-sm" onclick="openModal(\'modal-add-exec\')">+ Add Executive</button>' : '';
   document.getElementById('news-actions').innerHTML = S.isAdmin
@@ -1480,20 +1590,39 @@ function applyRoleUI(){
   document.getElementById('hub-actions').innerHTML = S.isAdmin
     ? '<button class="btn btn-primary btn-sm" onclick="openModal(\'modal-add-hub\')">+ Add Hub</button>' : '';
   if(S.isAdmin) updateAdminTreasury();
-  // Grey out member-only nav buttons for guests
   document.querySelectorAll('.nav-btn').forEach(btn=>{
     const page = btn.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
     if(!page) return;
-    if(MEMBER_PAGES.includes(page) && !S.isMember){
-      btn.style.opacity = '0.35';
-      btn.title = 'Sign in to access';
-    } else {
-      btn.style.opacity = '';
-      btn.title = '';
-    }
+    const locked = (MEMBER_PAGES.includes(page) && !S.isMember) || (ADMIN_PAGES.includes(page) && !S.isAdmin);
+    btn.style.opacity = locked ? '0.35' : '';
+    btn.title = locked ? 'Sign in to access' : '';
   });
 }
 
+// ── Sign up (apply) ──────────────────────────────────────────────────────────
+async function doSignup(){
+  const email = document.getElementById('su-email').value.trim();
+  const pass  = document.getElementById('su-pass').value;
+  const pass2 = document.getElementById('su-pass2').value;
+  const err   = document.getElementById('login-err');
+  const btn   = document.getElementById('signup-btn');
+  err.textContent = '';
+  if(!email || !pass){ err.textContent='Enter email and password.'; return; }
+  if(pass.length < 8){ err.textContent='Password must be at least 8 characters.'; return; }
+  if(pass !== pass2){ err.textContent='Passwords do not match.'; return; }
+  btn.textContent='Submitting...'; btn.disabled=true;
+  const { data, error } = await _sb.auth.signUp({ email, password:pass });
+  btn.textContent='Submit Application'; btn.disabled=false;
+  if(error){ err.textContent = error.message; return; }
+  if(data.user){
+    S.currentUser = data.user;
+    // Create pending profile immediately
+    await upsertProfile(data.user.id, email, { status:'pending', role:'member' });
+  }
+  showPending();
+}
+
+// ── Sign in ──────────────────────────────────────────────────────────────────
 async function doLogin(){
   const email = document.getElementById('l-email').value.trim();
   const pass  = document.getElementById('l-pass').value;
@@ -1501,12 +1630,11 @@ async function doLogin(){
   const btn   = document.getElementById('signin-btn');
   if(!email || !pass){ err.textContent='Enter your email and password.'; return; }
   err.textContent='';
-  btn.textContent='Signing in...';
-  btn.disabled=true;
+  btn.textContent='Signing in...'; btn.disabled=true;
   const { data, error } = await _sb.auth.signInWithPassword({ email, password:pass });
   btn.textContent='Sign In'; btn.disabled=false;
   if(error){ err.textContent = error.message.includes('Invalid') ? 'Invalid email or password.' : error.message; return; }
-  await applySession(data.session);
+  await handleSession(data.session);
 }
 
 function guestAccess(){
@@ -1518,32 +1646,85 @@ function guestAccess(){
 async function doLogout(){
   await _sb.auth.signOut();
   clearSession();
-  // Return to dispatch (public page)
   goNav(document.querySelector('.nav-btn[onclick*=dispatch]'), 'dispatch');
 }
 
+// ── UI tab switching ─────────────────────────────────────────────────────────
+function showSignin(){
+  ['auth-signup','auth-reset','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  document.getElementById('auth-signin').style.display='';
+  document.getElementById('login-err').textContent='';
+  document.getElementById('tab-signin-btn').style.background='var(--gold)';
+  document.getElementById('tab-signin-btn').style.color='#1a0e06';
+  document.getElementById('tab-signup-btn').style.background='none';
+  document.getElementById('tab-signup-btn').style.color='var(--text-dim)';
+}
+function showSignup(){
+  ['auth-signin','auth-reset','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  document.getElementById('auth-signup').style.display='';
+  document.getElementById('login-err').textContent='';
+  document.getElementById('tab-signup-btn').style.background='var(--gold)';
+  document.getElementById('tab-signup-btn').style.color='#1a0e06';
+  document.getElementById('tab-signin-btn').style.background='none';
+  document.getElementById('tab-signin-btn').style.color='var(--text-dim)';
+}
 function showReset(){
-  document.getElementById('auth-signin').style.display='none';
+  ['auth-signin','auth-signup','auth-pending'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   document.getElementById('auth-reset').style.display='';
   document.getElementById('login-err').textContent='';
 }
-function showSignin(){
-  document.getElementById('auth-reset').style.display='none';
-  document.getElementById('auth-signin').style.display='';
-  document.getElementById('login-err').textContent='';
-}
+
 async function doReset(){
   const email = document.getElementById('l-reset-email').value.trim();
   const err = document.getElementById('login-err');
   if(!email){ err.textContent='Enter your email.'; return; }
-  const { error } = await _sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.href
-  });
+  const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
   if(error){ err.textContent=error.message; return; }
   err.style.color='var(--green-lt)';
   err.textContent='Reset link sent! Check your email.';
   showSignin();
-  setTimeout(()=>{ err.style.color=''; err.textContent=''; },5000);
+  setTimeout(()=>{ err.style.color=''; err.textContent=''; }, 5000);
+}
+
+// ── Admin approvals ──────────────────────────────────────────────────────────
+async function refreshApprovals(){
+  if(!S.isAdmin) return;
+  const profiles = await fetchPendingProfiles();
+  const tbody = document.getElementById('approvals-tbody');
+  if(!tbody) return;
+  const badge = document.getElementById('pending-count-badge');
+  const pendingCount = profiles.filter(p=>p.status==='pending').length;
+  if(badge){
+    badge.textContent = pendingCount + ' pending';
+    badge.style.display = pendingCount ? '' : 'none';
+  }
+  if(!profiles.length){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:\'Share Tech Mono\',monospace;font-size:.73rem">No applications yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = profiles.map(p=>{
+    const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
+    const statusColor = p.status==='approved' ? 'var(--green-lt)' : p.status==='rejected' ? 'var(--red-lt)' : 'var(--gold)';
+    const actions = p.status==='pending'
+      ? `<button class="btn btn-ghost btn-sm" style="color:var(--green-lt);border-color:rgba(45,158,95,.3)" onclick="approveUser('${p.id}','${p.email}')">Approve</button>
+         <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-left:.35rem" onclick="rejectUser('${p.id}')">Reject</button>`
+      : `<span style="font-family:\'Share Tech Mono\',monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>`;
+    return `<tr>
+      <td style="font-family:\'Share Tech Mono\',monospace;font-size:.73rem">${p.email}</td>
+      <td style="font-family:\'Share Tech Mono\',monospace;font-size:.68rem;color:var(--text-dim)">${date}</td>
+      <td><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:.75rem;font-weight:600;color:${statusColor};text-transform:uppercase;letter-spacing:.06em">${p.status}</span></td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function approveUser(id, email){
+  await _sb.from('profiles').update({ status:'approved', role:'member' }).eq('id', id);
+  refreshApprovals();
+}
+async function rejectUser(id){
+  await _sb.from('profiles').update({ status:'rejected' }).eq('id', id);
+  refreshApprovals();
 }
 
 // Redirect guests away from member-only pages
@@ -1551,6 +1732,7 @@ function guardPage(page){
   if(ADMIN_PAGES.includes(page) && !S.isAdmin){ return false; }
   if(MEMBER_PAGES.includes(page) && !S.isMember){
     document.getElementById('login-screen').classList.remove('hidden');
+    showSignin();
     return false;
   }
   return true;
@@ -2157,6 +2339,7 @@ function addDispatchRoute(){
 function goNav(btn,page){
   if(!guardPage(page)) return;
   if(page==='pirep') setTimeout(renderPireps,50);
+  if(page==='admin') setTimeout(refreshApprovals,100);
   if(page==='admin'&&!S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -3015,7 +3198,7 @@ function refreshAllUI(){
     if(id==='fleet')      renderFleet();
     if(id==='economy')    renderEconomy();
     if(id==='hubs')       renderHubs();
-    if(id==='admin')      renderAdmin();
+    if(id==='admin')      { renderAdmin(); refreshApprovals(); }
     if(id==='dispatcher') renderDispatcher();
     if(id==='livemap')    onMapPageOpen();
     if(id==='pirep')      renderPireps();
