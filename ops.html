@@ -336,36 +336,19 @@ tr:last-child td{border-bottom:none}
     <div class="login-title">Operations Portal</div>
     <div class="login-sub">Virtual UPS Airlines</div>
 
-    <!-- Tab switcher: Admin | Crew | Apply -->
+    <!-- Tab switcher: Sign In | Apply -->
     <div style="display:flex;gap:0;margin-bottom:1.25rem;border:1px solid var(--border2);border-radius:3px;overflow:hidden">
-      <button id="tab-admin-btn" onclick="showAdminLogin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">&#x2B21; Admin</button>
-      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:none;color:var(--text-dim);border:none;border-left:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Crew</button>
+      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Sign In</button>
       <button id="tab-signup-btn" onclick="showSignup()" style="flex:1;background:none;color:var(--text-dim);border:none;border-left:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Apply</button>
     </div>
 
     <div class="login-err" id="login-err"></div>
 
-    <!-- Admin login — hardcoded credentials -->
-    <div id="auth-admin">
+    <!-- Unified sign in — works for both crew (Supabase) and admin (hardcoded) -->
+    <div id="auth-signin">
       <div class="form-group">
-        <label class="form-label">Username</label>
-        <input class="form-input" type="text" id="a-user" placeholder="admin" autocomplete="off" onkeydown="if(event.key==='Enter')doAdminLogin()">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input class="form-input" type="password" id="a-pass" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" onkeydown="if(event.key==='Enter')doAdminLogin()">
-      </div>
-      <div style="display:flex;gap:.5rem;margin-top:.25rem">
-        <button class="btn btn-ghost" style="flex:1" onclick="guestAccess()">View Only</button>
-        <button class="btn btn-primary" style="flex:2" onclick="doAdminLogin()">Sign In</button>
-      </div>
-    </div>
-
-    <!-- Crew sign in — Supabase Auth -->
-    <div id="auth-signin" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="l-email" placeholder="crew@vups.app" autocomplete="email">
+        <label class="form-label">Email / Username</label>
+        <input class="form-input" type="text" id="l-email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
@@ -386,8 +369,12 @@ tr:last-child td{border-bottom:none}
         Create an account — admin approval required before access is granted.
       </div>
       <div class="form-group">
+        <label class="form-label">Display Name</label>
+        <input class="form-input" type="text" id="su-name" placeholder="Your name or callsign" autocomplete="name">
+      </div>
+      <div class="form-group">
         <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="su-email" placeholder="crew@vups.app" autocomplete="email">
+        <input class="form-input" type="email" id="su-email" placeholder="your@email.com" autocomplete="email">
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
@@ -414,7 +401,7 @@ tr:last-child td{border-bottom:none}
       <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">Enter your email and we'll send a password reset link.</div>
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="l-reset-email" placeholder="crew@vups.app">
+        <input class="form-input" type="email" id="l-reset-email" placeholder="your@email.com">
       </div>
       <div style="display:flex;gap:.5rem;margin-top:.25rem">
         <button class="btn btn-ghost" style="flex:1" onclick="showSignin()">&#x2190; Back</button>
@@ -997,8 +984,8 @@ tr:last-child td{border-bottom:none}
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Email</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="approvals-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No applications yet.</td></tr></tbody>
+            <thead><tr><th>Name</th><th>Email</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="approvals-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No applications yet.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1570,12 +1557,12 @@ async function handleSession(session){
 
 function showPending(){
   // Hide all auth panels, show pending
-  ['auth-admin','auth-signin','auth-signup','auth-reset'].forEach(id=>{
+  ['auth-signin','auth-signup','auth-reset'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('auth-pending').style.display='';
   // Reset tab highlights
-  ['tab-admin-btn','tab-signin-btn','tab-signup-btn'].forEach(id=>{ const b=document.getElementById(id); if(b){ b.style.background='none'; b.style.color='var(--text-dim)'; } });
+  ['tab-signin-btn','tab-signup-btn'].forEach(id=>{ const b=document.getElementById(id); if(b){ b.style.background='none'; b.style.color='var(--text-dim)'; } });
   document.getElementById('login-err').textContent='';
   // Make sure login screen is visible
   document.getElementById('login-screen').classList.remove('hidden');
@@ -1598,7 +1585,7 @@ function applyRoleUI(){
   const mb = document.getElementById('member-badge');
   mb.style.display = (S.isMember && !S.isAdmin) ? '' : 'none';
   if(S.currentUser){
-    const name = S.currentUser.email === 'admin' ? 'ADMIN' : S.currentUser.email.split('@')[0].toUpperCase();
+    const name = S.currentUser.email === 'admin' ? 'ADMIN' : (S.currentUser.user_metadata?.display_name || S.currentUser.email.split('@')[0]).toUpperCase();
     const el = document.getElementById('member-badge-name');
     if(el) el.textContent = name;
   }
@@ -1620,37 +1607,55 @@ function applyRoleUI(){
 
 // ── Sign up (apply) ──────────────────────────────────────────────────────────
 async function doSignup(){
+  const name  = document.getElementById('su-name').value.trim();
   const email = document.getElementById('su-email').value.trim();
   const pass  = document.getElementById('su-pass').value;
   const pass2 = document.getElementById('su-pass2').value;
   const err   = document.getElementById('login-err');
   const btn   = document.getElementById('signup-btn');
   err.textContent = '';
+  if(!name){ err.textContent='Enter your display name.'; return; }
   if(!email || !pass){ err.textContent='Enter email and password.'; return; }
   if(pass.length < 8){ err.textContent='Password must be at least 8 characters.'; return; }
   if(pass !== pass2){ err.textContent='Passwords do not match.'; return; }
   btn.textContent='Submitting...'; btn.disabled=true;
-  const { data, error } = await _sb.auth.signUp({ email, password:pass });
+  const { data, error } = await _sb.auth.signUp({
+    email, password: pass,
+    options: { data: { display_name: name } }
+  });
   btn.textContent='Submit Application'; btn.disabled=false;
   if(error){ err.textContent = error.message; return; }
   if(data.user){
     S.currentUser = data.user;
-    // Create pending profile immediately
-    await upsertProfile(data.user.id, email, { status:'pending', role:'member' });
+    await upsertProfile(data.user.id, email, { status:'pending', role:'member', display_name: name });
   }
   showPending();
 }
 
 // ── Sign in ──────────────────────────────────────────────────────────────────
 async function doLogin(){
-  const email = document.getElementById('l-email').value.trim();
+  const input = document.getElementById('l-email').value.trim();
   const pass  = document.getElementById('l-pass').value;
   const err   = document.getElementById('login-err');
   const btn   = document.getElementById('signin-btn');
-  if(!email || !pass){ err.textContent='Enter your email and password.'; return; }
+  if(!input || !pass){ err.textContent='Enter your email and password.'; return; }
   err.textContent='';
+
+  // ── Check hardcoded admin first ──────────────────────────────────────────
+  if(input === 'admin' && pass === 'ups5yops'){
+    S.isAdmin  = true;
+    S.isMember = true;
+    S.currentUser = { email:'admin', user_metadata:{} };
+    document.getElementById('login-screen').classList.add('hidden');
+    applyRoleUI();
+    loadData();
+    refreshApprovals();
+    return;
+  }
+
+  // ── Otherwise try Supabase crew login ───────────────────────────────────
   btn.textContent='Signing in...'; btn.disabled=true;
-  const { data, error } = await _sb.auth.signInWithPassword({ email, password:pass });
+  const { data, error } = await _sb.auth.signInWithPassword({ email:input, password:pass });
   btn.textContent='Sign In'; btn.disabled=false;
   if(error){ err.textContent = error.message.includes('Invalid') ? 'Invalid email or password.' : error.message; return; }
   await handleSession(data.session);
@@ -1671,13 +1676,13 @@ async function doLogout(){
 // ── UI tab switching ─────────────────────────────────────────────────────────
 // ── Tab switching helpers ────────────────────────────────────────────────────
 function _setTab(activeId, activeTabId){
-  ['auth-admin','auth-signin','auth-signup','auth-reset','auth-pending'].forEach(id=>{
+  ['auth-signin','auth-signup','auth-reset','auth-pending'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById(activeId).style.display='';
   document.getElementById('login-err').textContent='';
   // Reset all tab buttons
-  ['tab-admin-btn','tab-signin-btn','tab-signup-btn'].forEach(id=>{
+  ['tab-signin-btn','tab-signup-btn'].forEach(id=>{
     const b=document.getElementById(id); if(!b) return;
     b.style.background='none'; b.style.color='var(--text-dim)';
   });
@@ -1686,7 +1691,7 @@ function _setTab(activeId, activeTabId){
     if(ab){ ab.style.background='var(--gold)'; ab.style.color='#1a0e06'; }
   }
 }
-function showAdminLogin(){ _setTab('auth-admin','tab-admin-btn'); }
+function showAdminLogin(){ showSignin(); }
 function showSignin(){ _setTab('auth-signin','tab-signin-btn'); }
 function showSignup(){ _setTab('auth-signup','tab-signup-btn'); }
 function showReset(){ _setTab('auth-reset', null); }
@@ -1746,7 +1751,8 @@ async function refreshApprovals(){
          <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-left:.35rem" onclick="rejectUser('${p.id}')">Reject</button>`
       : `<span style="font-family:\'Share Tech Mono\',monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>`;
     return `<tr>
-      <td style="font-family:\'Share Tech Mono\',monospace;font-size:.73rem">${p.email}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600">${p.display_name||'—'}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim)">${p.email}</td>
       <td style="font-family:\'Share Tech Mono\',monospace;font-size:.68rem;color:var(--text-dim)">${date}</td>
       <td><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:.75rem;font-weight:600;color:${statusColor};text-transform:uppercase;letter-spacing:.06em">${p.status}</span></td>
       <td>${actions}</td>
