@@ -615,7 +615,7 @@ tr:last-child td{border-bottom:none}
     <div style="font-size:1.5rem">🏆</div>
     <div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--gold-lt);letter-spacing:.05em">CEO TRANSITION ANNOUNCEMENT</div>
-      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">After 12 years of service, our founding CEO is stepping down. A successor has been named. The handoff takes effect <strong style="color:var(--text)">Q1 2025</strong>. Full statement on the <a href="#" onclick="goNav(document.querySelector('[onclick*=news]'),'news');return false" style="color:var(--gold);text-decoration:none">News page</a>.</div>
+      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">Founder and CEO of Virtual UPS Airlines since 2026. Leads all strategic decisions, network expansion and crew operations.</div>
     </div>
   </div>
 
@@ -1370,8 +1370,8 @@ const S = {
   ],
 
   executives: [
-    { id:1, name:'David P. Abney', initials:'DA', title:'Chief Executive Officer', type:'csuite', tenure:'2014', color:'exec-av-gold',   bio:'Founding CEO of Virtual UPS Airlines. Led the airline from a single route to a global operation with 6 hubs on 3 continents. Retiring after 12 years of distinguished service.', status:'retiring' },
-    { id:2, name:'Ben Hoffman',  initials:'BH', title:'Chief Executive Officer (Designate)', type:'csuite', tenure:'2025', color:'exec-av-purple', bio:'Named successor to the founding CEO. A trusted confidant of David Abney and a core member of the founding team, Ben has been instrumental in shaping the airline\'s culture and operations from the ground up. The Board unanimously selected him to carry the airline into its next chapter. Takes the CEO role effective Q1 2025.', status:'incoming' },
+
+    { id:2, name:'Ben Hoffman', initials:'BH', title:'Chief Executive Officer', type:'csuite', tenure:'2026', color:'exec-av-gold', bio:'Founder and CEO of Virtual UPS Airlines. Built the airline from the ground up into a global cargo operation spanning 3 continents, 11 aircraft types and over 60 routes. Leads all strategic decisions, network expansion and crew operations.', status:'active' },
     { id:3, name:'Brian Newman',   initials:'BN', title:'Chief Financial Officer',   type:'csuite', tenure:'2018', color:'exec-av-blue',   bio:'Oversees all financial operations, treasury management, profit share distribution, and quarterly earnings reporting.', status:'active' },
     { id:4, name:'Kate Gutmann',   initials:'KG', title:'Chief Commercial Officer',  type:'csuite', tenure:'2019', color:'exec-av-green',  bio:'Leads network expansion, route strategy, and hub development. Architected the VHHH and EDDK regional hub buildout.', status:'active' },
     { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet maintenance scheduling, and the AI pilot program.', status:'active' },
@@ -1381,18 +1381,6 @@ const S = {
   ],
 
   news: [
-    {
-      id:1, category:'retirement', date:'December 18, 2024',
-      headline:'Founding CEO David Abney Announces Retirement After 12 Years',
-      body:`After more than a decade at the helm of Virtual UPS Airlines, Chief Executive Officer David P. Abney has announced his intention to retire effective Q1 2025.\n\n"Leading this airline from a single route out of Louisville to a global operation spanning three continents has been the honor of my career," Abney said in a statement issued to all crew and stakeholders. "We built something real here — not just a virtual airline, but a community of professionals who take pride in every ton of freight we move."\n\nAbney joined the airline at its founding and oversaw the expansion to six hubs, the introduction of the AI pilot program, and consecutive years of record revenue. Under his leadership, Virtual UPS achieved a 98% on-time delivery rate — a figure he called his proudest accomplishment.\n\nThe Board of Directors has named Ben Hoffman as his successor. Hoffman, a trusted member of the founding team, was described by Abney as \"the only person I ever considered for this role.\"`,
-      author:'Office of the CEO — Corporate Communications'
-    },
-    {
-      id:2, category:'retirement', date:'December 18, 2024',
-      headline:'Board Names Ben Hoffman as Incoming CEO — Effective Q1 2025',
-      body:`The Virtual UPS Airlines Board of Directors has unanimously confirmed Ben Hoffman as the next Chief Executive Officer, effective Q1 2025 following a formal leadership transition.\n\nHoffman has been a core member of the founding team since day one, helping shape every major decision the airline has made. The Board cited his deep operational knowledge and his vision for expansion to new international routes as central to the unanimous selection.\n\n"We built this together," Hoffman said. "I am not stepping into a new role — I am stepping up in one I have always been part of. We will push this further than anyone thought possible."\n\nAbney will remain available in an advisory capacity through the end of Q2 2025 to ensure a smooth transition.`,
-      author:'Board of Directors — Virtual UPS Airlines'
-    },
     {
       id:3, category:'financial', date:'December 15, 2024',
       headline:'Q3 2024 Earnings: Revenue Up 10.3%, Margin Reaches Record 62%',
@@ -1501,10 +1489,27 @@ async function fetchPendingProfiles(){
 
 // ── initAuth — called once on page load ──────────────────────────────────────
 async function initAuth(){
+  // Always wire up Supabase listener first (crew sessions)
   _sb.auth.onAuthStateChange(async(_evt, sess)=>{
     if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
     if(sess) await handleSession(sess);
   });
+
+  // Check for hardcoded admin session
+  try{
+    if(localStorage.getItem('vups_admin_session') === '1'){
+      S.isAdmin  = true;
+      S.isMember = true;
+      S.currentUser = { email:'admin', user_metadata:{} };
+      document.getElementById('login-screen').classList.add('hidden');
+      applyRoleUI();
+      loadData();
+      refreshApprovals();
+      return;
+    }
+  }catch(e){}
+
+  // Check for Supabase crew session
   const { data:{ session } } = await _sb.auth.getSession();
   if(session) await handleSession(session);
   else loadData(); // guest — still load public data
@@ -1646,6 +1651,7 @@ async function doLogin(){
     S.isAdmin  = true;
     S.isMember = true;
     S.currentUser = { email:'admin', user_metadata:{} };
+    try{ localStorage.setItem('vups_admin_session','1'); }catch(e){}
     document.getElementById('login-screen').classList.add('hidden');
     applyRoleUI();
     loadData();
@@ -1668,6 +1674,7 @@ function guestAccess(){
 }
 
 async function doLogout(){
+  try{ localStorage.removeItem('vups_admin_session'); }catch(e){}
   await _sb.auth.signOut();
   clearSession();
   goNav(document.querySelector('.nav-btn[onclick*=dispatch]'), 'dispatch');
@@ -2542,15 +2549,17 @@ function renderFleet(){
         <div class="ac-spec"><div class="ac-spec-val">${owned}</div><div class="ac-spec-lbl">VA Owned</div></div>
       </div>
       <div class="ac-price ${canAfford?'li-pos':'li-neg'}">$${(ac.price/1000000).toFixed(1)}M</div>
-      <button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>
-        ${canAfford?'Purchase':'Insufficient Funds'}
-      </button>
+      ${S.isAdmin
+        ? `<button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>${canAfford?'Purchase':'Insufficient Funds'}</button>`
+        : `<div style="font-size:.65rem;color:var(--text-mute);text-align:center;padding:.35rem 0;font-family:'Share Tech Mono',monospace;letter-spacing:.06em">ADMIN ONLY</div>`
+      }
     </div>`;
   }).join('');
   renderOwnedFleet();
 }
 
 function purchaseAircraft(model,price){
+  if(!S.isAdmin){alert('Only admins can purchase aircraft.');return}
   if(S.treasury<price){alert('Insufficient treasury funds.');return}
   if(!confirm(`Purchase ${model} for $${(price/1000000).toFixed(1)}M?`)) return;
   S.treasury-=price;
