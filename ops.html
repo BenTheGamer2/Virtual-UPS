@@ -1323,7 +1323,16 @@ tr:last-child td{border-bottom:none}
 const ADMIN_EMAILS = ['ben@vups.app']; // ← add your email here
 const _sb = supabase.createClient(
   'https://mpmvfqkmvvbnsqvtvlnu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0',
+  {
+    auth: {
+      persistSession: true,
+      storageKey: 'vups_auth_session',
+      storage: window.localStorage,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 
 function _role(){ return S.isAdmin ? 'admin' : S.isMember ? 'member' : 'guest'; }
@@ -1489,13 +1498,15 @@ async function fetchPendingProfiles(){
 
 // ── initAuth — called once on page load ──────────────────────────────────────
 async function initAuth(){
-  // Always wire up Supabase listener first (crew sessions)
+  // Always wire up Supabase listener (handles token refresh + sign out)
   _sb.auth.onAuthStateChange(async(_evt, sess)=>{
     if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
-    if(sess) await handleSession(sess);
+    if(_evt === 'INITIAL_SESSION' || _evt === 'SIGNED_IN' || _evt === 'TOKEN_REFRESHED'){
+      if(sess) await handleSession(sess);
+    }
   });
 
-  // Check for hardcoded admin session
+  // Check for hardcoded admin session first
   try{
     if(localStorage.getItem('vups_admin_session') === '1'){
       S.isAdmin  = true;
@@ -1509,10 +1520,13 @@ async function initAuth(){
     }
   }catch(e){}
 
-  // Check for Supabase crew session
+  // Restore Supabase crew session from storage
   const { data:{ session } } = await _sb.auth.getSession();
-  if(session) await handleSession(session);
-  else loadData(); // guest — still load public data
+  if(session){
+    await handleSession(session);
+  } else {
+    loadData(); // no session — load as guest
+  }
 }
 
 async function handleSession(session){
@@ -3175,7 +3189,7 @@ const SUPA_URL  = 'https://mpmvfqkmvvbnsqvtvlnu.supabase.co';
 const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wbXZmcWttdnZibnNxdnR2bG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDcwODgsImV4cCI6MjA4ODEyMzA4OH0.EUvbjOOgFcbvIJmod580C9tRH883vvBmUSZbKkSFgs0';
 const SAVE_KEY  = 'vups_state_v2'; // local cache key
 
-const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+const _supa = _sb; // reuse auth client so session is shared
 let _supaConnected = false;
 let _saveTimeout = null;
 
