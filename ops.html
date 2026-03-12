@@ -27,6 +27,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 #login-screen.hidden{display:none}
+#auth-loader{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center}
+#auth-loader.hidden{display:none}
 .login-box{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:2.5rem 2rem;width:340px;text-align:center}
 .login-logo{width:48px;height:48px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:#1a0e06;margin:0 auto 1.25rem}
 .login-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.25rem}
@@ -330,7 +332,8 @@ tr:last-child td{border-bottom:none}
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="auth-loader"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.2em;color:var(--gold);opacity:.6">LOADING...</div></div>
+<div id="login-screen" class="hidden">
   <div class="login-box" style="width:360px">
     <div class="login-logo">UPS</div>
     <div class="login-title">Operations Portal</div>
@@ -1498,12 +1501,12 @@ async function fetchPendingProfiles(){
 
 // ── initAuth — called once on page load ──────────────────────────────────────
 async function initAuth(){
+  const loader = document.getElementById('auth-loader');
+
   // Always wire up Supabase listener (handles token refresh + sign out)
   _sb.auth.onAuthStateChange(async(_evt, sess)=>{
     if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
-    if(_evt === 'INITIAL_SESSION' || _evt === 'SIGNED_IN' || _evt === 'TOKEN_REFRESHED'){
-      if(sess) await handleSession(sess);
-    }
+    if(_evt === 'TOKEN_REFRESHED' && sess){ await handleSession(sess); }
   });
 
   // Check for hardcoded admin session first
@@ -1512,6 +1515,7 @@ async function initAuth(){
       S.isAdmin  = true;
       S.isMember = true;
       S.currentUser = { email:'admin', user_metadata:{} };
+      if(loader) loader.classList.add('hidden');
       document.getElementById('login-screen').classList.add('hidden');
       applyRoleUI();
       loadData();
@@ -1522,10 +1526,13 @@ async function initAuth(){
 
   // Restore Supabase crew session from storage
   const { data:{ session } } = await _sb.auth.getSession();
+  if(loader) loader.classList.add('hidden');
   if(session){
     await handleSession(session);
   } else {
-    loadData(); // no session — load as guest
+    // No session — show login screen
+    document.getElementById('login-screen').classList.remove('hidden');
+    loadData();
   }
 }
 
@@ -1591,8 +1598,10 @@ function clearSession(){
   S.currentUser = null;
   S.isMember    = false;
   S.isAdmin     = false;
+  const loader = document.getElementById('auth-loader');
+  if(loader) loader.classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
-  showAdminLogin();
+  showSignin();
   applyRoleUI();
 }
 
