@@ -1500,38 +1500,57 @@ async function fetchPendingProfiles(){
 }
 
 // ── initAuth — called once on page load ──────────────────────────────────────
-async function initAuth(){
+function _hideLoader(){
   const loader = document.getElementById('auth-loader');
+  if(loader) loader.classList.add('hidden');
+}
+function _showLogin(){
+  _hideLoader();
+  document.getElementById('login-screen').classList.remove('hidden');
+}
 
-  // Always wire up Supabase listener (handles token refresh + sign out)
-  _sb.auth.onAuthStateChange(async(_evt, sess)=>{
-    if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
-    if(_evt === 'TOKEN_REFRESHED' && sess){ await handleSession(sess); }
-  });
+async function initAuth(){
+  // Safety net — if anything hangs, show login after 4 seconds
+  const fallbackTimer = setTimeout(()=>{ _showLogin(); loadData(); }, 4000);
 
-  // Check for hardcoded admin session first
   try{
-    if(localStorage.getItem('vups_admin_session') === '1'){
-      S.isAdmin  = true;
-      S.isMember = true;
-      S.currentUser = { email:'admin', user_metadata:{} };
-      if(loader) loader.classList.add('hidden');
-      document.getElementById('login-screen').classList.add('hidden');
-      applyRoleUI();
+    // Wire up Supabase listener for ongoing changes
+    _sb.auth.onAuthStateChange(async(_evt, sess)=>{
+      if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
+      if(_evt === 'TOKEN_REFRESHED' && sess){ await handleSession(sess); }
+    });
+
+    // Check hardcoded admin session
+    try{
+      if(localStorage.getItem('vups_admin_session') === '1'){
+        clearTimeout(fallbackTimer);
+        S.isAdmin  = true;
+        S.isMember = true;
+        S.currentUser = { email:'admin', user_metadata:{} };
+        _hideLoader();
+        applyRoleUI();
+        loadData();
+        refreshApprovals();
+        return;
+      }
+    }catch(e){}
+
+    // Check Supabase crew session
+    const { data, error } = await _sb.auth.getSession();
+    clearTimeout(fallbackTimer);
+
+    if(error || !data.session){
+      _showLogin();
       loadData();
-      refreshApprovals();
       return;
     }
-  }catch(e){}
 
-  // Restore Supabase crew session from storage
-  const { data:{ session } } = await _sb.auth.getSession();
-  if(loader) loader.classList.add('hidden');
-  if(session){
-    await handleSession(session);
-  } else {
-    // No session — show login screen
-    document.getElementById('login-screen').classList.remove('hidden');
+    _hideLoader();
+    await handleSession(data.session);
+
+  }catch(e){
+    clearTimeout(fallbackTimer);
+    _showLogin();
     loadData();
   }
 }
@@ -3353,6 +3372,9 @@ function subscribeRealtime(){
 // Auto-save every 60s as heartbeat
 setInterval(saveState, 60000);
 window.addEventListener('beforeunload', saveState);
+
+// ── Boot the app ─────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{ initAuth(); });
 
 // (no _origRefreshTreasury stub needed)
 
