@@ -1542,7 +1542,7 @@ function _showLogin(){
 }
 
 async function initAuth(){
-  const fallbackTimer = setTimeout(()=>{ _showLogin(); loadData(); }, 5000);
+  const fallbackTimer = setTimeout(()=>{ _showLogin(); loadData(); }, 6000);
 
   try{
     // ── Restore hardcoded admin ──────────────────────────────────────────
@@ -1554,17 +1554,22 @@ async function initAuth(){
       return;
     }
 
-    // ── Restore crew session from manual localStorage cache ──────────────
-    const raw = localStorage.getItem('vups_crew_session');
+    // ── Try Supabase's own session restore first ─────────────────────────
+    // This is the most reliable path — Supabase stores tokens in its own key
+    const { data: sessionData, error: sessionError } = await _sb.auth.getSession();
+    if(!sessionError && sessionData && sessionData.session){
+      clearTimeout(fallbackTimer);
+      _hideLoader();
+      await handleSession(sessionData.session);
+      return;
+    }
+
+    // ── Fall back: silent re-login with saved credentials ────────────────
+    const raw = localStorage.getItem('vups_crew_creds');
     if(raw){
-      const saved = JSON.parse(raw);
-      // Check it hasn't expired (Supabase tokens last 1hr, we store refresh window)
-      if(saved && saved.user && saved.access_token){
-        // Re-set the session in Supabase so API calls work
-        const { data, error } = await _sb.auth.setSession({
-          access_token: saved.access_token,
-          refresh_token: saved.refresh_token
-        });
+      const { e: email, p: pass } = JSON.parse(raw);
+      if(email && pass){
+        const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
         if(!error && data.session){
           clearTimeout(fallbackTimer);
           _hideLoader();
@@ -1572,23 +1577,15 @@ async function initAuth(){
           return;
         }
       }
-      // Session expired or invalid — clear it
-      localStorage.removeItem('vups_crew_session');
+      // Creds no longer valid — clear them
+      localStorage.removeItem('vups_crew_creds');
     }
   }catch(e){ console.warn('Session restore error:', e); }
 
-  // Wire up listener for ongoing token refreshes
+  // Wire up listener for token refreshes
   _sb.auth.onAuthStateChange(async(_evt, sess)=>{
     if(_evt === 'SIGNED_OUT'){ clearSession(); }
-    if(_evt === 'TOKEN_REFRESHED' && sess){
-      // Update stored session with new tokens
-      try{ localStorage.setItem('vups_crew_session', JSON.stringify({
-        user: sess.user,
-        access_token: sess.access_token,
-        refresh_token: sess.refresh_token
-      })); }catch(e){}
-      await handleSession(sess);
-    }
+    if(_evt === 'TOKEN_REFRESHED' && sess){ await handleSession(sess); }
   });
 
   clearTimeout(fallbackTimer);
@@ -1633,14 +1630,9 @@ async function handleSession(session){
     return;
   }
 
-  // Approved member — save session to localStorage for persistence
+  // Approved member
   S.isMember = true;
   S.isAdmin  = false;
-  try{ localStorage.setItem('vups_crew_session', JSON.stringify({
-    user: session.user,
-    access_token: session.access_token,
-    refresh_token: session.refresh_token
-  })); }catch(e){}
   document.getElementById('login-screen').classList.add('hidden');
   applyRoleUI();
   loadData();
@@ -1763,7 +1755,7 @@ function guestAccess(){
 
 async function doLogout(){
   try{ localStorage.removeItem('vups_admin_session'); }catch(e){}
-  try{ localStorage.removeItem('vups_crew_session'); }catch(e){}
+  try{ localStorage.removeItem('vups_crew_creds'); }catch(e){}
   await _sb.auth.signOut();
   clearSession();
   goNav(document.querySelector('.nav-btn[onclick*=dispatch]'), 'dispatch');
@@ -1908,8 +1900,6 @@ function adminRenderPireps(){
 }
 
 function openPirepDetail(p){
-  const m = document.getElementById('modal-pirep-detail');
-  if(!m){ buildPirepDetailModal(); }
   // populate
   document.getElementById('pd-pilot').textContent   = p.pilot || '—';
   document.getElementById('pd-fn').textContent      = p.fn || '—';
@@ -1923,35 +1913,6 @@ function openPirepDetail(p){
   document.getElementById('pd-ldg').textContent     = p.ldgrate ? p.ldgrate + ' fpm' : '—';
   document.getElementById('pd-remarks').textContent = p.remarks || 'No remarks.';
   document.getElementById('modal-pirep-detail').classList.add('open');
-}
-
-function buildPirepDetailModal(){
-  const div = document.createElement('div');
-  div.id = 'modal-pirep-detail';
-  div.className = 'modal';
-  div.innerHTML = `
-    <div class="modal-box" style="max-width:480px">
-      <div class="modal-head">
-        <div class="modal-title">&#x2714; PIREP Detail</div>
-        <button class="modal-close" onclick="closeModal('modal-pirep-detail')">&#x2715;</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
-        <div><div class="form-label">Pilot</div><div id="pd-pilot" style="font-weight:600"></div></div>
-        <div><div class="form-label">Flight #</div><div id="pd-fn" style="color:var(--gold);font-weight:700;font-size:1.1rem"></div></div>
-        <div><div class="form-label">Date</div><div id="pd-date" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Route</div><div id="pd-route" style="font-weight:600"></div></div>
-        <div><div class="form-label">Aircraft</div><div id="pd-ac" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Block Time</div><div id="pd-bt" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Payload</div><div id="pd-payload" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Landing Rate</div><div id="pd-ldg" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Dep Fuel</div><div id="pd-fuel-dep" class="mono" style="font-size:.8rem"></div></div>
-        <div><div class="form-label">Arr Fuel</div><div id="pd-fuel-arr" class="mono" style="font-size:.8rem"></div></div>
-      </div>
-      <div class="form-label">Remarks</div>
-      <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
-    </div>
-  `;
-  document.body.appendChild(div);
 }
 
 
@@ -2014,21 +1975,24 @@ function opsParseMetar(m){
 
 async function fetchOpsMetars(){
   try{
-    const res = await fetch(OPS_METAR_API + OPS_METAR_STATIONS.join(','));
-    if(!res.ok) return;
-    const data = await res.json();
-    if(!Array.isArray(data)||!data.length) return;
-
-    const metarSpans = data.map(m=>{
-      const {cat,cls,wind,temp} = opsParseMetar(m);
-      return `<span><span class="t-hi">${m.icaoId}</span> <span class="${cls}">${cat}</span> ${wind}${temp?' · '+temp:''}</span>`;
+    const stations = OPS_METAR_STATIONS;
+    const results = await Promise.allSettled(
+      stations.map(id => fetch('https://aviationweather.gov/api/data/metar?ids='+id+'&format=json').then(r=>r.json()))
+    );
+    const metarSpans = [];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled' && Array.isArray(r.value) && r.value[0]){
+        const m = r.value[0];
+        const {cat,cls,wind,temp} = opsParseMetar(m);
+        metarSpans.push('<span><span class="t-hi">'+stations[i]+'</span> <span class="'+cls+'">'+cat+'</span> '+wind+(temp?' &middot; '+temp:'')+'</span>');
+      } else {
+        metarSpans.push('<span><span class="t-hi">'+stations[i]+'</span> <span class="t-r">N/A</span></span>');
+      }
     });
-
     const staticSpans = [
-      `<span>vUPS OPS &nbsp;·&nbsp; <span class="t-hi">ICAO: 5X</span></span>`,
-      `<span>METARs updated <span class="t-g">${new Date().toUTCString().slice(17,22)}Z</span></span>`,
+      '<span>vUPS OPS &nbsp;&middot;&nbsp; <span class="t-hi">ICAO: 5X</span></span>',
+      '<span>METARs <span class="t-g">' + new Date().toUTCString().slice(17,22) + 'Z</span></span>',
     ];
-
     const all = [...metarSpans, ...staticSpans];
     const el = document.getElementById('ops-ticker-inner');
     if(el) el.innerHTML = [...all,...all].join('');
@@ -4150,5 +4114,30 @@ async function filePirep(){
 }
 
 </script>
+
+<!-- PIREP Detail Modal -->
+<div id="modal-pirep-detail" class="modal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-head">
+      <div class="modal-title">&#x2714; PIREP Detail</div>
+      <button class="modal-close" onclick="closeModal('modal-pirep-detail')">&#x2715;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+      <div><div class="form-label">Pilot</div><div id="pd-pilot" style="font-weight:600;font-size:.9rem"></div></div>
+      <div><div class="form-label">Flight #</div><div id="pd-fn" style="color:var(--gold);font-weight:700;font-size:1.1rem"></div></div>
+      <div><div class="form-label">Date</div><div id="pd-date" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Route</div><div id="pd-route" style="font-weight:600;font-size:.9rem"></div></div>
+      <div><div class="form-label">Aircraft</div><div id="pd-ac" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Block Time</div><div id="pd-bt" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Payload</div><div id="pd-payload" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Landing Rate</div><div id="pd-ldg" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Dep Fuel</div><div id="pd-fuel-dep" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Arr Fuel</div><div id="pd-fuel-arr" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+    </div>
+    <div class="form-label">Remarks</div>
+    <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
+  </div>
+</div>
+
 </body>
 </html>

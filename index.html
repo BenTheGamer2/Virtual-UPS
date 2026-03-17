@@ -406,26 +406,25 @@ function parseMetar(m){
 
 async function fetchMetars(){
   try{
-    const ids = METAR_STATIONS.join(',');
-    const res = await fetch(METAR_API + ids);
-    if(!res.ok) return;
-    const data = await res.json();
-    if(!Array.isArray(data) || !data.length) return;
-
-    const staticItems = [
-      `<span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>`,
-      `<span>11 aircraft types &nbsp;·&nbsp; 66 routes &nbsp;·&nbsp; <span class="t-b">Live sync</span></span>`,
-    ];
-
-    const metarItems = data.map(m => {
-      const {cat, cls, wind, temp} = parseMetar(m);
-      return `<span><span class="t-gold">${m.icaoId}</span> <span class="${cls}">${cat}</span> ${wind}${temp?' · '+temp:''}</span>`;
+    const results = await Promise.allSettled(
+      METAR_STATIONS.map(id => fetch('https://aviationweather.gov/api/data/metar?ids='+id+'&format=json').then(r=>r.json()))
+    );
+    const metarItems = [];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled' && Array.isArray(r.value) && r.value[0]){
+        const m = r.value[0];
+        const {cat,cls,wind,temp} = parseMetar(m);
+        metarItems.push('<span><span class="t-gold">'+METAR_STATIONS[i]+'</span> <span class="'+cls+'">'+cat+'</span> '+wind+(temp?' &middot; '+temp:'')+'</span>');
+      }
     });
-
+    const staticItems = [
+      '<span>vUPS OPERATIONS &nbsp;&middot;&nbsp; <span class="t-gold">ICAO: 5X</span></span>',
+      '<span>11 aircraft types &nbsp;&middot;&nbsp; 66 routes &nbsp;&middot;&nbsp; <span class="t-b">Live sync</span></span>',
+    ];
     const all = [...staticItems, ...metarItems];
     const track = document.getElementById('ticker-track');
-    if(track) track.innerHTML = [...all, ...all].join('');
-  } catch(e){ /* keep static ticker on error */ }
+    if(all.length > 2 && track) track.innerHTML = [...all,...all].join('');
+  } catch(e){ }
 }
 
 fetchMetars();
