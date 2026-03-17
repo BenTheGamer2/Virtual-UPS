@@ -883,7 +883,7 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="form-group" style="margin:0">
         <label class="form-label">SimBrief Username</label>
-        <input class="form-input" id="rg-sbuser" value="VisualLanding112" placeholder="SimBrief username">
+        <input class="form-input" id="rg-sbuser" placeholder="Your SimBrief username" oninput="saveSBUser(this.value)">
       </div>
     </div>
 
@@ -906,7 +906,7 @@ tr:last-child td{border-bottom:none}
 
   <input type="hidden" id="cb-origin"><input type="hidden" id="cb-dest">
   <input type="hidden" id="cb-aircraft"><input type="hidden" id="cb-alt" value="FL350">
-  <input type="hidden" id="cb-ci" value="52"><input type="hidden" id="cb-sbuser" value="VisualLanding112">
+  <input type="hidden" id="cb-ci" value="52"><input type="hidden" id="cb-sbuser" value="">
 
     <!-- Pre-made routes -->
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem">
@@ -1949,44 +1949,31 @@ function guardPage(page){
 
 // ── Live METARs ───────────────────────────────────────────────────────────────
 const OPS_METAR_STATIONS = ['KSDF','KORD','EDDK','VHHH','PANC'];
-const OPS_METAR_API = 'https://aviationweather.gov/api/data/metar?format=json&ids=';
-
-function opsFlightCat(vis, ceiling){
-  if(ceiling < 500 || vis < 1)  return { cat:'LIFR', cls:'t-r' };
-  if(ceiling < 1000 || vis < 3) return { cat:'IFR',  cls:'t-r' };
-  if(ceiling < 3000 || vis < 5) return { cat:'MVFR', cls:'t-b' };
-  return { cat:'VFR', cls:'t-g' };
-}
-
-function opsParseMetar(m){
-  const vis = m.visib !== undefined ? parseFloat(m.visib) : 10;
-  let ceiling = 9999;
-  if(m.clouds && m.clouds.length){
-    for(const layer of m.clouds){
-      if((layer.cover==='BKN'||layer.cover==='OVC') && layer.base < ceiling)
-        ceiling = layer.base;
-    }
-  }
-  const {cat,cls} = opsFlightCat(vis, ceiling);
-  const wind = m.wdir !== undefined ? `${String(m.wdir).padStart(3,'0')}@${Math.round(m.wspd)}kt` : 'CALM';
-  const temp = m.temp !== undefined ? `${Math.round(m.temp)}°C` : '';
-  return {cat, cls, wind, temp};
-}
+const OPS_METAR_API = 'https://metar.vatsim.net/metar.php?id=';
 
 async function fetchOpsMetars(){
   try{
-    const stations = OPS_METAR_STATIONS;
+    // Use VATSIM METAR API — CORS-friendly, no key needed
     const results = await Promise.allSettled(
-      stations.map(id => fetch('https://aviationweather.gov/api/data/metar?ids='+id+'&format=json').then(r=>r.json()))
+      OPS_METAR_STATIONS.map(id =>
+        fetch('https://metar.vatsim.net/metar.php?id=' + id)
+          .then(r => r.text())
+      )
     );
     const metarSpans = [];
-    results.forEach((r,i)=>{
-      if(r.status==='fulfilled' && Array.isArray(r.value) && r.value[0]){
-        const m = r.value[0];
-        const {cat,cls,wind,temp} = opsParseMetar(m);
-        metarSpans.push('<span><span class="t-hi">'+stations[i]+'</span> <span class="'+cls+'">'+cat+'</span> '+wind+(temp?' &middot; '+temp:'')+'</span>');
+    results.forEach((r, i) => {
+      const id = OPS_METAR_STATIONS[i];
+      if(r.status === 'fulfilled' && r.value && r.value.trim() && !r.value.includes('No METAR')) {
+        const raw = r.value.trim();
+        // Parse flight category from raw METAR text
+        const cat = parseRawMetarCat(raw);
+        const cls = cat==='VFR'?'t-g':cat==='MVFR'?'t-b':'t-r';
+        // Extract wind
+        const windMatch = raw.match(/\b(\d{3}|VRB)(\d{2,3})(G\d+)?KT\b/);
+        const wind = windMatch ? windMatch[1]+'@'+parseInt(windMatch[2])+'kt' : '';
+        metarSpans.push('<span><span class="t-hi">' + id + '</span> <span class="' + cls + '">' + cat + '</span>' + (wind?' '+wind:'') + '</span>');
       } else {
-        metarSpans.push('<span><span class="t-hi">'+stations[i]+'</span> <span class="t-r">N/A</span></span>');
+        metarSpans.push('<span><span class="t-hi">' + id + '</span> <span class="t-r">UNAVAIL</span></span>');
       }
     });
     const staticSpans = [
@@ -1995,12 +1982,34 @@ async function fetchOpsMetars(){
     ];
     const all = [...metarSpans, ...staticSpans];
     const el = document.getElementById('ops-ticker-inner');
-    if(el) el.innerHTML = [...all,...all].join('');
-  }catch(e){}
+    if(el && metarSpans.length) el.innerHTML = [...all,...all].join('');
+  } catch(e) { console.warn('METAR fetch error', e); }
+}
+
+function parseRawMetarCat(raw){
+  // Ceiling: find lowest BKN/OVC layer
+  let ceiling = 9999;
+  const layers = raw.matchAll(/\b(BKN|OVC)(\d{3})\b/g);
+  for(const l of layers){
+    const alt = parseInt(l[2]) * 100;
+    if(alt < ceiling) ceiling = alt;
+  }
+  // Visibility
+  let vis = 10;
+  const visM = raw.match(/\s(\d+)SM\b/);
+  if(visM) vis = parseFloat(visM[1]);
+  const fracM = raw.match(/\s(\d+)\/(\d+)SM\b/);
+  if(fracM) vis = parseInt(fracM[1])/parseInt(fracM[2]);
+  if(/\bCAVOK\b/.test(raw)) return 'VFR';
+  if(ceiling < 500 || vis < 1) return 'LIFR';
+  if(ceiling < 1000 || vis < 3) return 'IFR';
+  if(ceiling < 3000 || vis < 5) return 'MVFR';
+  return 'VFR';
 }
 
 fetchOpsMetars();
 setInterval(fetchOpsMetars, 5 * 60 * 1000);
+
 
 function tick(){
   const n=new Date();
@@ -2221,10 +2230,27 @@ function renderDispatcher(){
   }).join('');
 }
 
+function saveSBUser(val){
+  try{ if(val) localStorage.setItem('vups_sbuser', val); }catch(e){}
+  const cb = document.getElementById('cb-sbuser');
+  if(cb) cb.value = val;
+}
+function loadSBUser(){
+  try{
+    const saved = localStorage.getItem('vups_sbuser');
+    if(saved){
+      const inp = document.getElementById('rg-sbuser');
+      if(inp) inp.value = saved;
+      const cb = document.getElementById('cb-sbuser');
+      if(cb) cb.value = saved;
+    }
+  }catch(e){}
+}
+
 function dispatchRoute(routeId, routeOverride, sbUserOverride){
   const route = routeOverride || S.dispatcherRoutes.find(r=>r.id===routeId);
   if(!route) return;
-  const sbUser = sbUserOverride || (document.getElementById("cb-sbuser")?document.getElementById("cb-sbuser").value:"VisualLanding112");
+  const sbUser = sbUserOverride || (document.getElementById("cb-sbuser")?document.getElementById("cb-sbuser").value:"");
   const aiPilots = S.pilots.filter(p=>p.type==='ai');
   let pilot = aiPilots[Math.floor(Math.random()*aiPilots.length)];
   if(!pilot) pilot = {id:0,type:'ai',name:'AI Dispatch',rank:'Regional F/O',route:'any',freq:1,hours:500,flights:50,ontime:97,earned:0,xp:50};
@@ -2261,6 +2287,7 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
   const tr = document.createElement('tr');
   const sbAc2 = SIMBRIEF_AC_MAP[route.aircraft]||'B744';
   const sbParams = new URLSearchParams({orig:route.origin,dest:route.dest,type:sbAc2,airline:'UPS',fltnum:fn.replace('5Y',''),units:'LBS'});
+  if(!sbUser){ alert('Enter your SimBrief username in the Dispatch form first.'); return; }
   const sbUrl = 'https://dispatch.simbrief.com/options/custom?'+sbParams.toString()+'&userid='+sbUser;
   tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td>'+pilot.name.replace('AI ','')+'</td><td><a href="'+sbUrl+'" target="_blank" style="color:var(--blue-lt);font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.7rem;text-decoration:none;border:1px solid rgba(36,113,163,.4);border-radius:2px;padding:.1rem .4rem">OFP</a></td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
   tbody.prepend(tr);
@@ -2542,14 +2569,14 @@ function dispatchGeneratedRoute(){
   if(!_generatedRoute){ alert('Generate a route first.'); return; }
   const r=_generatedRoute;
   const route={id:-1,origin:r.orig,dest:r.dest,aircraft:r.aircraft,label:r.orig+' to '+r.dest,category:r.length};
-  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  const sbUser=document.getElementById('rg-sbuser').value||'';
   dispatchRoute(-1,route,sbUser);
 }
 
 function openGeneratedSimbrief(){
   if(!_generatedRoute){ alert('Generate a route first.'); return; }
   const r=_generatedRoute;
-  const sbUser=document.getElementById('rg-sbuser').value||'VisualLanding112';
+  const sbUser=document.getElementById('rg-sbuser').value||'';
   const params=new URLSearchParams({orig:r.orig,dest:r.dest,type:r.sbAc,airline:'UPS',
     fltnum:r.fn.replace('5X',''),cruisealt:r.alt.replace('FL','')+'00',ci:r.ci,units:'LBS'});
   const url='https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser;
@@ -2560,7 +2587,7 @@ function openGeneratedSimbrief(){
 
 // Legacy compat for pre-made route card SimBrief buttons
 function openSimbrief(fnOverride,originOverride,destOverride,acOverride){
-  const sbUser=(document.getElementById('rg-sbuser')||{value:'VisualLanding112'}).value||'VisualLanding112';
+  const sbUser=(document.getElementById('rg-sbuser')||{value:''}).value||'';
   const origin=originOverride||''; const dest=destOverride||'';
   const aircraft=acOverride||'Boeing 747-8F';
   const fn=fnOverride||('5X'+(Math.floor(Math.random()*900)+100));
@@ -2571,7 +2598,7 @@ function openSimbrief(fnOverride,originOverride,destOverride,acOverride){
 }
 
 function getCustomFields(){
-  return {origin:'',dest:'',aircraft:'Boeing 747-8F',alt:'FL350',ci:52,sbUser:'VisualLanding112'};
+  return {origin:'',dest:'',aircraft:'Boeing 747-8F',alt:'FL350',ci:52,sbUser:''};
 }
 function dispatchCustomFlight(){ dispatchGeneratedRoute(); }
 
