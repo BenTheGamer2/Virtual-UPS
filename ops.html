@@ -2470,9 +2470,9 @@ function generateRoute(){
   const [minH, maxH] = lengthRange[length] || [0,99];
   const effectiveMax = Math.min(maxH, cap[1]);
 
-  // Build candidates with real or estimated block times
+  // Build candidates — filter by block time AND airport type compatibility
   let candidates = ALL_AIRPORTS
-    .filter(a => a.icao !== orig)
+    .filter(a => a.icao !== orig && a.types.includes(length))
     .map(a => {
       const known = blockTimeMap[orig+'-'+a.icao] || blockTimeMap[a.icao+'-'+orig];
       const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao);
@@ -3147,6 +3147,31 @@ const blockTimeMap = {
   'KSDF-KBNA':0.75, 'KBNA-KSDF':0.75,
   'KSDF-KIND':0.75, 'KIND-KSDF':0.75,
   'KSDF-KCVG':0.5,  'KCVG-KSDF':0.5,
+  // Additional international
+  'KSDF-OTHH':14.5, 'OTHH-KSDF':14.5,
+  'KSDF-OERK':14.0, 'OERK-KSDF':14.0,
+  'KSDF-WSSS':18.5, 'WSSS-KSDF':18.5,
+  'KSDF-VTBS':17.5, 'VTBS-KSDF':17.5,
+  'KSDF-RPLL':17.0, 'RPLL-KSDF':17.0,
+  'KSDF-RJAA':13.5, 'RJAA-KSDF':13.5,
+  'KSDF-RKSI':13.0, 'RKSI-KSDF':13.0,
+  'KSDF-ZBAA':13.5, 'ZBAA-KSDF':13.5,
+  'EDDK-OTHH':6.5,  'OTHH-EDDK':6.5,
+  'EDDK-WSSS':12.5, 'WSSS-EDDK':12.5,
+  'EDDK-RJAA':12.0, 'RJAA-EDDK':12.0,
+  // Additional domestic
+  'KSDF-KBOS':2.5,  'KBOS-KSDF':2.5,
+  'KSDF-KIAD':1.5,  'KIAD-KSDF':1.5,
+  'KSDF-KBWI':1.5,  'KBWI-KSDF':1.5,
+  'KSDF-KSFO':5.5,  'KSFO-KSDF':5.5,
+  'KSDF-KLAX':4.5,  'KLAX-KSDF':4.5,
+  'KSDF-KLAS':4.0,  'KLAS-KSDF':4.0,
+  'KSDF-KJFK':2.0,  'KJFK-KSDF':2.0,
+  'KSDF-KEWR':2.0,  'KEWR-KSDF':2.0,
+  'KSDF-KSTL':1.0,  'KSTL-KSDF':1.0,
+  'KSDF-KMEM':0.75, 'KMEM-KSDF':0.75,
+  'KSDF-KPHX':3.5,  'KPHX-KSDF':3.5,
+  'KSDF-KORD':1.25, 'KORD-KSDF':1.25,
 };
 function blockTime(o,d){
   return blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o] || 3.0;
@@ -3641,44 +3666,31 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 // Airport coordinates: [lat, lon]
 const AIRPORT_COORDS = {
   // UPS Primary Hubs
-  KSDF:[38.1744,-85.7364],  // Louisville — Worldport
-  KPHL:[39.8729,-75.2437],  // Philadelphia — East Coast Hub
-  KONT:[34.0560,-117.6009], // Ontario CA — West Coast Hub
-  KRFD:[42.1954,-89.0972],  // Rockford IL — Midwest Hub
-  KMIA:[25.7959,-80.2870],  // Miami — Latin America Hub
-  EDDK:[50.8659,7.1427],    // Cologne — Europe Hub
-  VHHH:[22.3080,113.9145],  // Hong Kong — Asia Hub
-  ZPBH:[22.6393,113.8107],  // Shenzhen — China Hub
-  ZSPD:[31.1443,121.8083],  // Shanghai Pudong
-  WMKK:[2.7456,101.7099],   // Kuala Lumpur
-  OMDB:[25.2528,55.3657],   // Dubai
-  PANC:[61.1744,-149.9964], // Anchorage — Pacific relay
-  EGSS:[51.8850,0.2350],    // London Stansted
-  // Domestic spokes
-  KPIT:[40.4915,-80.2329],  // Pittsburgh
-  KSTL:[38.7487,-90.3700],  // St. Louis
-  KEWR:[40.6895,-74.1745],  // Newark
-  KPHX:[33.4373,-112.0078], // Phoenix
-  KHOU:[29.6454,-95.2789],  // Houston
-  KMEM:[35.0424,-89.9767],  // Memphis
-  EPWA:[52.1657,20.9671],   // Warsaw
-  ZBAA:[40.0799,116.5850],  // Beijing Capital
-  RKSI:[37.4692,126.4505],  // Seoul Incheon
-  KATL:[33.6407,-84.4277],  // Atlanta
-  KDFW:[32.8998,-97.0403],  // Dallas/Fort Worth
-  KSEA:[47.4502,-122.3088], // Seattle
-  KCLT:[35.2140,-80.9431],  // Charlotte
-  KLEX:[38.0366,-84.6059],  // Lexington
-  KHSV:[34.6372,-86.7752],  // Huntsville
-  KBNA:[36.1245,-86.6782],  // Nashville
-  KIND:[39.7173,-86.2944],  // Indianapolis
-  KCVG:[39.0489,-84.6678],  // Cincinnati
-  KJFK:[40.6398,-73.7789],  // New York JFK
-  KLAX:[33.9425,-118.4085], // Los Angeles
-  KORD:[41.9742,-87.9073],  // Chicago OHare
-  CYYZ:[43.6777,-79.6248],  // Toronto
-  LFPG:[49.0097,2.5479],    // Paris CDG
-  RJAA:[35.7653,140.3864],  // Tokyo Narita
+  KSDF:[38.1744,-85.7364],  KPHL:[39.8729,-75.2437],  KONT:[34.0560,-117.6009],
+  KRFD:[42.1954,-89.0972],  KMIA:[25.7959,-80.2870],  EDDK:[50.8659,7.1427],
+  VHHH:[22.3080,113.9145],  ZPBH:[22.6393,113.8107],  ZSPD:[31.1443,121.8083],
+  WMKK:[2.7456,101.7099],   OMDB:[25.2528,55.3657],   PANC:[61.1744,-149.9964],
+  EGSS:[51.8850,0.2350],
+  // US Domestic
+  KPIT:[40.4915,-80.2329],  KSTL:[38.7487,-90.3700],  KEWR:[40.6895,-74.1745],
+  KPHX:[33.4373,-112.0078], KHOU:[29.6454,-95.2789],  KMEM:[35.0424,-89.9767],
+  KATL:[33.6407,-84.4277],  KDFW:[32.8998,-97.0403],  KSEA:[47.4502,-122.3088],
+  KCLT:[35.2140,-80.9431],  KLEX:[38.0366,-84.6059],  KHSV:[34.6372,-86.7752],
+  KBNA:[36.1245,-86.6782],  KIND:[39.7173,-86.2944],  KCVG:[39.0489,-84.6678],
+  KJFK:[40.6398,-73.7789],  KLAX:[33.9425,-118.4085], KORD:[41.9742,-87.9073],
+  KBOS:[42.3656,-71.0096],  KIAD:[38.9531,-77.4565],  KBWI:[39.1754,-76.6682],
+  KSFO:[37.6213,-122.3790], KLAS:[36.0840,-115.1537],  KMDW:[41.7868,-87.7522],
+  // Europe
+  LFPG:[49.0097,2.5479],    EHAM:[52.3086,4.7639],    LEMD:[40.4936,-3.5668],
+  LIRF:[41.8003,12.2389],   EDDM:[48.3538,11.7861],   EPWA:[52.1657,20.9671],
+  // Asia
+  RJAA:[35.7653,140.3864],  RJBB:[34.4273,135.2440],  RKSI:[37.4692,126.4505],
+  ZBAA:[40.0799,116.5850],  WSSS:[1.3592,103.9940],   VTBS:[13.6811,100.7470],
+  RPLL:[14.5086,121.0194],  WIII:[-6.1256,106.6558],
+  // Middle East
+  OTHH:[25.2731,51.6080],   OERK:[24.4576,46.6988],
+  // Alaska
+  PAFA:[64.8152,-147.8561],
 };
 function getCoords(icao){ return AIRPORT_COORDS[icao]||null; }
 
