@@ -1862,22 +1862,84 @@ async function deleteUser(id, email){
 function adminRenderPireps(){
   const tb = document.getElementById('admin-pirep-tbody');
   if(!tb) return;
+  const countEl = document.getElementById('admin-pirep-count');
+  if(countEl) countEl.textContent = _pireps.length ? _pireps.length + ' filed' : '';
   if(!_pireps.length){
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:\'Share Tech Mono\',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:1.25rem">No PIREPs filed yet.</td></tr>';
     return;
   }
-  tb.innerHTML = _pireps.slice().reverse().map((p,i)=>`
-    <tr>
-      <td class="mono" style="font-size:.68rem">${p.date||'—'}</td>
-      <td style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${p.pilot||'—'}</td>
-      <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.92rem">${p.fn||'—'}</td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600">${p.orig||'?'} → ${p.dest||'?'}</td>
-      <td class="mono" style="font-size:.68rem">${p.ac||'—'}</td>
-      <td class="mono">${p.bt?p.bt+'h':'—'}</td>
-      <td class="mono">${p.payload?Number(p.payload).toLocaleString()+' lbs':'—'}</td>
-      <td><button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3)" onclick="adminDeletePirep(${_pireps.length-1-i})">Delete</button></td>
-    </tr>`).join('');
+  const rows = _pireps.slice().reverse().map((p,i)=>{
+    const idx = _pireps.length - 1 - i;
+    const ldg = p.ldgrate ? p.ldgrate + ' fpm' : '&mdash;';
+    const ldgColor = p.ldgrate ? (p.ldgrate<=200 ? '#2d9e5f' : p.ldgrate<=400 ? '#c8920a' : '#c03a2b') : '#5a4a38';
+    const row = document.createElement('tr');
+    row.style.cursor = 'pointer';
+    row.title = 'Click to view full PIREP';
+    row.onclick = function(){ openPirepDetail(p); };
+    row.innerHTML = [
+      '<td class="mono" style="font-size:.68rem">' + (p.date||'&mdash;') + '</td>',
+      '<td style="font-size:.85rem;font-weight:600">' + (p.pilot||'&mdash;') + '</td>',
+      '<td style="color:#c8920a;font-weight:700;font-size:.92rem">' + (p.fn||'&mdash;') + '</td>',
+      '<td style="font-size:.85rem;font-weight:600">' + (p.orig||'?') + ' &rarr; ' + (p.dest||'?') + '</td>',
+      '<td class="mono" style="font-size:.68rem">' + (p.ac||'&mdash;') + '</td>',
+      '<td class="mono">' + (p.bt ? p.bt + 'h' : '&mdash;') + '</td>',
+      '<td class="mono">' + (p.payload ? Number(p.payload).toLocaleString() + ' lbs' : '&mdash;') + '</td>',
+      '<td class="mono" style="color:' + ldgColor + '">' + ldg + '</td>',
+      '<td><button class="btn btn-ghost btn-sm" style="color:#c03a2b;border-color:rgba(192,57,43,.3)" onclick="event.stopPropagation();adminDeletePirep(' + idx + ')">Delete</button></td>'
+    ].join('');
+    return row;
+  });
+  tb.innerHTML = '';
+  rows.forEach(r => tb.appendChild(r));
 }
+
+function openPirepDetail(p){
+  const m = document.getElementById('modal-pirep-detail');
+  if(!m){ buildPirepDetailModal(); }
+  // populate
+  document.getElementById('pd-pilot').textContent   = p.pilot || '—';
+  document.getElementById('pd-fn').textContent      = p.fn || '—';
+  document.getElementById('pd-date').textContent    = p.date || '—';
+  document.getElementById('pd-route').textContent   = (p.orig||'?') + ' → ' + (p.dest||'?');
+  document.getElementById('pd-ac').textContent      = p.ac || '—';
+  document.getElementById('pd-bt').textContent      = p.bt ? p.bt + ' hours' : '—';
+  document.getElementById('pd-payload').textContent = p.payload ? Number(p.payload).toLocaleString() + ' lbs' : '—';
+  document.getElementById('pd-fuel-dep').textContent = p.fuelDep ? Number(p.fuelDep).toLocaleString() + ' lbs' : '—';
+  document.getElementById('pd-fuel-arr').textContent = p.fuelArr ? Number(p.fuelArr).toLocaleString() + ' lbs' : '—';
+  document.getElementById('pd-ldg').textContent     = p.ldgrate ? p.ldgrate + ' fpm' : '—';
+  document.getElementById('pd-remarks').textContent = p.remarks || 'No remarks.';
+  document.getElementById('modal-pirep-detail').classList.add('open');
+}
+
+function buildPirepDetailModal(){
+  const div = document.createElement('div');
+  div.id = 'modal-pirep-detail';
+  div.className = 'modal';
+  div.innerHTML = `
+    <div class="modal-box" style="max-width:480px">
+      <div class="modal-head">
+        <div class="modal-title">&#x2714; PIREP Detail</div>
+        <button class="modal-close" onclick="closeModal('modal-pirep-detail')">&#x2715;</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+        <div><div class="form-label">Pilot</div><div id="pd-pilot" style="font-weight:600"></div></div>
+        <div><div class="form-label">Flight #</div><div id="pd-fn" style="color:var(--gold);font-weight:700;font-size:1.1rem"></div></div>
+        <div><div class="form-label">Date</div><div id="pd-date" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Route</div><div id="pd-route" style="font-weight:600"></div></div>
+        <div><div class="form-label">Aircraft</div><div id="pd-ac" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Block Time</div><div id="pd-bt" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Payload</div><div id="pd-payload" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Landing Rate</div><div id="pd-ldg" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Dep Fuel</div><div id="pd-fuel-dep" class="mono" style="font-size:.8rem"></div></div>
+        <div><div class="form-label">Arr Fuel</div><div id="pd-fuel-arr" class="mono" style="font-size:.8rem"></div></div>
+      </div>
+      <div class="form-label">Remarks</div>
+      <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
 
 function adminDeletePirep(idx){
   if(!confirm('Delete this PIREP?')) return;
@@ -3411,6 +3473,9 @@ function refreshAllUI(){
   document.getElementById('sum-ai-rev').textContent  = '$' + S.sessionRevenue.toLocaleString();
   document.getElementById('sum-freight').textContent = S.totalFreight.toLocaleString() + ' lbs';
   document.getElementById('sum-flights').textContent = S.totalFlights;
+  // Always keep admin PIREP table up to date
+  adminRenderPireps();
+  renderPireps();
   // Re-render whichever page is active
   const active = document.querySelector('.page.active');
   if(active){
