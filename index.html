@@ -195,13 +195,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:1.75
 <div class="ticker">
   <div class="ticker-track" id="ticker-track">
     <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>
-    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-r">CLOSED FOR RECRUITMENT</span></span>
-    <span>Worldport — <span class="t-gold">KSDF</span> Louisville, KY</span>
-    <span>Asia Hub — <span class="t-gold">VHHH</span> Hong Kong</span>
-    <span>Europe Hub — <span class="t-gold">EDDK</span> Cologne/Bonn</span>
-    <span>11 aircraft types &nbsp;·&nbsp; <span class="t-b">Real-time sync</span></span>
-    <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>
-    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-r">CLOSED FOR RECRUITMENT</span></span>
+    <span>Est. 2026 &nbsp;·&nbsp; <span class="t-gold">Launching Today</span></span>
     <span>Worldport — <span class="t-gold">KSDF</span> Louisville, KY</span>
     <span>Asia Hub — <span class="t-gold">VHHH</span> Hong Kong</span>
     <span>Europe Hub — <span class="t-gold">EDDK</span> Cologne/Bonn</span>
@@ -362,8 +356,8 @@ function tick(){
 }
 tick(); setInterval(tick,1000);
 
-// ── Countdown — March 20 2026 00:00 EST = 05:00 UTC ──────────────────────────
-const LAUNCH=new Date('2026-03-20T05:00:00Z');
+// ── Countdown — March 18 2026 10:00am ET = 15:00 UTC ────────────────────────
+const LAUNCH=new Date('2026-03-18T15:00:00Z');
 function updateCD(){
   const diff=LAUNCH-Date.now();
   if(diff<=0){
@@ -377,6 +371,65 @@ function updateCD(){
   document.getElementById('cd-s').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
 }
 updateCD(); setInterval(updateCD,1000);
+
+
+// ── Live METARs ───────────────────────────────────────────────────────────────
+const METAR_STATIONS = ['KSDF','KORD','EDDK','VHHH','PANC'];
+const METAR_API = 'https://aviationweather.gov/api/data/metar?format=json&ids=';
+
+function flightCat(vis, ceiling){
+  if(ceiling < 500 || vis < 1) return { cat:'LIFR', cls:'t-r' };
+  if(ceiling < 1000 || vis < 3) return { cat:'IFR', cls:'t-r' };
+  if(ceiling < 3000 || vis < 5) return { cat:'MVFR', cls:'t-b' };
+  return { cat:'VFR', cls:'t-g' };
+}
+
+function parseMetar(m){
+  // visibility
+  const vis = m.visib !== undefined ? parseFloat(m.visib) : 10;
+  // ceiling — lowest BKN or OVC layer
+  let ceiling = 9999;
+  if(m.clouds && m.clouds.length){
+    for(const layer of m.clouds){
+      if((layer.cover === 'BKN' || layer.cover === 'OVC') && layer.base < ceiling){
+        ceiling = layer.base;
+      }
+    }
+  }
+  const {cat, cls} = flightCat(vis, ceiling);
+  const wind = m.wdir !== undefined
+    ? `${String(m.wdir).padStart(3,'0')}@${Math.round(m.wspd)}kt`
+    : 'CALM';
+  const temp = m.temp !== undefined ? `${Math.round(m.temp)}°C` : '';
+  return { cat, cls, wind, temp, vis, raw: m.rawOb || '' };
+}
+
+async function fetchMetars(){
+  try{
+    const ids = METAR_STATIONS.join(',');
+    const res = await fetch(METAR_API + ids);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!Array.isArray(data) || !data.length) return;
+
+    const staticItems = [
+      `<span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-gold">ICAO: 5X</span></span>`,
+      `<span>11 aircraft types &nbsp;·&nbsp; 66 routes &nbsp;·&nbsp; <span class="t-b">Live sync</span></span>`,
+    ];
+
+    const metarItems = data.map(m => {
+      const {cat, cls, wind, temp} = parseMetar(m);
+      return `<span><span class="t-gold">${m.icaoId}</span> <span class="${cls}">${cat}</span> ${wind}${temp?' · '+temp:''}</span>`;
+    });
+
+    const all = [...staticItems, ...metarItems];
+    const track = document.getElementById('ticker-track');
+    if(track) track.innerHTML = [...all, ...all].join('');
+  } catch(e){ /* keep static ticker on error */ }
+}
+
+fetchMetars();
+setInterval(fetchMetars, 5 * 60 * 1000); // refresh every 5 min
 
 // ── Mobile nav ────────────────────────────────────────────────────────────────
 function toggleNav(){ document.getElementById('mob-nav').classList.toggle('open'); }

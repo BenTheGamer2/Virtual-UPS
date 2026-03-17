@@ -416,19 +416,13 @@ tr:last-child td{border-bottom:none}
 
 <!-- TICKER -->
 <div class="ticker">
-  <div class="ticker-inner">
-    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
-    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
-    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
-    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
-    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
-    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
-    <span>KSDF <span class="t-hi">VFR 10SM SKC</span></span>
-    <span>VUPS <span class="t-g">$84.20</span> <span class="t-g">▲ +2.4%</span></span>
-    <span>AI Chen completed 5Y741 KSDF→EDDK <span class="t-g">+$38,400</span></span>
-    <span>CEO Retirement Announcement — <span class="t-hi">See Leadership Page</span></span>
-    <span>EDDK <span class="t-hi">BKN025 MVFR</span></span>
-    <span>Fleet treasury <span class="t-g">$5.9B</span> — all systems nominal</span>
+  <div class="ticker-inner" id="ops-ticker-inner">
+    <span>KSDF <span class="t-hi">LOADING METAR...</span></span>
+    <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-hi">ICAO: 5X</span></span>
+    <span>EDDK <span class="t-hi">LOADING METAR...</span></span>
+    <span>VHHH <span class="t-hi">LOADING METAR...</span></span>
+    <span>PANC <span class="t-hi">LOADING METAR...</span></span>
+    <span>KORD <span class="t-hi">LOADING METAR...</span></span>
   </div>
 </div>
 
@@ -1048,6 +1042,22 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- PIREPs -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        PIREP Log
+        <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3)" onclick="adminClearPireps()">Clear All</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block</th><th>Payload</th><th>Actions</th></tr></thead>
+            <tbody id="admin-pirep-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- TREASURY -->
     <div class="admin-section">
       <div class="admin-section-title">Treasury Controls</div>
@@ -1330,8 +1340,6 @@ const _sb = supabase.createClient(
   {
     auth: {
       persistSession: true,
-      storageKey: 'vups_auth_session',
-      storage: window.localStorage,
       autoRefreshToken: true,
       detectSessionInUrl: true
     }
@@ -1510,49 +1518,58 @@ function _showLogin(){
 }
 
 async function initAuth(){
-  // Safety net — if anything hangs, show login after 4 seconds
-  const fallbackTimer = setTimeout(()=>{ _showLogin(); loadData(); }, 4000);
+  const fallbackTimer = setTimeout(()=>{ _showLogin(); loadData(); }, 5000);
 
   try{
-    // Wire up Supabase listener for ongoing changes
-    _sb.auth.onAuthStateChange(async(_evt, sess)=>{
-      if(_evt === 'SIGNED_OUT'){ clearSession(); return; }
-      if(_evt === 'TOKEN_REFRESHED' && sess){ await handleSession(sess); }
-    });
-
-    // Check hardcoded admin session
-    try{
-      if(localStorage.getItem('vups_admin_session') === '1'){
-        clearTimeout(fallbackTimer);
-        S.isAdmin  = true;
-        S.isMember = true;
-        S.currentUser = { email:'admin', user_metadata:{} };
-        _hideLoader();
-        applyRoleUI();
-        loadData();
-        refreshApprovals();
-        return;
-      }
-    }catch(e){}
-
-    // Check Supabase crew session
-    const { data, error } = await _sb.auth.getSession();
-    clearTimeout(fallbackTimer);
-
-    if(error || !data.session){
-      _showLogin();
-      loadData();
+    // ── Restore hardcoded admin ──────────────────────────────────────────
+    if(localStorage.getItem('vups_admin_session') === '1'){
+      clearTimeout(fallbackTimer);
+      S.isAdmin = true; S.isMember = true;
+      S.currentUser = { email:'admin', user_metadata:{} };
+      _hideLoader(); applyRoleUI(); loadData(); refreshApprovals();
       return;
     }
 
-    _hideLoader();
-    await handleSession(data.session);
+    // ── Restore crew session from manual localStorage cache ──────────────
+    const raw = localStorage.getItem('vups_crew_session');
+    if(raw){
+      const saved = JSON.parse(raw);
+      // Check it hasn't expired (Supabase tokens last 1hr, we store refresh window)
+      if(saved && saved.user && saved.access_token){
+        // Re-set the session in Supabase so API calls work
+        const { data, error } = await _sb.auth.setSession({
+          access_token: saved.access_token,
+          refresh_token: saved.refresh_token
+        });
+        if(!error && data.session){
+          clearTimeout(fallbackTimer);
+          _hideLoader();
+          await handleSession(data.session);
+          return;
+        }
+      }
+      // Session expired or invalid — clear it
+      localStorage.removeItem('vups_crew_session');
+    }
+  }catch(e){ console.warn('Session restore error:', e); }
 
-  }catch(e){
-    clearTimeout(fallbackTimer);
-    _showLogin();
-    loadData();
-  }
+  // Wire up listener for ongoing token refreshes
+  _sb.auth.onAuthStateChange(async(_evt, sess)=>{
+    if(_evt === 'SIGNED_OUT'){ clearSession(); }
+    if(_evt === 'TOKEN_REFRESHED' && sess){
+      // Update stored session with new tokens
+      try{ localStorage.setItem('vups_crew_session', JSON.stringify({
+        user: sess.user,
+        access_token: sess.access_token,
+        refresh_token: sess.refresh_token
+      })); }catch(e){}
+      await handleSession(sess);
+    }
+  });
+
+  clearTimeout(fallbackTimer);
+  _showLogin();
+  loadData();
 }
 
 async function handleSession(session){
@@ -1592,9 +1609,14 @@ async function handleSession(session){
     return;
   }
 
-  // Approved member
+  // Approved member — save session to localStorage for persistence
   S.isMember = true;
   S.isAdmin  = false;
+  try{ localStorage.setItem('vups_crew_session', JSON.stringify({
+    user: session.user,
+    access_token: session.access_token,
+    refresh_token: session.refresh_token
+  })); }catch(e){}
   document.getElementById('login-screen').classList.add('hidden');
   applyRoleUI();
   loadData();
@@ -1717,6 +1739,7 @@ function guestAccess(){
 
 async function doLogout(){
   try{ localStorage.removeItem('vups_admin_session'); }catch(e){}
+  try{ localStorage.removeItem('vups_crew_session'); }catch(e){}
   await _sb.auth.signOut();
   clearSession();
   goNav(document.querySelector('.nav-btn[onclick*=dispatch]'), 'dispatch');
@@ -1797,8 +1820,10 @@ async function refreshApprovals(){
     const statusColor = p.status==='approved' ? 'var(--green-lt)' : p.status==='rejected' ? 'var(--red-lt)' : 'var(--gold)';
     const actions = p.status==='pending'
       ? `<button class="btn btn-ghost btn-sm" style="color:var(--green-lt);border-color:rgba(45,158,95,.3)" onclick="approveUser('${p.id}','${p.email}')">Approve</button>
-         <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-left:.35rem" onclick="rejectUser('${p.id}')">Reject</button>`
-      : `<span style="font-family:\'Share Tech Mono\',monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>`;
+         <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-left:.35rem" onclick="rejectUser('${p.id}')">Reject</button>
+         <button class="btn btn-ghost btn-sm" style="color:var(--text-mute);border-color:var(--border2);margin-left:.35rem" onclick="deleteUser('${p.id}','${p.email}')">Delete</button>`
+      : `<span style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>
+         <button class="btn btn-ghost btn-sm" style="color:var(--text-mute);border-color:var(--border2);margin-left:.5rem" onclick="deleteUser('${p.id}','${p.email}')">Delete</button>`;
     return `<tr>
       <td style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600">${p.display_name||'—'}</td>
       <td style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim)">${p.email}</td>
@@ -1818,6 +1843,48 @@ async function rejectUser(id){
   refreshApprovals();
 }
 
+async function deleteUser(id, email){
+  if(!confirm('Permanently delete user ' + email + '?\nThis removes them from the approvals list.')) return;
+  await _sb.from('profiles').delete().eq('id', id);
+  refreshApprovals();
+}
+
+function adminRenderPireps(){
+  const tb = document.getElementById('admin-pirep-tbody');
+  if(!tb) return;
+  if(!_pireps.length){
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:\'Share Tech Mono\',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _pireps.slice().reverse().map((p,i)=>`
+    <tr>
+      <td class="mono" style="font-size:.68rem">${p.date||'—'}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${p.pilot||'—'}</td>
+      <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.92rem">${p.fn||'—'}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600">${p.orig||'?'} → ${p.dest||'?'}</td>
+      <td class="mono" style="font-size:.68rem">${p.ac||'—'}</td>
+      <td class="mono">${p.bt?p.bt+'h':'—'}</td>
+      <td class="mono">${p.payload?Number(p.payload).toLocaleString()+' lbs':'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3)" onclick="adminDeletePirep(${_pireps.length-1-i})">Delete</button></td>
+    </tr>`).join('');
+}
+
+function adminDeletePirep(idx){
+  if(!confirm('Delete this PIREP?')) return;
+  _pireps.splice(idx, 1);
+  saveState();
+  adminRenderPireps();
+  renderPireps();
+}
+
+function adminClearPireps(){
+  if(!confirm('Clear ALL PIREPs? This cannot be undone.')) return;
+  _pireps = [];
+  saveState();
+  adminRenderPireps();
+  renderPireps();
+}
+
 // Redirect guests away from member-only pages
 function guardPage(page){
   if(ADMIN_PAGES.includes(page) && !S.isAdmin){ return false; }
@@ -1832,6 +1899,59 @@ function guardPage(page){
 // ════════════════════════════════════════════════
 //  CLOCK
 // ════════════════════════════════════════════════
+
+// ── Live METARs ───────────────────────────────────────────────────────────────
+const OPS_METAR_STATIONS = ['KSDF','KORD','EDDK','VHHH','PANC'];
+const OPS_METAR_API = 'https://aviationweather.gov/api/data/metar?format=json&ids=';
+
+function opsFlightCat(vis, ceiling){
+  if(ceiling < 500 || vis < 1)  return { cat:'LIFR', cls:'t-r' };
+  if(ceiling < 1000 || vis < 3) return { cat:'IFR',  cls:'t-r' };
+  if(ceiling < 3000 || vis < 5) return { cat:'MVFR', cls:'t-b' };
+  return { cat:'VFR', cls:'t-g' };
+}
+
+function opsParseMetar(m){
+  const vis = m.visib !== undefined ? parseFloat(m.visib) : 10;
+  let ceiling = 9999;
+  if(m.clouds && m.clouds.length){
+    for(const layer of m.clouds){
+      if((layer.cover==='BKN'||layer.cover==='OVC') && layer.base < ceiling)
+        ceiling = layer.base;
+    }
+  }
+  const {cat,cls} = opsFlightCat(vis, ceiling);
+  const wind = m.wdir !== undefined ? `${String(m.wdir).padStart(3,'0')}@${Math.round(m.wspd)}kt` : 'CALM';
+  const temp = m.temp !== undefined ? `${Math.round(m.temp)}°C` : '';
+  return {cat, cls, wind, temp};
+}
+
+async function fetchOpsMetars(){
+  try{
+    const res = await fetch(OPS_METAR_API + OPS_METAR_STATIONS.join(','));
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!Array.isArray(data)||!data.length) return;
+
+    const metarSpans = data.map(m=>{
+      const {cat,cls,wind,temp} = opsParseMetar(m);
+      return `<span><span class="t-hi">${m.icaoId}</span> <span class="${cls}">${cat}</span> ${wind}${temp?' · '+temp:''}</span>`;
+    });
+
+    const staticSpans = [
+      `<span>vUPS OPS &nbsp;·&nbsp; <span class="t-hi">ICAO: 5X</span></span>`,
+      `<span>METARs updated <span class="t-g">${new Date().toUTCString().slice(17,22)}Z</span></span>`,
+    ];
+
+    const all = [...metarSpans, ...staticSpans];
+    const el = document.getElementById('ops-ticker-inner');
+    if(el) el.innerHTML = [...all,...all].join('');
+  }catch(e){}
+}
+
+fetchOpsMetars();
+setInterval(fetchOpsMetars, 5 * 60 * 1000);
+
 function tick(){
   const n=new Date();
   const p=x=>String(x).padStart(2,'0');
@@ -2430,7 +2550,7 @@ function addDispatchRoute(){
 function goNav(btn,page){
   if(!guardPage(page)) return;
   if(page==='pirep') setTimeout(renderPireps,50);
-  if(page==='admin') setTimeout(refreshApprovals,100);
+  if(page==='admin') setTimeout(()=>{ refreshApprovals(); adminRenderPireps(); },100);
   if(page==='admin'&&!S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -3291,7 +3411,7 @@ function refreshAllUI(){
     if(id==='fleet')      renderFleet();
     if(id==='economy')    renderEconomy();
     if(id==='hubs')       renderHubs();
-    if(id==='admin')      { renderAdmin(); refreshApprovals(); }
+    if(id==='admin')      { renderAdmin(); refreshApprovals(); adminRenderPireps(); }
     if(id==='dispatcher') renderDispatcher();
     if(id==='livemap')    onMapPageOpen();
     if(id==='pirep')      renderPireps();
