@@ -1176,12 +1176,26 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Dep Fuel (lbs)</label>
-          <input class="form-input" id="pr-fuel-dep" type="number" placeholder="180000">
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+            Dep Fuel
+            <span id="fuel-unit-display" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute)">LBS</span>
+          </label>
+          <div style="position:relative">
+            <input class="form-input" id="pr-fuel-dep" type="number" placeholder="180000" oninput="convertFuelDisplay()">
+            <span id="fuel-dep-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
+          </div>
+          <div id="fuel-dep-converted" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
         </div>
         <div class="form-group">
-          <label class="form-label">Arr Fuel (lbs)</label>
-          <input class="form-input" id="pr-fuel-arr" type="number" placeholder="32000">
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+            Arr Fuel
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute)" id="fuel-arr-unit-lbl"></span>
+          </label>
+          <div style="position:relative">
+            <input class="form-input" id="pr-fuel-arr" type="number" placeholder="32000" oninput="convertFuelDisplay()">
+            <span id="fuel-arr-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
+          </div>
+          <div id="fuel-arr-converted" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
         </div>
       </div>
       <div class="form-group">
@@ -4048,7 +4062,11 @@ function renderPireps(){
 let _payloadUnit = 'lbs';
 function setPayloadUnit(unit){
   _payloadUnit = unit;
-  document.getElementById('payload-unit-display').textContent = unit.toUpperCase();
+  const u = unit.toUpperCase();
+  // Update all unit labels
+  ['payload-unit-display','fuel-dep-unit','fuel-arr-unit'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=u;
+  });
   const lbsBtn = document.getElementById('payload-unit-lbs');
   const kgBtn  = document.getElementById('payload-unit-kg');
   if(unit === 'lbs'){
@@ -4059,6 +4077,7 @@ function setPayloadUnit(unit){
     lbsBtn.style.background = 'none';        lbsBtn.style.color = 'var(--text-mute)'; lbsBtn.style.borderColor = 'var(--border2)';
   }
   convertPayloadDisplay();
+  convertFuelDisplay();
 }
 function convertPayloadDisplay(){
   const val = parseFloat(document.getElementById('pr-payload').value);
@@ -4077,6 +4096,27 @@ function getPayloadLbs(){
   const val = parseFloat(document.getElementById('pr-payload').value) || 0;
   return _payloadUnit === 'kg' ? Math.round(val * 2.20462) : val;
 }
+function getFuelLbs(fieldId){
+  const val = parseFloat(document.getElementById(fieldId).value) || 0;
+  return _payloadUnit === 'kg' ? Math.round(val * 2.20462) : val;
+}
+function convertFuelDisplay(){
+  const fields = [
+    { input:'pr-fuel-dep', converted:'fuel-dep-converted' },
+    { input:'pr-fuel-arr', converted:'fuel-arr-converted' }
+  ];
+  fields.forEach(({input, converted})=>{
+    const val = parseFloat(document.getElementById(input).value);
+    const el  = document.getElementById(converted);
+    if(!el) return;
+    if(isNaN(val) || val <= 0){ el.textContent=''; return; }
+    if(_payloadUnit === 'kg'){
+      el.textContent = '= ' + Math.round(val * 2.20462).toLocaleString() + ' lbs';
+    } else {
+      el.textContent = '= ' + Math.round(val / 2.20462).toLocaleString() + ' kg';
+    }
+  });
+}
 
 async function filePirep(){
   if(!S.isMember){ alert('Sign in to file PIREPs.'); return; }
@@ -4091,7 +4131,9 @@ async function filePirep(){
   const rmk  = document.getElementById('pr-remarks').value.trim();
   if(!fn||!orig||!dest||!bt){ alert('Fill in required fields: Flight #, Route, Block Time'); return; }
   const pilot = S.currentUser?.user_metadata?.display_name || S.currentUser?.email?.split('@')[0] || 'Unknown';
-  const pirep = { fn, date, orig, dest, ac, bt:parseFloat(bt).toFixed(1), payload:pl, ldg, remarks:rmk, pilot, filed: Date.now() };
+  const fuelDep = getFuelLbs('pr-fuel-dep');
+  const fuelArr = getFuelLbs('pr-fuel-arr');
+  const pirep = { fn, date, orig, dest, ac, bt:parseFloat(bt).toFixed(1), payload:pl, fuelDep, fuelArr, ldgrate:parseFloat(ldg)||0, remarks:rmk, pilot, filed: Date.now() };
   _pireps.push(pirep);
   // Persist to Supabase state
   try {
@@ -4101,7 +4143,7 @@ async function filePirep(){
   } catch(e){ console.warn('PIREP save error',e); }
   closeModal('modal-file-pirep');
   // Clear form
-  ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-ldgrate','pr-remarks'].forEach(id=>{
+  ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-fuel-dep','pr-fuel-arr','pr-ldgrate','pr-remarks'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   renderPireps();
