@@ -500,7 +500,7 @@ tr:last-child td{border-bottom:none}
   <div class="stats-row">
     <div class="stat"><div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active Flights</div><div class="stat-sub pos">AI fleet live</div></div>
     <div class="stat"><div class="stat-val gld">98%</div><div class="stat-lbl">AI On-Time</div><div class="stat-sub pos">Fleet nominal</div></div>
-    <div class="stat"><div class="stat-val" id="s-crew-count">4</div><div class="stat-lbl">AI Pilots Active</div><div class="stat-sub" style="color:var(--blue-lt)">All online</div></div>
+    <div class="stat"><div class="stat-val" id="s-crew-count">0</div><div class="stat-lbl">Crew Members</div><div class="stat-sub" style="color:var(--blue-lt)">Registered pilots</div></div>
     <div class="stat"><div class="stat-val warn" id="s-human-count">0</div><div class="stat-lbl">Human Crew</div><div class="stat-sub" style="color:var(--text-mute)">Pending enrollment</div></div>
     <div class="stat"><div class="stat-val pos" id="s-revenue">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI earning</div></div>
   </div>
@@ -542,7 +542,7 @@ tr:last-child td{border-bottom:none}
           <tbody id="flight-tbody"></tbody></table>
         </div>
         <div id="flight-empty" class="empty-state" style="padding:1.5rem 1rem">
-          <div class="icon">✈</div><p>AI pilots spinning up. Flights appear here automatically.</p>
+          <div class="icon">✈</div><p>Dispatched flights appear here.</p>
         </div>
       </div>
       <div class="card">
@@ -552,8 +552,8 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="dcol">
       <div class="card">
-        <div class="card-title">AI Pilot Activity</div>
-        <div class="ai-activity" id="ai-log">
+        <div class="card-title">Recent Dispatches</div>
+        <div class="ai-activity" id="dispatch-log">
           <div class="ai-line"><span class="ai-time">--:--Z</span><span>Waiting for AI flights...</span></div>
         </div>
       </div>
@@ -742,7 +742,6 @@ tr:last-child td{border-bottom:none}
         <div class="ledger-item"><span class="li-desc">⚪ Standard Ground</span><span style="color:var(--text-dim);font-family:'Share Tech Mono',monospace">$4.00/lb</span></div>
         <div class="ledger-item"><span class="li-desc">⚠ Hazmat Surcharge</span><span class="warn">+$6.00/lb</span></div>
         <div class="ledger-item"><span class="li-desc">🌙 Night Shift Bonus</span><span class="gld">+15%</span></div>
-        <div class="ledger-item"><span class="li-desc">🤖 AI Pilot Rate</span><span style="color:var(--blue-lt);font-family:'Share Tech Mono',monospace">×0.80 base</span></div>
       </div>
       <div class="card">
         <div class="card-title">Quarterly Report — Full Year 2024</div>
@@ -993,7 +992,6 @@ tr:last-child td{border-bottom:none}
       <div class="admin-section-title">
         Crew Management
         <div style="display:flex;gap:.5rem">
-          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ai')">+ AI Pilot</button>
           <button class="btn btn-purple btn-sm" onclick="openModal('modal-add-human')">+ Human Crew</button>
         </div>
       </div>
@@ -1002,10 +1000,7 @@ tr:last-child td{border-bottom:none}
           <div class="card-title">Human Roster</div>
           <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Base</th><th>Hours</th><th>Actions</th></tr></thead><tbody id="admin-human-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr></tbody></table></div>
         </div>
-        <div class="card">
-          <div class="card-title">AI Pilot Roster</div>
-          <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Rank</th><th>Route</th><th>Flights</th><th>Actions</th></tr></thead><tbody id="admin-ai-tbody"></tbody></table></div>
-        </div>
+
       </div>
     </div>
 
@@ -1281,7 +1276,7 @@ tr:last-child td{border-bottom:none}
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Add AI Pilot</div><button class="modal-close" onclick="closeModal('modal-add-ai')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">AI pilots fly autonomously, earn at 80% base rate, and rank up over time.</p>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">Add crew members to manage your roster.</p>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Callsign</label><input class="form-input" placeholder="Martinez" id="ai-name"></div>
         <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="ai-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
@@ -1392,10 +1387,6 @@ const S = {
   stockBase: 142.80,
 
   pilots: [
-    { id:1, type:'ai', name:'AI Chen',   rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:2241, flights:401, ontime:98, earned:55000, xp:100 },
-    { id:2, type:'ai', name:'AI Patel',  rank:'Regional F/O',   base:'EDDK', route:'domestic', freq:2, hours:580,  flights:96,  ontime:96, earned:16000, xp:58  },
-    { id:3, type:'ai', name:'AI Torres', rank:'Global Captain', base:'KSDF', route:'longhaul', freq:2, hours:1910, flights:344, ontime:99, earned:51000, xp:100 },
-    { id:4, type:'ai', name:'AI Kim',    rank:'Feeder Pilot',   base:'KSDF', route:'feeder',   freq:1, hours:88,   flights:22,  ontime:91, earned:1800,  xp:18  },
   ],
 
   hubs: [
@@ -1418,25 +1409,20 @@ const S = {
     { id:2, name:'Ben Hoffman', initials:'BH', title:'Chief Executive Officer', type:'csuite', tenure:'2026', color:'exec-av-gold', bio:'Founder and CEO of Virtual UPS Airlines. Built the airline from the ground up into a global cargo operation spanning 3 continents, 11 aircraft types and over 60 routes. Leads all strategic decisions, network expansion and crew operations.', status:'active' },
     { id:3, name:'Brian Newman',   initials:'BN', title:'Chief Financial Officer',   type:'csuite', tenure:'2018', color:'exec-av-blue',   bio:'Oversees all financial operations, treasury management, profit share distribution, and quarterly earnings reporting.', status:'active' },
     { id:4, name:'Kate Gutmann',   initials:'KG', title:'Chief Commercial Officer',  type:'csuite', tenure:'2019', color:'exec-av-green',  bio:'Leads network expansion, route strategy, and hub development. Architected the VHHH and EDDK regional hub buildout.', status:'active' },
-    { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet maintenance scheduling, and the AI pilot program.', status:'active' },
+    { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet scheduling, and crew management.', status:'active' },
     { id:6, name:'Scott Price',    initials:'SP', title:'Independent Director',      type:'board',  tenure:'2020', color:'exec-av-gray',   bio:'Former logistics executive. Chairs the Audit and Finance Committee.', status:'active' },
     { id:7, name:'Angela Hwang',   initials:'AH', title:'Independent Director',      type:'board',  tenure:'2021', color:'exec-av-gray',   bio:'Aviation industry veteran. Member of the Safety and Operations Committee.', status:'active' },
-    { id:8, name:'Rodney Adkins',  initials:'RA', title:'Independent Director',      type:'board',  tenure:'2019', color:'exec-av-gray',   bio:'Technology and innovation specialist. Championed the AI pilot program initiative.', status:'active' },
+    { id:8, name:'Rodney Adkins',  initials:'RA', title:'Independent Director',      type:'board',  tenure:'2019', color:'exec-av-gray',   bio:'Technology and innovation specialist. Oversees digital operations and IT infrastructure.', status:'active' },
   ],
 
   news: [
     {
       id:3, category:'financial', date:'December 15, 2024',
       headline:'Q3 2024 Earnings: Revenue Up 10.3%, Margin Reaches Record 62%',
-      body:`Virtual UPS Airlines reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The AI pilot program continued to be the primary revenue driver, completing 344 flights across the long-haul network.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "The AI program runs at 80% of standard rate with zero downtime."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
+      body:`Virtual UPS Airlines reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The long-haul network continued to be the primary revenue driver, completing 344 flights across international routes.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "Our cost structure remains lean and our margins are among the best in the industry."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
       author:'Brian Newman — Chief Financial Officer'
     },
-    {
-      id:4, category:'operational', date:'December 10, 2024',
-      headline:'Virtual UPS Expands AI Pilot Fleet — Two New Captains Added',
-      body:`Chief Operations Officer Juan Perez announced the deployment of two additional AI Global Captains to the long-haul fleet, bringing total AI capacity to four active pilots.\n\nThe expansion is expected to increase daily freight volume by approximately 35% across the KSDF–EDDK and KSDF–VHHH corridors. Both new pilots have been assigned B747-400F type ratings.\n\n"The AI fleet is the backbone of our operation," Perez said. "They fly around the clock, they don't call in sick, and they consistently deliver at 98% on-time. We're going to keep scaling this."`,
-      author:'Juan Perez — Chief Operations Officer'
-    },
+
     {
       id:5, category:'breaking', date:'December 5, 2024',
       headline:'VUPS Stock Reaches All-Time High of $84.20 — Up 142% Since Launch',
@@ -2251,9 +2237,9 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
   const route = routeOverride || S.dispatcherRoutes.find(r=>r.id===routeId);
   if(!route) return;
   const sbUser = sbUserOverride || (document.getElementById("cb-sbuser")?document.getElementById("cb-sbuser").value:"");
-  const aiPilots = S.pilots.filter(p=>p.type==='ai');
-  let pilot = aiPilots[Math.floor(Math.random()*aiPilots.length)];
-  if(!pilot) pilot = {id:0,type:'ai',name:'AI Dispatch',rank:'Regional F/O',route:'any',freq:1,hours:500,flights:50,ontime:97,earned:0,xp:50};
+  // Use logged-in crew member as pilot, or generic dispatcher
+  const crewName = S.currentUser?.user_metadata?.display_name || S.currentUser?.email?.split('@')[0] || 'Dispatch';
+  let pilot = {id:0, type:'human', name:crewName, rank:'Captain', route:'any', freq:1, hours:500, flights:50, ontime:97, earned:0, xp:50};
   const [fmin,fmax] = freightMap[route.aircraft] || [10000,100000];
   const freight = Math.floor(Math.random()*(fmax-fmin)+fmin);
   const baseRate = pilot.rank==='Global Captain'?12:pilot.rank==='Regional F/O'?8.5:4;
@@ -2272,7 +2258,7 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
   const flightObj = {fn, origin:route.origin, dest:route.dest, ac:route.aircraft, pilot:pilot.name, startTime:Date.now(), blockHours, freight, revenue};
   liveFlights.push(flightObj);
   addFlightRow(flightObj, true);
-  addAILog(pilot.name, fn, route.origin, route.dest, revenue);
+  addDispatchLog(pilot.name, fn, route.origin, route.dest, revenue);
   addLedgerRow(fn + ' Revenue — ' + pilot.name, revenue);
   updateLoadBar(route.aircraft, freight);
   saveState();
@@ -2690,9 +2676,9 @@ function renderCrew(){
   // Jumpseat
   const jsb=document.getElementById('jumpseat-board');
   const routes=[['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF']];
-  const flying=S.pilots.filter(p=>p.type==='ai').slice(0,3);
+  const flying=[];
   jsb.innerHTML=flying.length
-    ?flying.map((p,i)=>{const r=routes[i%routes.length];return `<div class="ledger-item"><span class="li-desc">${p.name}</span><span style="color:var(--text-dim)">${r[0]}→${r[1]}</span><span style="color:var(--green-lt)">1 seat</span></div>`}).join('')
+?'<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No active flights.</div>'
     :'<div style="color:var(--text-mute);font-size:.7rem;padding:.5rem 0">No active jumpseat requests.</div>';
 }
 
@@ -2846,7 +2832,7 @@ function renderOwnedFleet(){
 //  ECONOMY
 // ════════════════════════════════════════════════
 function renderEconomy(){
-  const humans=S.pilots.filter(p=>p.type==='human');
+  const humans=S.pilots.filter(p=>p.type!=='ai');
   const totalE=humans.reduce((a,p)=>a+p.earned,0)||1;
   const pool=Math.round(S.treasury*.07);
   document.getElementById('earnings-tbody').innerHTML=humans.length
@@ -2888,13 +2874,7 @@ function renderAdmin(){
       </td></tr>`).join('')
     :`<tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr>`;
 
-  document.getElementById('admin-ai-tbody').innerHTML=S.pilots.filter(p=>p.type==='ai').map(p=>`<tr>
-    <td>${p.name}</td><td><span class="badge b-blue">${p.rank.split(' ')[0]}</span></td>
-    <td>${p.route}</td><td>${p.flights}</td>
-    <td style="display:flex;gap:.35rem">
-      <button class="btn btn-ghost btn-sm" onclick="triggerAI(${p.id})">▶ Fly</button>
-      <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
-    </td></tr>`).join('');
+
 
   document.getElementById('admin-exec-tbody').innerHTML=S.executives.map(e=>`<tr>
     <td>${e.name}</td><td style="color:var(--text-dim);font-size:.7rem">${e.title}</td>
@@ -3309,50 +3289,7 @@ const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,2480
 // Active live flights: { fn, origin, dest, ac, pilot, startTime, blockHours, freight, revenue }
 const liveFlights = [];
 
-function triggerAI(id){
-  const p=S.pilots.find(x=>x.id===id);if(!p) return;
-  const pool=routeMap[p.route]||routeMap.any;
-  const [origin,dest,ac]=pool[Math.floor(Math.random()*pool.length)];
-  const [fmin,fmax]=freightMap[ac]||[50000,150000];
-  const freight=Math.floor(Math.random()*(fmax-fmin)+fmin);
-  const baseRate=p.rank==='Global Captain'?12:p.rank==='Regional F/O'?8.5:4;
-  const revenue=Math.round(freight*baseRate*.80);
-  const fn='5Y'+(Math.floor(Math.random()*900)+100);
-  const fuelCost=Math.round(revenue*.18);
-  const blockHours=blockTime(origin,dest);
 
-  p.flights++;p.hours+=Math.round(blockHours);p.earned+=revenue;
-  p.xp=Math.min(100,p.xp+Math.floor(Math.random()*3)+1);
-  checkRankUp(p);
-
-  S.treasury+=revenue-fuelCost;
-  S.sessionRevenue+=revenue;
-  S.sessionCosts+=fuelCost;
-  S.totalFreight+=freight;
-
-  refreshTreasury();
-  document.getElementById('sum-ai-rev').textContent='$'+S.sessionRevenue.toLocaleString();
-  document.getElementById('sum-freight').textContent=S.totalFreight.toLocaleString()+' lbs';
-
-  // Add to live flights array for real tracking
-  const startTime = Date.now();
-  const flightObj = { fn, origin, dest, ac, pilot: p.name, startTime, blockHours, freight, revenue };
-  liveFlights.push(flightObj);
-
-  addFlightRow(flightObj, true);
-  addAILog(p.name,fn,origin,dest,revenue);
-  addLedgerRow(`${fn} Revenue — ${p.name}`,revenue);
-  updateLoadBar(ac,freight);
-  saveState();
-}
-
-
-function checkRankUp(p){
-  const old=p.rank;
-  if(p.hours>=1000&&p.rank!=='Global Captain'){p.rank='Global Captain';p.xp=10;}
-  else if(p.hours>=250&&p.rank==='Feeder Pilot'){p.rank='Regional F/O';p.xp=5;}
-  if(p.rank!==old) addAILog(p.name,'—','—','—',0,`promoted to <span style="color:var(--gold-lt)">${p.rank}</span> 🎖`);
-}
 
 // ── Leader election (only one tab fires scheduled flights) ───────────────────
 const CYCLE_KEY = 'vups_cycle_leader';
@@ -3384,7 +3321,7 @@ function seedScheduledFlights(){
       addFlightRow(f, true);
       const now = new Date();
       const t = String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0')+'Z';
-      addAILog('Scheduled', f.fn, f.origin, f.dest, 0, f.fn+' departed '+f.origin+' at scheduled time');
+      addDispatchLog('Scheduled', f.fn, f.origin, f.dest, 0, f.fn+' departed '+f.origin+' at scheduled time');
     }
   });
   document.getElementById('s-active').textContent = liveFlights.filter(f=>Date.now()<f.startTime+f.blockHours*3600000).length;
@@ -3396,10 +3333,6 @@ setInterval(()=>{
   if(!amLeader()) return;
   claimLeadership();
   seedScheduledFlights();
-  // Also allow manual AI pilots to fly extra routes
-  S.pilots.filter(p=>p.type==='ai').forEach(p=>{
-    if(Math.random()<0.15) triggerAI(p.id); // much lower rate — scheduled flights carry the load
-  });
 }, 300000); // every 5 min
 
 // Heartbeat
@@ -3408,8 +3341,8 @@ setInterval(()=>{ if(amLeader()) claimLeadership(); }, 20000);
 // ════════════════════════════════════════════════
 //  LOGGING
 // ════════════════════════════════════════════════
-function addAILog(name,fn,origin,dest,revenue,customMsg){
-  const log=document.getElementById('ai-log');if(!log) return;
+function addDispatchLog(name,fn,origin,dest,revenue,customMsg){
+  const log=document.getElementById('dispatch-log');if(!log) return;
   const now=new Date();
   const t=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}Z`;
   const msg=customMsg||`completed ${fn} ${origin}→${dest} <span class="earn">+$${revenue.toLocaleString()}</span>`;
