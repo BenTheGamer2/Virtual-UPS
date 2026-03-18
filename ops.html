@@ -1263,7 +1263,61 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
-        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option><option>KHSV</option></select></div>
+        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base">
+<option value="KSDF">KSDF</option>
+<option value="KRFD">KRFD</option>
+<option value="KIND">KIND</option>
+<option value="KCVG">KCVG</option>
+<option value="KORD">KORD</option>
+<option value="KMDW">KMDW</option>
+<option value="KSTL">KSTL</option>
+<option value="KPHL">KPHL</option>
+<option value="KJFK">KJFK</option>
+<option value="KBOS">KBOS</option>
+<option value="KIAD">KIAD</option>
+<option value="KBWI">KBWI</option>
+<option value="KEWR">KEWR</option>
+<option value="KONT">KONT</option>
+<option value="KLAX">KLAX</option>
+<option value="KSFO">KSFO</option>
+<option value="KSEA">KSEA</option>
+<option value="KLAS">KLAS</option>
+<option value="KPHX">KPHX</option>
+<option value="KMIA">KMIA</option>
+<option value="KATL">KATL</option>
+<option value="KDFW">KDFW</option>
+<option value="KHOU">KHOU</option>
+<option value="KBNA">KBNA</option>
+<option value="KCLT">KCLT</option>
+<option value="KHSV">KHSV</option>
+<option value="KLEX">KLEX</option>
+<option value="KMEM">KMEM</option>
+<option value="KPIT">KPIT</option>
+<option value="EDDK">EDDK</option>
+<option value="EGSS">EGSS</option>
+<option value="LFPG">LFPG</option>
+<option value="EHAM">EHAM</option>
+<option value="LEMD">LEMD</option>
+<option value="LIRF">LIRF</option>
+<option value="EDDM">EDDM</option>
+<option value="EPWA">EPWA</option>
+<option value="VHHH">VHHH</option>
+<option value="ZPBH">ZPBH</option>
+<option value="ZSPD">ZSPD</option>
+<option value="RJAA">RJAA</option>
+<option value="RJBB">RJBB</option>
+<option value="RKSI">RKSI</option>
+<option value="ZBAA">ZBAA</option>
+<option value="WSSS">WSSS</option>
+<option value="WMKK">WMKK</option>
+<option value="VTBS">VTBS</option>
+<option value="RPLL">RPLL</option>
+<option value="OMDB">OMDB</option>
+<option value="OTHH">OTHH</option>
+<option value="OERK">OERK</option>
+<option value="PANC">PANC</option>
+<option value="PAFA">PAFA</option>
+</select></div>
       </div>
       <div class="form-group"><label class="form-label">Starting Hours</label><input class="form-input" type="number" placeholder="0" id="h-hours" value="0"></div>
       <div class="form-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-human')">Cancel</button><button class="btn btn-primary" onclick="addHuman()">Add Member</button></div>
@@ -2347,24 +2401,24 @@ const ALL_AIRPORTS = [
   {icao:'EDDM', name:'Munich',                  region:'EUROPE',     types:['domestic']},
   {icao:'EPWA', name:'Warsaw',                  region:'EUROPE',     types:['domestic']},
   // East Asia
-  {icao:'VHHH', name:'Hong Kong',               region:'ASIA_EAST',  types:['longhaul']},
+  {icao:'VHHH', name:'Hong Kong',               region:'ASIA_EAST',  types:['domestic','longhaul']},
   {icao:'ZPBH', name:'Shenzhen',                region:'ASIA_EAST',  types:['longhaul']},
   {icao:'ZSPD', name:'Shanghai Pudong',         region:'ASIA_EAST',  types:['longhaul']},
   {icao:'RJAA', name:'Tokyo Narita',            region:'ASIA_EAST',  types:['longhaul']},
   {icao:'RKSI', name:'Seoul Incheon',           region:'ASIA_EAST',  types:['longhaul']},
   {icao:'ZBAA', name:'Beijing Capital',         region:'ASIA_EAST',  types:['longhaul']},
   // SE Asia
-  {icao:'WMKK', name:'Kuala Lumpur',            region:'ASIA_SE',    types:['longhaul']},
+  {icao:'WMKK', name:'Kuala Lumpur',            region:'ASIA_SE',    types:['domestic','longhaul']},
   {icao:'WSSS', name:'Singapore Changi',        region:'ASIA_SE',    types:['longhaul']},
   {icao:'VTBS', name:'Bangkok Suvarnabhumi',    region:'ASIA_SE',    types:['longhaul']},
   {icao:'RPLL', name:'Manila',                  region:'ASIA_SE',    types:['longhaul']},
   // Middle East
-  {icao:'OMDB', name:'Dubai',                   region:'MIDDLE_EAST',types:['longhaul']},
+  {icao:'OMDB', name:'Dubai',                   region:'MIDDLE_EAST',types:['domestic','longhaul']},
   {icao:'OERK', name:'Riyadh',                  region:'MIDDLE_EAST',types:['longhaul']},
   {icao:'OTHH', name:'Doha',                    region:'MIDDLE_EAST',types:['longhaul']},
   // Alaska
   {icao:'PANC', name:'Anchorage',               region:'ALASKA',     types:['domestic','longhaul']},
-  {icao:'PAFA', name:'Fairbanks',               region:'ALASKA',     types:['feeder','domestic']},
+  {icao:'PAFA', name:'Fairbanks',               region:'ALASKA',     types:['domestic']},
 ];
 
 // Aircraft capability limits: [minBlockH, maxBlockH]
@@ -2414,6 +2468,23 @@ function updateDepAirports(){
   const sel = document.getElementById('rg-dep-airport');
   if(!sel) return;
   sel.innerHTML = airports.map(a=>`<option value="${a.icao}">${a.icao} — ${a.name}</option>`).join('');
+  updateLengthOptions();
+}
+
+function updateLengthOptions(){
+  const region = document.getElementById('rg-dep-region').value;
+  const US_REGIONS = ['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'];
+  const isUS = US_REGIONS.includes(region);
+  const feederOpt = document.querySelector('#rg-length option[value="feeder"]');
+  if(feederOpt){
+    feederOpt.disabled = !isUS;
+    feederOpt.textContent = isUS ? '🟢 Short / Feeder (<2h)' : '🟢 Short / Feeder (US only)';
+  }
+  // If feeder is selected but origin is not US, switch to domestic
+  const lengthSel = document.getElementById('rg-length');
+  if(!isUS && lengthSel && lengthSel.value === 'feeder'){
+    lengthSel.value = 'domestic';
+  }
 }
 
 function updateArrAirports(){} // no-op, kept for compatibility
@@ -2452,13 +2523,26 @@ function generateRoute(){
   if(!orig){ alert('Select a departure airport first.'); return; }
 
   const cap = AC_CAPABILITY[aircraft] || [0.3, 18];
-  const lengthRange = { feeder:[0,2.5], domestic:[2,8.5], longhaul:[7.5,99] };
+  const lengthRange = { feeder:[0.3,2.0], domestic:[2.0,7.5], longhaul:[7.5,99] };
   const [minH, maxH] = lengthRange[length] || [0,99];
   const effectiveMax = Math.min(maxH, cap[1]);
 
   // Build candidates — filter by block time AND airport type compatibility
+  const US_REGIONS = ['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'];
+  const origAirport = ALL_AIRPORTS.find(a=>a.icao===orig);
+  const origIsUS = origAirport && US_REGIONS.includes(origAirport.region);
+
   let candidates = ALL_AIRPORTS
-    .filter(a => a.icao !== orig && a.types.includes(length))
+    .filter(a => {
+      if(a.icao === orig) return false;
+      if(!a.types.includes(length)) return false;
+      // Feeder only within US — no feeder from/to international airports
+      if(length === 'feeder'){
+        const destIsUS = US_REGIONS.includes(a.region);
+        if(!origIsUS || !destIsUS) return false;
+      }
+      return true;
+    })
     .map(a => {
       const known = blockTimeMap[orig+'-'+a.icao] || blockTimeMap[a.icao+'-'+orig];
       const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao);
@@ -2470,28 +2554,12 @@ function generateRoute(){
   const isHeavy = heavyAC.includes(aircraft);
   const isNarrow = ['Boeing 727-100F','Boeing 727-200F','Douglas DC-8F','Boeing 757-200F','Airbus A300-600F'].includes(aircraft);
 
-  let pool = [...candidates];
-  if(isHeavy && length==='longhaul'){
-    const intl = candidates.filter(a=>['ASIA_EAST','ASIA_SE','EUROPE','MIDDLE_EAST'].includes(a.region));
-    if(intl.length) pool = intl;
-  } else if(isNarrow && length==='feeder'){
-    const dom = candidates.filter(a=>['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'].includes(a.region));
-    if(dom.length) pool = dom;
-  } else if(isNarrow && length==='longhaul'){
-    const shortIntl = candidates.filter(a=>['EUROPE','US_EAST','US_WEST','ALASKA'].includes(a.region));
-    if(shortIntl.length) pool = shortIntl;
-  }
-
-  pool = pool.sort(()=>Math.random()-0.5);
+  // Strictly enforce type + block time — no fallback that ignores filters
+  let pool = candidates.sort(()=>Math.random()-0.5);
 
   if(!pool.length){
-    const fallback = ALL_AIRPORTS
-      .filter(a=>a.icao!==orig)
-      .map(a=>({...a,bt:blockTimeMap[orig+'-'+a.icao]||blockTimeMap[a.icao+'-'+orig]||calcBlockTime(orig,a.icao)}))
-      .filter(a=>a.bt<=cap[1])
-      .sort(()=>Math.random()-0.5);
-    if(!fallback.length){ alert('No valid route found for this aircraft and route length combination.'); return; }
-    pool = fallback;
+    alert('No valid route found for ' + length + ' from ' + orig + ' with ' + aircraft + '. Try a different length or aircraft.');
+    return;
   }
 
   const dest = pool[0];
@@ -3152,6 +3220,38 @@ const blockTimeMap = {
   'KSDF-KMEM':0.75, 'KMEM-KSDF':0.75,
   'KSDF-KPHX':3.5,  'KPHX-KSDF':3.5,
   'KSDF-KORD':1.25, 'KORD-KSDF':1.25,
+  // Intra-Asia domestic
+  'VHHH-ZPBH':0.5, 'ZPBH-VHHH':0.5, 'VHHH-ZSPD':2.0, 'ZSPD-VHHH':2.0,
+  'VHHH-RJAA':4.0, 'RJAA-VHHH':4.0, 'VHHH-RKSI':3.0, 'RKSI-VHHH':3.0,
+  'VHHH-ZBAA':3.0, 'ZBAA-VHHH':3.0, 'VHHH-WSSS':3.5, 'WSSS-VHHH':3.5,
+  'VHHH-VTBS':2.5, 'VTBS-VHHH':2.5, 'VHHH-RPLL':2.0, 'RPLL-VHHH':2.0,
+  'ZSPD-RJAA':2.5, 'RJAA-ZSPD':2.5, 'ZSPD-RKSI':1.5, 'RKSI-ZSPD':1.5,
+  'ZSPD-ZBAA':2.0, 'ZBAA-ZSPD':2.0, 'RJAA-RKSI':2.0, 'RKSI-RJAA':2.0,
+  'RJAA-RJBB':1.0, 'RJBB-RJAA':1.0, 'WSSS-VTBS':2.0, 'VTBS-WSSS':2.0,
+  'WSSS-RPLL':3.5, 'RPLL-WSSS':3.5, 'WSSS-WMKK':0.75,'WMKK-WSSS':0.75,
+  // Intra-Middle East domestic
+  'OMDB-OTHH':1.0, 'OTHH-OMDB':1.0, 'OMDB-OERK':1.5, 'OERK-OMDB':1.5,
+  'OTHH-OERK':1.2, 'OERK-OTHH':1.2,
+  // Intra-Europe domestic
+  'EDDK-EGSS':1.5, 'EGSS-EDDK':1.5, 'EDDK-LFPG':1.0, 'LFPG-EDDK':1.0,
+  'EDDK-EHAM':0.75,'EHAM-EDDK':0.75,'EDDK-LEMD':2.5, 'LEMD-EDDK':2.5,
+  'EDDK-LIRF':2.0, 'LIRF-EDDK':2.0, 'EDDK-EDDM':1.0, 'EDDM-EDDK':1.0,
+  'EDDK-EPWA':2.0, 'EPWA-EDDK':2.0, 'EGSS-LFPG':1.0, 'LFPG-EGSS':1.0,
+  'EGSS-EHAM':1.0, 'EHAM-EGSS':1.0, 'EGSS-LEMD':2.5, 'LEMD-EGSS':2.5,
+  'EGSS-LIRF':2.5, 'LIRF-EGSS':2.5, 'EGSS-EDDM':2.0, 'EDDM-EGSS':2.0,
+  'EGSS-EPWA':2.5, 'EPWA-EGSS':2.5, 'LFPG-EHAM':1.0, 'EHAM-LFPG':1.0,
+  'LFPG-LEMD':2.0, 'LEMD-LFPG':2.0, 'LFPG-LIRF':2.0, 'LIRF-LFPG':2.0,
+  'LFPG-EDDM':1.5, 'EDDM-LFPG':1.5, 'LFPG-EPWA':2.5, 'EPWA-LFPG':2.5,
+  'EHAM-LEMD':2.5, 'LEMD-EHAM':2.5, 'EHAM-LIRF':2.5, 'LIRF-EHAM':2.5,
+  'EHAM-EDDM':1.5, 'EDDM-EHAM':1.5, 'EHAM-EPWA':2.0, 'EPWA-EHAM':2.0,
+  'LEMD-LIRF':2.5, 'LIRF-LEMD':2.5, 'LEMD-EDDM':2.5, 'EDDM-LEMD':2.5,
+  'LEMD-EPWA':3.5, 'EPWA-LEMD':3.5, 'LIRF-EDDM':1.5, 'EDDM-LIRF':1.5,
+  'LIRF-EPWA':3.0, 'EPWA-LIRF':3.0, 'EDDM-EPWA':2.0, 'EPWA-EDDM':2.0,
+  // Alaska domestic
+  'PANC-PAFA':0.75,'PAFA-PANC':0.75,
+  // Transatlantic domestic (7h range)
+  'KJFK-EGSS':7.0, 'EGSS-KJFK':7.0, 'KJFK-LFPG':7.5, 'LFPG-KJFK':7.5,
+  'KBOS-EGSS':7.0, 'EGSS-KBOS':7.0,
 };
 function blockTime(o,d){
   return blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o] || 3.0;
