@@ -37,13 +37,13 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 /* TICKER */
 .ticker{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;height:28px;display:flex;align-items:center}
-.ticker-inner{display:flex;gap:3rem;animation:tick 90s linear infinite;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-mute)}
+.ticker-inner{display:flex;gap:3rem;animation:tick 90s linear infinite;white-space:nowrap;font-family:monospace;font-size:.68rem;color:var(--text-mute)}
 .t-hi{color:var(--gold)}.t-g{color:var(--green-lt)}.t-r{color:var(--red-lt)}.t-b{color:var(--blue-lt)}
 @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* STOCK TICKER BAR */
 .stock-bar{background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);padding:.3rem 1.5rem;display:flex;align-items:center;gap:1.5rem;overflow-x:auto}
-.stock-item{display:flex;align-items:center;gap:.5rem;white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.stock-item{display:flex;align-items:center;gap:.5rem;white-space:nowrap;font-family:monospace;font-size:.72rem}
 .stock-sym{color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.06em}
 .stock-price{color:var(--text)}
 .stock-chg.up{color:var(--green-lt)}.stock-chg.dn{color:var(--red-lt)}
@@ -64,7 +64,7 @@ nav{display:flex;gap:.1rem;margin-left:.5rem}
 .member-only-nav.active,.member-only-nav:hover{background:rgba(36,113,163,.12) !important;color:var(--blue-lt) !important}
 .admin-only-nav.active,.admin-only-nav:hover{background:rgba(125,60,152,.15) !important;color:var(--purple-lt) !important}
 .header-right{margin-left:auto;display:flex;align-items:center;gap:.85rem}
-.zulu{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
+.zulu{font-family:monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.06em}
 .zulu strong{color:var(--gold);font-weight:400}
 .treasury-badge{display:flex;align-items:center;gap:.4rem;background:rgba(200,146,10,.08);border:1px solid var(--border2);border-radius:3px;padding:.25rem .65rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--gold-lt);letter-spacing:.04em}
 .treasury-badge .lbl{color:var(--text-mute);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
@@ -105,7 +105,7 @@ main{padding:1.25rem;max-width:1600px;margin:0 auto}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.8rem}
 th{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:.55rem .75rem;border-bottom:1px solid rgba(46,31,18,.6);font-family:'Share Tech Mono',monospace;font-size:.75rem;vertical-align:middle}
+td{padding:.55rem .75rem;border-bottom:1px solid rgba(46,31,18,.6);font-family:monospace;font-size:.75rem;vertical-align:middle}
 tr:hover td{background:rgba(200,146,10,.03)}
 tr:last-child td{border-bottom:none}
 
@@ -134,7 +134,7 @@ tr:last-child td{border-bottom:none}
 /* DISPATCH LAYOUT */
 .dispatch-layout{display:grid;grid-template-columns:230px 1fr 220px;gap:1rem}
 .dcol{display:flex;flex-direction:column;gap:.75rem}
-.metar-raw{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--blue-lt);background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;line-height:1.7;margin-bottom:.75rem;word-break:break-all}
+.metar-raw{font-family:monospace;font-size:.68rem;color:var(--blue-lt);background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;line-height:1.7;margin-bottom:.75rem;word-break:break-all}
 .wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
 .wx-cell{background:rgba(0,0,0,.2);border-radius:3px;padding:.4rem .5rem;text-align:center}
 .wx-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;color:var(--blue-lt);line-height:1}
@@ -166,7 +166,7 @@ tr:last-child td{border-bottom:none}
 
 /* ECONOMY */
 .eco-layout{display:grid;grid-template-columns:320px 1fr;gap:1rem}
-.ledger-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(46,31,18,.5);font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.ledger-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(46,31,18,.5);font-family:monospace;font-size:.72rem}
 .ledger-item:last-child{border-bottom:none}
 .li-desc{color:var(--text-dim)}.li-pos{color:var(--green-lt)}.li-neg{color:var(--red-lt)}
 
@@ -179,7 +179,7 @@ tr:last-child td{border-bottom:none}
 .hub-detail-val{color:var(--text)}
 
 /* AI LOG */
-.ai-activity{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)}
+.ai-activity{font-family:monospace;font-size:.7rem;color:var(--text-dim)}
 .ai-line{padding:.28rem 0;border-bottom:1px solid rgba(46,31,18,.3);display:flex;gap:.5rem;align-items:flex-start}
 .ai-line:last-child{border-bottom:none}
 .ai-time{color:var(--text-mute);white-space:nowrap}
@@ -199,7 +199,7 @@ tr:last-child td{border-bottom:none}
 .exec-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.2}
 .exec-title{font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem;margin-bottom:.6rem}
 .exec-bio{font-size:.75rem;color:var(--text-dim);line-height:1.6}
-.exec-tenure{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute);margin-top:.5rem}
+.exec-tenure{font-family:monospace;font-size:.62rem;color:var(--text-mute);margin-top:.5rem}
 .retiring-banner{background:rgba(200,146,10,.08);border:1px solid rgba(200,146,10,.25);border-radius:3px;padding:.4rem .65rem;font-size:.7rem;color:var(--gold-lt);margin-top:.6rem;font-family:'Share Tech Mono',monospace}
 
 /* ── NEWS FEED ── */
@@ -212,10 +212,10 @@ tr:last-child td{border-bottom:none}
 .news-card.financial{border-left:3px solid var(--green-lt)}
 .news-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.5rem}
 .news-category{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
-.news-date{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);white-space:nowrap}
+.news-date{font-family:monospace;font-size:.65rem;color:var(--text-mute);white-space:nowrap}
 .news-headline{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);line-height:1.3;margin-bottom:.4rem}
 .news-body{font-size:.78rem;color:var(--text-dim);line-height:1.7}
-.news-author{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.news-author{font-family:monospace;font-size:.65rem;color:var(--text-mute);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)}
 
 /* ── FLEET ACQUISITION ── */
 .fleet-layout{display:grid;grid-template-columns:1fr 280px;gap:1rem}
@@ -230,7 +230,7 @@ tr:last-child td{border-bottom:none}
 .ac-spec-val{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:600;color:var(--text)}
 .ac-spec-lbl{font-size:.55rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em}
 .ac-price{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.6rem}
-.ac-owned-count{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);margin-bottom:.5rem}
+.ac-owned-count{font-family:monospace;font-size:.68rem;color:var(--text-dim);margin-bottom:.5rem}
 
 /* ── QUARTERLY REPORT ── */
 .report-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
@@ -284,7 +284,7 @@ tr:last-child td{border-bottom:none}
 .flight-progress-wrap{margin:0;padding:0}
 .flight-prog-bar{height:3px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;margin-top:2px}
 .flight-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt));transition:width 1s linear}
-.flight-eta-cell{font-family:'Share Tech Mono',monospace;font-size:.68rem;line-height:1.3}
+.flight-eta-cell{font-family:monospace;font-size:.68rem;line-height:1.3}
 .flight-eta-rem{font-size:.6rem;color:var(--text-mute);display:block}
 
 /* RESPONSIVE */
@@ -453,7 +453,7 @@ tr:last-child td{border-bottom:none}
   </div>
   <span class="stock-divider">|</span>
   <div class="stock-item" style="margin-left:auto">
-    <span id="stk-source-lbl" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute)">Market — loading…</span>
+    <span id="stk-source-lbl" style="font-family:monospace;font-size:.65rem;color:var(--text-mute)">Market — loading…</span>
   </div>
 </div>
 
@@ -583,7 +583,7 @@ tr:last-child td{border-bottom:none}
     <div style="display:flex;flex-direction:column;gap:.75rem">
       <div class="card">
         <div class="card-title">Rank Progression</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem">
+        <div style="font-family:monospace;font-size:.72rem">
           <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--green-lt)">Feeder Pilot</span><span style="color:var(--text-mute)">0–249 hrs</span></div>
           <div style="padding:0 0 .35rem .75rem;font-size:.65rem;color:var(--text-mute);border-bottom:1px solid var(--border)">C208B · ATR-42 · ATR-72</div>
           <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--blue-lt)">Regional F/O</span><span style="color:var(--text-mute)">250–999 hrs</span></div>
@@ -659,7 +659,7 @@ tr:last-child td{border-bottom:none}
   <div class="sec-header">
     <div class="sec-title">Fleet <span>Acquisition</span></div>
     <div class="sec-actions">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)">Treasury: <span id="fleet-treasury" class="gld">$5,900,000,000</span></span>
+      <span style="font-family:monospace;font-size:.72rem;color:var(--text-dim)">Treasury: <span id="fleet-treasury" class="gld">$5,900,000,000</span></span>
     </div>
   </div>
   <div class="fleet-layout">
@@ -676,11 +676,11 @@ tr:last-child td{border-bottom:none}
         <div class="card-title">Fleet Value</div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold-lt)" id="fleet-value">$0</div>
         <div style="font-size:.65rem;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem">Total acquisition cost</div>
-        <div style="margin-top:.75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)" id="fleet-count">0 aircraft owned</div>
+        <div style="margin-top:.75rem;font-family:monospace;font-size:.72rem;color:var(--text-dim)" id="fleet-count">0 aircraft owned</div>
       </div>
       <div class="card">
         <div class="card-title">Purchase Log</div>
-        <div id="purchase-log" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim)">
+        <div id="purchase-log" style="font-family:monospace;font-size:.7rem;color:var(--text-dim)">
           <div style="color:var(--text-mute)">No purchases yet.</div>
         </div>
       </div>
@@ -786,6 +786,40 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
   </div>
+
+  <!-- ══ TRIP BIDDING ══════════════════════════════════════════════════════ -->
+  <div style="margin-top:1.5rem">
+    <div class="sec-header" style="margin-bottom:.75rem">
+      <div class="sec-title" style="font-size:1rem">Trip <span>Board</span></div>
+      <div class="sec-actions">
+        <span style="font-family:monospace;font-size:.65rem;color:var(--text-mute)">First come, first served</span>
+        <button class="btn btn-purple btn-sm" id="post-trip-btn" onclick="openModal('modal-post-trip')" style="display:none;margin-left:.5rem">+ Post Trip</button>
+      </div>
+    </div>
+
+    <!-- My Assignments (member view) -->
+    <div id="my-assignments" style="display:none;margin-bottom:1rem">
+      <div class="card">
+        <div class="card-title" style="color:var(--blue-lt)">✈ My Assigned Trips</div>
+        <div id="my-assignments-body">
+          <div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No trips assigned yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Open trips table -->
+    <div class="card">
+      <div class="card-title">Open Trips</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Date</th><th>Dep (Z)</th><th>Block</th><th>Bids</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="trips-tbody">
+            <tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:1.5rem;font-family:monospace;font-size:.73rem">No trips posted yet. Admin will post available trips here.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════ HUBS ═══════════ -->
@@ -806,7 +840,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <!-- Sync status -->
-  <div id="sync-banner" style="background:rgba(36,113,163,.08);border:1px solid rgba(36,113,163,.25);border-radius:4px;padding:.5rem 1rem;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--blue-lt);display:flex;align-items:center;gap:.6rem">
+  <div id="sync-banner" style="background:rgba(36,113,163,.08);border:1px solid rgba(36,113,163,.25);border-radius:4px;padding:.5rem 1rem;margin-bottom:1rem;font-family:monospace;font-size:.72rem;color:var(--blue-lt);display:flex;align-items:center;gap:.6rem">
     <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-mute);flex-shrink:0;display:inline-block"></span>
     <span id="sync-label">Connecting to live database...</span>
   </div>
@@ -821,14 +855,19 @@ tr:last-child td{border-bottom:none}
         <label class="form-label">Departure Region</label>
         <select class="form-select" id="rg-dep-region" onchange="updateDepAirports()">
           <option value="US_MIDWEST">🇺🇸 US Midwest</option>
-          <option value="US_EAST">🇺🇸 US East Coast</option>
-          <option value="US_WEST">🇺🇸 US West Coast</option>
+          <option value="US_EAST">🇺🇸 US East</option>
           <option value="US_SOUTH">🇺🇸 US South</option>
+          <option value="US_WEST">🇺🇸 US West</option>
+          <option value="HAWAII">🌺 Hawaii</option>
+          <option value="ALASKA">❄️ Alaska</option>
+          <option value="CANADA">🇨🇦 Canada</option>
+          <option value="LATAM">🌎 Latin America</option>
           <option value="EUROPE">🇪🇺 Europe</option>
-          <option value="ASIA_EAST">🌏 East Asia</option>
-          <option value="ASIA_SE">🌏 Southeast Asia</option>
           <option value="MIDDLE_EAST">🌍 Middle East</option>
-          <option value="ALASKA">🌨 Alaska / Pacific</option>
+          <option value="ASIA_EAST">🌏 East Asia</option>
+          <option value="ASIA_SE">🌏 SE Asia</option>
+          <option value="ASIA_SOUTH">🌏 South Asia</option>
+          <option value="OCEANIA">🦘 Oceania</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
@@ -889,9 +928,9 @@ tr:last-child td{border-bottom:none}
     <div id="rg-preview" style="display:none;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.85rem 1rem;margin-bottom:.85rem">
       <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:.5rem">
         <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold-lt)" id="rg-preview-fn"></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text)" id="rg-preview-route"></div>
+        <div style="font-family:monospace;font-size:.85rem;color:var(--text)" id="rg-preview-route"></div>
       </div>
-      <div id="rg-preview-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.35rem .75rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim)"></div>
+      <div id="rg-preview-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.35rem .75rem;font-family:monospace;font-size:.72rem;color:var(--text-dim)"></div>
       <div style="margin-top:.6rem;font-size:.68rem;font-style:italic;color:var(--text-mute)" id="rg-dest-reason"></div>
     </div>
 
@@ -900,7 +939,7 @@ tr:last-child td{border-bottom:none}
       <button class="btn btn-primary" id="rg-dispatch-btn" onclick="dispatchGeneratedRoute()" style="display:none">▶ Dispatch Flight</button>
       <button class="btn btn-blue" id="rg-simbrief-btn" onclick="openGeneratedSimbrief()" style="display:none">✈ Open SimBrief OFP</button>
     </div>
-    <div id="cb-simbrief-note" style="display:none;margin-top:.5rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--blue-lt)"></div>
+    <div id="cb-simbrief-note" style="display:none;margin-top:.5rem;font-family:monospace;font-size:.7rem;color:var(--blue-lt)"></div>
   </div>
 
   <input type="hidden" id="cb-origin"><input type="hidden" id="cb-dest">
@@ -915,7 +954,7 @@ tr:last-child td{border-bottom:none}
   <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
 
   <!-- Toast -->
-  <div id="dispatch-toast" style="display:none;background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.35);border-radius:4px;padding:.75rem 1.1rem;font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--green-lt);margin-bottom:1rem"></div>
+  <div id="dispatch-toast" style="display:none;background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.35);border-radius:4px;padding:.75rem 1.1rem;font-family:monospace;font-size:.8rem;color:var(--green-lt);margin-bottom:1rem"></div>
 
   <!-- Recent dispatches table — LIVE, synced -->
   <div class="card">
@@ -934,7 +973,7 @@ tr:last-child td{border-bottom:none}
   <div class="sec-header">
     <div class="sec-title">🗺 Live <span>Flight Map</span></div>
     <div class="sec-actions">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-mute)" id="map-flight-count">—</span>
+      <span style="font-family:monospace;font-size:.72rem;color:var(--text-mute)" id="map-flight-count">—</span>
       <button class="btn btn-ghost btn-sm" onclick="refreshMapFlights()">↻ Refresh</button>
     </div>
   </div>
@@ -946,7 +985,7 @@ tr:last-child td{border-bottom:none}
   <div style="display:grid;grid-template-columns:180px 1fr;gap:1rem">
     <div class="card">
       <div class="card-title">Legend</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;line-height:1.8">
+      <div style="font-family:monospace;font-size:.7rem;line-height:1.8">
         <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#c8920a;flex-shrink:0;display:inline-block"></span>Long Haul (8h+)</div>
         <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#3498db;flex-shrink:0;display:inline-block"></span>Domestic (3–8h)</div>
         <div style="display:flex;align-items:center;gap:.5rem"><span style="width:10px;height:10px;border-radius:50%;background:#35c270;flex-shrink:0;display:inline-block"></span>Feeder (&lt;3h)</div>
@@ -975,13 +1014,13 @@ tr:last-child td{border-bottom:none}
     <div class="admin-section">
       <div class="admin-section-title">
         Crew Applications
-        <span id="pending-count-badge" style="background:rgba(192,57,43,.15);color:var(--red-lt);border:1px solid rgba(192,57,43,.3);border-radius:2px;font-size:.62rem;padding:.1rem .45rem;font-family:'Share Tech Mono',monospace;display:none"></span>
+        <span id="pending-count-badge" style="background:rgba(192,57,43,.15);color:var(--red-lt);border:1px solid rgba(192,57,43,.3);border-radius:2px;font-size:.62rem;padding:.1rem .45rem;font-family:monospace;display:none"></span>
       </div>
       <div class="card">
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Name</th><th>Email</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="approvals-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No applications yet.</td></tr></tbody>
+            <tbody id="approvals-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:monospace;font-size:.73rem">No applications yet.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1047,7 +1086,7 @@ tr:last-child td{border-bottom:none}
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block</th><th>Payload</th><th>Actions</th></tr></thead>
-            <tbody id="admin-pirep-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr></tbody>
+            <tbody id="admin-pirep-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:monospace;font-size:.73rem">No PIREPs filed yet.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1101,7 +1140,7 @@ tr:last-child td{border-bottom:none}
           <th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Payload</th><th>Status</th>
         </tr></thead>
         <tbody id="pirep-tbody">
-          <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:'Share Tech Mono',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>
+          <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>
         </tbody>
       </table>
     </div>
@@ -1158,39 +1197,39 @@ tr:last-child td{border-bottom:none}
           <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
             Payload
             <span style="display:flex;gap:.3rem;align-items:center">
-              <button type="button" id="payload-unit-lbs" onclick="setPayloadUnit('lbs')" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--gold);background:var(--gold);color:#1a0e06;cursor:pointer">LBS</button>
-              <button type="button" id="payload-unit-kg" onclick="setPayloadUnit('kg')" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--border2);background:none;color:var(--text-mute);cursor:pointer">KG</button>
+              <button type="button" id="payload-unit-lbs" onclick="setPayloadUnit('lbs')" style="font-family:monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--gold);background:var(--gold);color:#1a0e06;cursor:pointer">LBS</button>
+              <button type="button" id="payload-unit-kg" onclick="setPayloadUnit('kg')" style="font-family:monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--border2);background:none;color:var(--text-mute);cursor:pointer">KG</button>
             </span>
           </label>
           <div style="position:relative">
             <input class="form-input" id="pr-payload" type="number" placeholder="180000" oninput="convertPayloadDisplay()">
-            <span id="payload-unit-display" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
+            <span id="payload-unit-display" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
           </div>
-          <div id="payload-converted" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
+          <div id="payload-converted" style="font-family:monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
             Dep Fuel
-            <span id="fuel-unit-display" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute)">LBS</span>
+            <span id="fuel-unit-display" style="font-family:monospace;font-size:.62rem;color:var(--text-mute)">LBS</span>
           </label>
           <div style="position:relative">
             <input class="form-input" id="pr-fuel-dep" type="number" placeholder="180000" oninput="convertFuelDisplay()">
-            <span id="fuel-dep-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
+            <span id="fuel-dep-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
           </div>
-          <div id="fuel-dep-converted" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
+          <div id="fuel-dep-converted" style="font-family:monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
         </div>
         <div class="form-group">
           <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
             Arr Fuel
-            <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute)" id="fuel-arr-unit-lbl"></span>
+            <span style="font-family:monospace;font-size:.62rem;color:var(--text-mute)" id="fuel-arr-unit-lbl"></span>
           </label>
           <div style="position:relative">
             <input class="form-input" id="pr-fuel-arr" type="number" placeholder="32000" oninput="convertFuelDisplay()">
-            <span id="fuel-arr-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
+            <span id="fuel-arr-unit" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);font-family:monospace;font-size:.65rem;color:var(--text-mute);pointer-events:none">LBS</span>
           </div>
-          <div id="fuel-arr-converted" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
+          <div id="fuel-arr-converted" style="font-family:monospace;font-size:.65rem;color:var(--text-mute);margin-top:.25rem;min-height:.9rem"></div>
         </div>
       </div>
       <div class="form-group">
@@ -1878,11 +1917,11 @@ async function refreshApprovals(){
       ? `<button class="btn btn-ghost btn-sm" style="color:var(--green-lt);border-color:rgba(45,158,95,.3)" onclick="approveUser('${p.id}','${p.email}')">Approve</button>
          <button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-left:.35rem" onclick="rejectUser('${p.id}')">Reject</button>
          <button class="btn btn-ghost btn-sm" style="color:var(--text-mute);border-color:var(--border2);margin-left:.35rem" onclick="deleteUser('${p.id}','${p.email}')">Delete</button>`
-      : `<span style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>
+      : `<span style="font-family:monospace;font-size:.65rem;color:var(--text-mute)">${p.status}</span>
          <button class="btn btn-ghost btn-sm" style="color:var(--text-mute);border-color:var(--border2);margin-left:.5rem" onclick="deleteUser('${p.id}','${p.email}')">Delete</button>`;
     return `<tr>
       <td style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600">${p.display_name||'—'}</td>
-      <td style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim)">${p.email}</td>
+      <td style="font-family:monospace;font-size:.68rem;color:var(--text-dim)">${p.email}</td>
       <td style="font-family:\'Share Tech Mono\',monospace;font-size:.68rem;color:var(--text-dim)">${date}</td>
       <td><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:.75rem;font-weight:600;color:${statusColor};text-transform:uppercase;letter-spacing:.06em">${p.status}</span></td>
       <td>${actions}</td>
@@ -2358,69 +2397,212 @@ const SIMBRIEF_AC_MAP = {
 // All UPS-served airports, tagged by region and type
 // type: feeder=<2h, domestic=2-8h, longhaul=8h+
 const ALL_AIRPORTS = [
-  // US Midwest
-  {icao:'KSDF', name:'Louisville (Worldport)',  region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
-  {icao:'KRFD', name:'Rockford IL',             region:'US_MIDWEST', types:['feeder','domestic']},
-  {icao:'KIND', name:'Indianapolis',            region:'US_MIDWEST', types:['feeder','domestic']},
-  {icao:'KCVG', name:'Cincinnati',              region:'US_MIDWEST', types:['feeder','domestic']},
-  {icao:'KORD', name:'Chicago OHare',           region:'US_MIDWEST', types:['feeder','domestic']},
-  {icao:'KMDW', name:'Chicago Midway',          region:'US_MIDWEST', types:['feeder']},
-  {icao:'KSTL', name:'St. Louis',               region:'US_MIDWEST', types:['feeder','domestic']},
-  // US East
-  {icao:'KPHL', name:'Philadelphia',            region:'US_EAST',    types:['domestic','longhaul']},
-  {icao:'KJFK', name:'New York JFK',            region:'US_EAST',    types:['domestic','longhaul']},
-  {icao:'KBOS', name:'Boston',                  region:'US_EAST',    types:['domestic']},
-  {icao:'KIAD', name:'Washington Dulles',       region:'US_EAST',    types:['domestic']},
-  {icao:'KBWI', name:'Baltimore',               region:'US_EAST',    types:['domestic']},
-  {icao:'KEWR', name:'Newark',                  region:'US_EAST',    types:['domestic']},
-  // US West
-  {icao:'KONT', name:'Ontario CA',              region:'US_WEST',    types:['domestic','longhaul']},
-  {icao:'KLAX', name:'Los Angeles',             region:'US_WEST',    types:['domestic','longhaul']},
-  {icao:'KSFO', name:'San Francisco',           region:'US_WEST',    types:['domestic','longhaul']},
-  {icao:'KSEA', name:'Seattle',                 region:'US_WEST',    types:['domestic','longhaul']},
-  {icao:'KLAS', name:'Las Vegas',               region:'US_WEST',    types:['domestic']},
-  {icao:'KPHX', name:'Phoenix',                 region:'US_WEST',    types:['domestic']},
-  // US South
-  {icao:'KMIA', name:'Miami',                   region:'US_SOUTH',   types:['domestic','longhaul']},
-  {icao:'KATL', name:'Atlanta',                 region:'US_SOUTH',   types:['domestic']},
-  {icao:'KDFW', name:'Dallas/Fort Worth',       region:'US_SOUTH',   types:['domestic']},
-  {icao:'KHOU', name:'Houston',                 region:'US_SOUTH',   types:['domestic']},
-  {icao:'KBNA', name:'Nashville',               region:'US_SOUTH',   types:['feeder','domestic']},
-  {icao:'KCLT', name:'Charlotte',               region:'US_SOUTH',   types:['feeder','domestic']},
-  {icao:'KHSV', name:'Huntsville',              region:'US_SOUTH',   types:['feeder']},
-  {icao:'KLEX', name:'Lexington',               region:'US_SOUTH',   types:['feeder']},
-  {icao:'KMEM', name:'Memphis',                 region:'US_SOUTH',   types:['feeder','domestic']},
-  {icao:'KPIT', name:'Pittsburgh',              region:'US_SOUTH',   types:['domestic']},
-  // Europe
-  {icao:'EDDK', name:'Cologne/Bonn',            region:'EUROPE',     types:['domestic','longhaul']},
-  {icao:'EGSS', name:'London Stansted',         region:'EUROPE',     types:['domestic','longhaul']},
-  {icao:'LFPG', name:'Paris CDG',               region:'EUROPE',     types:['domestic','longhaul']},
-  {icao:'EHAM', name:'Amsterdam',               region:'EUROPE',     types:['domestic','longhaul']},
-  {icao:'LEMD', name:'Madrid',                  region:'EUROPE',     types:['domestic']},
-  {icao:'LIRF', name:'Rome Fiumicino',          region:'EUROPE',     types:['domestic']},
-  {icao:'EDDM', name:'Munich',                  region:'EUROPE',     types:['domestic']},
-  {icao:'EPWA', name:'Warsaw',                  region:'EUROPE',     types:['domestic']},
-  // East Asia
-  {icao:'VHHH', name:'Hong Kong',               region:'ASIA_EAST',  types:['domestic','longhaul']},
-  {icao:'ZPBH', name:'Shenzhen',                region:'ASIA_EAST',  types:['longhaul']},
-  {icao:'ZSPD', name:'Shanghai Pudong',         region:'ASIA_EAST',  types:['longhaul']},
-  {icao:'RJAA', name:'Tokyo Narita',            region:'ASIA_EAST',  types:['longhaul']},
-  {icao:'RKSI', name:'Seoul Incheon',           region:'ASIA_EAST',  types:['longhaul']},
-  {icao:'ZBAA', name:'Beijing Capital',         region:'ASIA_EAST',  types:['longhaul']},
-  // SE Asia
-  {icao:'WMKK', name:'Kuala Lumpur',            region:'ASIA_SE',    types:['domestic','longhaul']},
-  {icao:'WSSS', name:'Singapore Changi',        region:'ASIA_SE',    types:['longhaul']},
-  {icao:'VTBS', name:'Bangkok Suvarnabhumi',    region:'ASIA_SE',    types:['longhaul']},
-  {icao:'RPLL', name:'Manila',                  region:'ASIA_SE',    types:['longhaul']},
-  // Middle East
-  {icao:'OMDB', name:'Dubai',                   region:'MIDDLE_EAST',types:['domestic','longhaul']},
-  {icao:'OERK', name:'Riyadh',                  region:'MIDDLE_EAST',types:['longhaul']},
-  {icao:'OTHH', name:'Doha',                    region:'MIDDLE_EAST',types:['longhaul']},
-  // Alaska
-  {icao:'PANC', name:'Anchorage',               region:'ALASKA',     types:['domestic','longhaul']},
-  {icao:'PAFA', name:'Fairbanks',               region:'ALASKA',     types:['domestic']},
-];
-
+  // ── US Midwest ──────────────────────────────────────────────────────────────
+  {icao:'KSDF', name:'Louisville, KY',          region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
+  {icao:'KIND', name:'Indianapolis, IN',         region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KCVG', name:'Cincinnati, OH',           region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KORD', name:'Chicago, IL',              region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KSTL', name:'St. Louis, MO',            region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KMKE', name:'Milwaukee, WI',            region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KMSP', name:'Minneapolis, MN',          region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KDSM', name:'Des Moines, IA',           region:'US_MIDWEST', types:['feeder']},
+  {icao:'KOMA', name:'Omaha, NE',                region:'US_MIDWEST', types:['feeder']},
+  {icao:'KICT', name:'Wichita, KS',              region:'US_MIDWEST', types:['feeder']},
+  {icao:'KMCI', name:'Kansas City, MO',          region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KLCK', name:'Columbus, OH',             region:'US_MIDWEST', types:['feeder']},
+  {icao:'KCLE', name:'Cleveland, OH',            region:'US_MIDWEST', types:['feeder','domestic']},
+  {icao:'KLAN', name:'Lansing, MI',              region:'US_MIDWEST', types:['feeder']},
+  {icao:'KDTW', name:'Detroit, MI',              region:'US_MIDWEST', types:['feeder','domestic']},
+  // ── US East ─────────────────────────────────────────────────────────────────
+  {icao:'KPHL', name:'Philadelphia, PA',         region:'US_EAST', types:['feeder','domestic','longhaul']},
+  {icao:'KJFK', name:'New York, NY',             region:'US_EAST', types:['domestic','longhaul']},
+  {icao:'KEWR', name:'Newark, NJ',               region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KBOS', name:'Boston, MA',               region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KIAD', name:'Washington Dulles, DC',    region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KBWI', name:'Baltimore, MD',            region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KBDL', name:'Hartford, CT',             region:'US_EAST', types:['feeder']},
+  {icao:'KBUF', name:'Buffalo, NY',              region:'US_EAST', types:['feeder']},
+  {icao:'KALB', name:'Albany, NY',               region:'US_EAST', types:['feeder']},
+  {icao:'KSYR', name:'Syracuse, NY',             region:'US_EAST', types:['feeder']},
+  {icao:'KPIT', name:'Pittsburgh, PA',           region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KMDT', name:'Harrisburg, PA',           region:'US_EAST', types:['feeder']},
+  {icao:'KORF', name:'Norfolk, VA',              region:'US_EAST', types:['feeder']},
+  {icao:'KRDU', name:'Raleigh/Durham, NC',       region:'US_EAST', types:['feeder','domestic']},
+  {icao:'KGSO', name:'Greensboro, NC',           region:'US_EAST', types:['feeder']},
+  {icao:'KCAE', name:'Columbia, SC',             region:'US_EAST', types:['feeder']},
+  {icao:'KGSP', name:'Greenville, SC',           region:'US_EAST', types:['feeder']},
+  // ── US South ────────────────────────────────────────────────────────────────
+  {icao:'KMIA', name:'Miami, FL',                region:'US_SOUTH', types:['domestic','longhaul']},
+  {icao:'KATL', name:'Atlanta, GA',              region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KDFW', name:'Dallas/Ft. Worth, TX',     region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KIAH', name:'Houston, TX',              region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KBNA', name:'Nashville, TN',            region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KCLT', name:'Charlotte, NC',            region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KHSV', name:'Huntsville, AL',           region:'US_SOUTH', types:['feeder']},
+  {icao:'KLEX', name:'Lexington, KY',            region:'US_SOUTH', types:['feeder']},
+  {icao:'KMEM', name:'Memphis, TN',              region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KBHM', name:'Birmingham, AL',           region:'US_SOUTH', types:['feeder']},
+  {icao:'KJAX', name:'Jacksonville, FL',         region:'US_SOUTH', types:['feeder']},
+  {icao:'KMCO', name:'Orlando, FL',              region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KTPA', name:'Tampa, FL',                region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KSAT', name:'San Antonio, TX',          region:'US_SOUTH', types:['feeder']},
+  {icao:'KAUS', name:'Austin, TX',               region:'US_SOUTH', types:['feeder','domestic']},
+  {icao:'KMFE', name:'McAllen, TX',              region:'US_SOUTH', types:['feeder']},
+  {icao:'KLRD', name:'Laredo, TX',               region:'US_SOUTH', types:['feeder']},
+  {icao:'KELP', name:'El Paso, TX',              region:'US_SOUTH', types:['feeder']},
+  {icao:'KTUL', name:'Tulsa, OK',                region:'US_SOUTH', types:['feeder']},
+  {icao:'KOKC', name:'Oklahoma City, OK',        region:'US_SOUTH', types:['feeder']},
+  {icao:'KTYS', name:'Knoxville, TN',            region:'US_SOUTH', types:['feeder']},
+  {icao:'KMSY', name:'New Orleans, LA',          region:'US_SOUTH', types:['feeder','domestic']},
+  // ── US West ─────────────────────────────────────────────────────────────────
+  {icao:'KONT', name:'Ontario, CA',              region:'US_WEST', types:['domestic','longhaul']},
+  {icao:'KLAX', name:'Los Angeles, CA',          region:'US_WEST', types:['domestic','longhaul']},
+  {icao:'KSFO', name:'San Francisco, CA',        region:'US_WEST', types:['domestic','longhaul']},
+  {icao:'KBFI', name:'Seattle, WA',              region:'US_WEST', types:['domestic','longhaul']},
+  {icao:'KLAS', name:'Las Vegas, NV',            region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KPHX', name:'Phoenix, AZ',              region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KOAK', name:'Oakland, CA',              region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KSAN', name:'San Diego, CA',            region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KDEN', name:'Denver, CO',               region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KSLC', name:'Salt Lake City, UT',       region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KRNO', name:'Reno, NV',                 region:'US_WEST', types:['feeder']},
+  {icao:'KFAT', name:'Fresno, CA',               region:'US_WEST', types:['feeder']},
+  {icao:'KMHR', name:'Sacramento, CA',           region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KGEG', name:'Spokane, WA',              region:'US_WEST', types:['feeder']},
+  {icao:'KPDX', name:'Portland, OR',             region:'US_WEST', types:['feeder','domestic']},
+  {icao:'KBOI', name:'Boise, ID',                region:'US_WEST', types:['feeder']},
+  {icao:'KBIL', name:'Billings, MT',             region:'US_WEST', types:['feeder']},
+  // ── Hawaii / Pacific ────────────────────────────────────────────────────────
+  {icao:'KHNL', name:'Honolulu, HI',             region:'HAWAII', types:['domestic','longhaul']},
+  {icao:'PKOA', name:'Kona, HI',                 region:'HAWAII', types:['feeder']},
+  // ── Puerto Rico ─────────────────────────────────────────────────────────────
+  {icao:'TJSJ', name:'San Juan, PR',             region:'US_SOUTH', types:['feeder','domestic']},
+  // ── Alaska ──────────────────────────────────────────────────────────────────
+  {icao:'PANC', name:'Anchorage, AK',            region:'ALASKA', types:['domestic','longhaul']},
+  // ── Canada ──────────────────────────────────────────────────────────────────
+  {icao:'CYYZ', name:'Toronto, Canada',          region:'CANADA', types:['domestic']},
+  {icao:'CYMX', name:'Montreal, Canada',         region:'CANADA', types:['domestic']},
+  {icao:'CYVR', name:'Vancouver, Canada',        region:'CANADA', types:['domestic']},
+  {icao:'CYEG', name:'Edmonton, Canada',         region:'CANADA', types:['domestic']},
+  {icao:'CYYC', name:'Calgary, Canada',          region:'CANADA', types:['domestic']},
+  {icao:'CYWG', name:'Winnipeg, Canada',         region:'CANADA', types:['feeder']},
+  // ── Europe ──────────────────────────────────────────────────────────────────
+  {icao:'EDDK', name:'Cologne, Germany',         region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'EGSS', name:'London Stansted, UK',      region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'LFPG', name:'Paris CDG, France',        region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'EHAM', name:'Amsterdam, Netherlands',   region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'LEMD', name:'Madrid, Spain',            region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'LIRF', name:'Rome, Italy',              region:'EUROPE', types:['domestic']},
+  {icao:'EDDM', name:'Munich, Germany',          region:'EUROPE', types:['domestic']},
+  {icao:'EPWA', name:'Warsaw, Poland',           region:'EUROPE', types:['domestic']},
+  {icao:'EDDF', name:'Frankfurt, Germany',       region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'ELLX', name:'Luxembourg',               region:'EUROPE', types:['domestic']},
+  {icao:'EBBR', name:'Brussels, Belgium',        region:'EUROPE', types:['domestic']},
+  {icao:'ESSA', name:'Stockholm, Sweden',        region:'EUROPE', types:['domestic']},
+  {icao:'EFHK', name:'Helsinki, Finland',        region:'EUROPE', types:['domestic']},
+  {icao:'ENGM', name:'Oslo, Norway',             region:'EUROPE', types:['domestic']},
+  {icao:'EKCH', name:'Copenhagen, Denmark',      region:'EUROPE', types:['domestic']},
+  {icao:'EIDW', name:'Dublin, Ireland',          region:'EUROPE', types:['domestic']},
+  {icao:'EINN', name:'Shannon, Ireland',         region:'EUROPE', types:['domestic']},
+  {icao:'EGCC', name:'Manchester, UK',           region:'EUROPE', types:['domestic']},
+  {icao:'EGPF', name:'Glasgow, UK',              region:'EUROPE', types:['domestic']},
+  {icao:'EGPH', name:'Edinburgh, UK',            region:'EUROPE', types:['domestic']},
+  {icao:'EGKK', name:'London Heathrow, UK',      region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'EGBB', name:'Birmingham, UK',           region:'EUROPE', types:['domestic']},
+  {icao:'EIDW', name:'Dublin, Ireland',          region:'EUROPE', types:['domestic']},
+  {icao:'LSZH', name:'Zurich, Switzerland',      region:'EUROPE', types:['domestic']},
+  {icao:'LOWW', name:'Vienna, Austria',          region:'EUROPE', types:['domestic']},
+  {icao:'LKPR', name:'Prague, Czech Republic',   region:'EUROPE', types:['domestic']},
+  {icao:'LHBP', name:'Budapest, Hungary',        region:'EUROPE', types:['domestic']},
+  {icao:'LROP', name:'Bucharest, Romania',       region:'EUROPE', types:['domestic']},
+  {icao:'LGAV', name:'Athens, Greece',           region:'EUROPE', types:['domestic']},
+  {icao:'LTBA', name:'Istanbul, Turkey',         region:'EUROPE', types:['domestic','longhaul']},
+  {icao:'LTBJ', name:'Izmir, Turkey',            region:'EUROPE', types:['domestic']},
+  {icao:'LTAC', name:'Ankara, Turkey',           region:'EUROPE', types:['domestic']},
+  {icao:'LEBL', name:'Barcelona, Spain',         region:'EUROPE', types:['domestic']},
+  {icao:'LEVX', name:'Valencia, Spain',          region:'EUROPE', types:['domestic']},
+  {icao:'LEZL', name:'Seville, Spain',           region:'EUROPE', types:['domestic']},
+  {icao:'LPPT', name:'Lisbon, Portugal',         region:'EUROPE', types:['domestic']},
+  {icao:'LPPR', name:'Porto, Portugal',          region:'EUROPE', types:['domestic']},
+  {icao:'LIMC', name:'Milan, Italy',             region:'EUROPE', types:['domestic']},
+  {icao:'LIPZ', name:'Venice, Italy',            region:'EUROPE', types:['domestic']},
+  {icao:'LIPE', name:'Bologna, Italy',           region:'EUROPE', types:['domestic']},
+  {icao:'LFMN', name:'Nice, France',             region:'EUROPE', types:['domestic']},
+  {icao:'LFBO', name:'Toulouse, France',         region:'EUROPE', types:['domestic']},
+  {icao:'LFLL', name:'Lyon, France',             region:'EUROPE', types:['domestic']},
+  {icao:'LFBD', name:'Bordeaux, France',         region:'EUROPE', types:['domestic']},
+  {icao:'LFRS', name:'Nantes, France',           region:'EUROPE', types:['domestic']},
+  {icao:'EDLW', name:'Dortmund, Germany',        region:'EUROPE', types:['domestic']},
+  {icao:'EDVE', name:'Braunschweig, Germany',    region:'EUROPE', types:['domestic']},
+  {icao:'EDDH', name:'Hamburg, Germany',         region:'EUROPE', types:['domestic']},
+  {icao:'EDDB', name:'Berlin, Germany',          region:'EUROPE', types:['domestic']},
+  {icao:'EDDP', name:'Leipzig, Germany',         region:'EUROPE', types:['domestic']},
+  {icao:'EDDN', name:'Nuremberg, Germany',       region:'EUROPE', types:['domestic']},
+  {icao:'EDDS', name:'Stuttgart, Germany',       region:'EUROPE', types:['domestic']},
+  {icao:'EDDV', name:'Hanover, Germany',         region:'EUROPE', types:['domestic']},
+  {icao:'EDLV', name:'Dusseldorf, Germany',      region:'EUROPE', types:['domestic']},
+  {icao:'EDWH', name:'Bremen, Germany',          region:'EUROPE', types:['domestic']},
+  {icao:'EDMO', name:'Munster, Germany',         region:'EUROPE', types:['domestic']},
+  {icao:'EDDR', name:'Dresden, Germany',         region:'EUROPE', types:['domestic']},
+  {icao:'LIPB', name:'Bergamo, Italy',           region:'EUROPE', types:['domestic']},
+  {icao:'LIMJ', name:'Genoa, Italy',             region:'EUROPE', types:['domestic']},
+  {icao:'LMML', name:'Malta',                    region:'EUROPE', types:['domestic']},
+  {icao:'EBLG', name:'Liege, Belgium',           region:'EUROPE', types:['domestic']},
+  {icao:'MMLO', name:'Malmö, Sweden',            region:'EUROPE', types:['domestic']},
+  // ── Middle East ─────────────────────────────────────────────────────────────
+  {icao:'OMDB', name:'Dubai, UAE',               region:'MIDDLE_EAST', types:['domestic','longhaul']},
+  {icao:'OMDW', name:'Dubai World Central, UAE', region:'MIDDLE_EAST', types:['domestic','longhaul']},
+  {icao:'OMAA', name:'Abu Dhabi, UAE',           region:'MIDDLE_EAST', types:['domestic']},
+  {icao:'OJAI', name:'Sharjah, UAE',             region:'MIDDLE_EAST', types:['domestic']},
+  {icao:'OTHH', name:'Doha, Qatar',              region:'MIDDLE_EAST', types:['domestic','longhaul']},
+  {icao:'OERK', name:'Riyadh, Saudi Arabia',     region:'MIDDLE_EAST', types:['domestic']},
+  {icao:'LLBG', name:'Tel Aviv, Israel',         region:'MIDDLE_EAST', types:['domestic']},
+  // ── East Asia ───────────────────────────────────────────────────────────────
+  {icao:'VHHH', name:'Hong Kong',                region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'ZPBH', name:'Shenzhen, China',          region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'ZSPD', name:'Shanghai, China',          region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'ZGGG', name:'Guangzhou, China',         region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'ZHCC', name:'Zhengzhou, China',         region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'ZBAA', name:'Beijing, China',           region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'RJAA', name:'Tokyo Narita, Japan',      region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'RJBB', name:'Osaka, Japan',             region:'ASIA_EAST', types:['domestic']},
+  {icao:'RJFF', name:'Fukuoka, Japan',           region:'ASIA_EAST', types:['domestic']},
+  {icao:'RJOO', name:'Nagoya, Japan',            region:'ASIA_EAST', types:['domestic']},
+  {icao:'RKSI', name:'Seoul Incheon, Korea',     region:'ASIA_EAST', types:['domestic','longhaul']},
+  {icao:'RCTP', name:'Taipei, Taiwan',           region:'ASIA_EAST', types:['domestic','longhaul']},
+  // ── SE Asia ─────────────────────────────────────────────────────────────────
+  {icao:'WSSS', name:'Singapore',                region:'ASIA_SE', types:['domestic','longhaul']},
+  {icao:'WMKK', name:'Kuala Lumpur, Malaysia',   region:'ASIA_SE', types:['domestic','longhaul']},
+  {icao:'VTBS', name:'Bangkok, Thailand',        region:'ASIA_SE', types:['domestic','longhaul']},
+  {icao:'RPLL', name:'Manila, Philippines',      region:'ASIA_SE', types:['domestic']},
+  {icao:'RPLC', name:'Pampanga, Philippines',    region:'ASIA_SE', types:['domestic']},
+  {icao:'VVTS', name:'Ho Chi Minh, Vietnam',     region:'ASIA_SE', types:['domestic']},
+  {icao:'VVNB', name:'Hanoi, Vietnam',           region:'ASIA_SE', types:['domestic']},
+  {icao:'WIDD', name:'Penang, Malaysia',         region:'ASIA_SE', types:['domestic']},
+  // ── South Asia ──────────────────────────────────────────────────────────────
+  {icao:'VIDP', name:'Delhi, India',             region:'ASIA_SOUTH', types:['domestic','longhaul']},
+  {icao:'VOBL', name:'Bangalore, India',         region:'ASIA_SOUTH', types:['domestic']},
+  // ── Oceania ─────────────────────────────────────────────────────────────────
+  {icao:'YSSY', name:'Sydney, Australia',        region:'OCEANIA', types:['domestic','longhaul']},
+  {icao:'YMML', name:'Melbourne, Australia',     region:'OCEANIA', types:['domestic']},
+  {icao:'YBBN', name:'Brisbane, Australia',      region:'OCEANIA', types:['domestic']},
+  {icao:'YPPH', name:'Perth, Australia',         region:'OCEANIA', types:['domestic']},
+  {icao:'YSCB', name:'Canberra, Australia',      region:'OCEANIA', types:['feeder']},
+  {icao:'PGUM', name:'Guam',                     region:'OCEANIA', types:['domestic']},
+  // ── Latin America ───────────────────────────────────────────────────────────
+  {icao:'MMMX', name:'Mexico City, Mexico',      region:'LATAM', types:['domestic','longhaul']},
+  {icao:'MMGL', name:'Guadalajara, Mexico',      region:'LATAM', types:['domestic']},
+  {icao:'MMMY', name:'Monterrey, Mexico',        region:'LATAM', types:['domestic']},
+  {icao:'MRLB', name:'San Jose, Costa Rica',     region:'LATAM', types:['domestic']},
+  {icao:'MGSJ', name:'Guatemala City',           region:'LATAM', types:['domestic']},
+  {icao:'MNMG', name:'Managua, Nicaragua',       region:'LATAM', types:['domestic']},
+  {icao:'MPTO', name:'Panama City, Panama',      region:'LATAM', types:['domestic']},
+  {icao:'MDSD', name:'Santo Domingo, Dom. Rep.', region:'LATAM', types:['domestic']},
+  {icao:'SEQU', name:'Quito, Ecuador',           region:'LATAM', types:['domestic']},
+  {icao:'SKBO', name:'Bogota, Colombia',         region:'LATAM', types:['domestic','longhaul']},
+  {icao:'SCEL', name:'Santiago, Chile',          region:'LATAM', types:['domestic','longhaul']},
+  {icao:'SBVT', name:'Sao Paulo, Brazil',        region:'LATAM', types:['domestic','longhaul']},
+]
 // Aircraft capability limits: [minBlockH, maxBlockH]
 const AC_CAPABILITY = {
   'Boeing 727-100F':           [0.3, 4.0],
@@ -2473,7 +2655,7 @@ function updateDepAirports(){
 
 function updateLengthOptions(){
   const region = document.getElementById('rg-dep-region').value;
-  const US_REGIONS = ['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'];
+  const US_REGIONS = ['US_MIDWEST','US_EAST','US_SOUTH','US_WEST','HAWAII','ALASKA'];
   const isUS = US_REGIONS.includes(region);
   const feederOpt = document.querySelector('#rg-length option[value="feeder"]');
   if(feederOpt){
@@ -2528,7 +2710,7 @@ function generateRoute(){
   const effectiveMax = Math.min(maxH, cap[1]);
 
   // Build candidates — filter by block time AND airport type compatibility
-  const US_REGIONS = ['US_MIDWEST','US_EAST','US_WEST','US_SOUTH'];
+  const US_REGIONS = ['US_MIDWEST','US_EAST','US_SOUTH','US_WEST','HAWAII','ALASKA'];
   const origAirport = ALL_AIRPORTS.find(a=>a.icao===orig);
   const origIsUS = origAirport && US_REGIONS.includes(origAirport.region);
 
@@ -2831,7 +3013,7 @@ function renderFleet(){
         </div>
         <div style="text-align:right">
           ${owned>0?`<span class="badge b-green">×${owned} Owned</span>`:''}
-          <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">UPS Fleet: ${ac.qty||'—'}</div>
+          <div style="font-family:monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">UPS Fleet: ${ac.qty||'—'}</div>
         </div>
       </div>
       ${ac.note?`<div style="font-size:.67rem;color:var(--text-dim);margin-bottom:.5rem;line-height:1.4;font-style:italic">${ac.note}</div>`:''}
@@ -2844,7 +3026,7 @@ function renderFleet(){
       <div class="ac-price ${canAfford?'li-pos':'li-neg'}">$${(ac.price/1000000).toFixed(1)}M</div>
       ${S.isAdmin
         ? `<button class="btn ${canAfford?'btn-primary':'btn-ghost'} btn-sm" style="width:100%" onclick="purchaseAircraft('${ac.model}',${ac.price})" ${canAfford?'':'disabled style="opacity:.4;cursor:not-allowed"'}>${canAfford?'Purchase':'Insufficient Funds'}</button>`
-        : `<div style="font-size:.65rem;color:var(--text-mute);text-align:center;padding:.35rem 0;font-family:'Share Tech Mono',monospace;letter-spacing:.06em">ADMIN ONLY</div>`
+        : `<div style="font-size:.65rem;color:var(--text-mute);text-align:center;padding:.35rem 0;font-family:monospace;letter-spacing:.06em">ADMIN ONLY</div>`
       }
     </div>`;
   }).join('');
@@ -2889,7 +3071,7 @@ function renderOwnedFleet(){
     if(ac){totalVal+=ac.price*q;totalCount+=q;}
   });
   list.innerHTML=entries.map(([m,q])=>`
-    <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:'Share Tech Mono',monospace;font-size:.72rem">
+    <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(46,31,18,.4);font-family:monospace;font-size:.72rem">
       <span style="color:var(--text)">${m}</span><span class="gld">×${q}</span>
     </div>`).join('');
   vc.textContent='$'+(totalVal/1000000).toFixed(1)+'M';
@@ -3492,6 +3674,10 @@ function applySnap(snap){
     _pireps.length = 0;
     _pireps.push(...snap.pireps);
   }
+  if(snap.trips && Array.isArray(snap.trips)){
+    if(!_stateCache) _stateCache = {};
+    _stateCache.trips = snap.trips;
+  }
   _stateCache = snap;
 }
 
@@ -3505,6 +3691,7 @@ function refreshAllUI(){
   // Always keep admin PIREP table up to date
   adminRenderPireps();
   renderPireps();
+  renderTripBoard();
   // Re-render whichever page is active
   const active = document.querySelector('.page.active');
   if(active){
@@ -3664,32 +3851,80 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 
 // Airport coordinates: [lat, lon]
 const AIRPORT_COORDS = {
-  // UPS Primary Hubs
-  KSDF:[38.1744,-85.7364],  KPHL:[39.8729,-75.2437],  KONT:[34.0560,-117.6009],
-  KRFD:[42.1954,-89.0972],  KMIA:[25.7959,-80.2870],  EDDK:[50.8659,7.1427],
-  VHHH:[22.3080,113.9145],  ZPBH:[22.6393,113.8107],  ZSPD:[31.1443,121.8083],
-  WMKK:[2.7456,101.7099],   OMDB:[25.2528,55.3657],   PANC:[61.1744,-149.9964],
-  EGSS:[51.8850,0.2350],
-  // US Domestic
-  KPIT:[40.4915,-80.2329],  KSTL:[38.7487,-90.3700],  KEWR:[40.6895,-74.1745],
-  KPHX:[33.4373,-112.0078], KHOU:[29.6454,-95.2789],  KMEM:[35.0424,-89.9767],
-  KATL:[33.6407,-84.4277],  KDFW:[32.8998,-97.0403],  KSEA:[47.4502,-122.3088],
-  KCLT:[35.2140,-80.9431],  KLEX:[38.0366,-84.6059],  KHSV:[34.6372,-86.7752],
-  KBNA:[36.1245,-86.6782],  KIND:[39.7173,-86.2944],  KCVG:[39.0489,-84.6678],
-  KJFK:[40.6398,-73.7789],  KLAX:[33.9425,-118.4085], KORD:[41.9742,-87.9073],
-  KBOS:[42.3656,-71.0096],  KIAD:[38.9531,-77.4565],  KBWI:[39.1754,-76.6682],
-  KSFO:[37.6213,-122.3790], KLAS:[36.0840,-115.1537],  KMDW:[41.7868,-87.7522],
+  // US Midwest
+  KSDF:[38.1744,-85.7364], KIND:[39.7173,-86.2944], KCVG:[39.0489,-84.6678],
+  KORD:[41.9742,-87.9073], KSTL:[38.7487,-90.3700], KMKE:[42.9472,-87.8966],
+  KMSP:[44.8820,-93.2218], KDSM:[41.5340,-93.6631], KOMA:[41.3032,-95.8941],
+  KICT:[37.6499,-97.4331], KMCI:[39.2976,-94.7139], KLCK:[39.8139,-82.9279],
+  KCLE:[41.4117,-81.8498], KLAN:[42.7787,-84.5874], KDTW:[42.2124,-83.3534],
+  // US East
+  KPHL:[39.8729,-75.2437], KJFK:[40.6398,-73.7789], KEWR:[40.6895,-74.1745],
+  KBOS:[42.3656,-71.0096], KIAD:[38.9531,-77.4565], KBWI:[39.1754,-76.6682],
+  KBDL:[41.9389,-72.6832], KBUF:[42.9405,-78.7322], KALB:[42.7483,-73.8017],
+  KSYR:[43.1112,-76.1063], KPIT:[40.4915,-80.2329], KMDT:[40.1935,-76.7634],
+  KORF:[36.8976,-76.0123], KRDU:[35.8776,-78.7875], KGSO:[36.0978,-79.9373],
+  KCAE:[33.9388,-81.1195], KGSP:[34.8957,-82.2189],
+  // US South
+  KMIA:[25.7959,-80.2870], KATL:[33.6407,-84.4277], KDFW:[32.8998,-97.0403],
+  KIAH:[29.9844,-95.3414], KBNA:[36.1245,-86.6782], KCLT:[35.2140,-80.9431],
+  KHSV:[34.6372,-86.7752], KLEX:[38.0366,-84.6059], KMEM:[35.0424,-89.9767],
+  KBHM:[33.5629,-86.7535], KJAX:[30.4941,-81.6879], KMCO:[28.4294,-81.3090],
+  KTPA:[27.9755,-82.5332], KSAT:[29.5337,-98.4698], KAUS:[30.1945,-97.6699],
+  KMFE:[26.1758,-98.2386], KLRD:[27.5438,-99.4615], KELP:[31.8072,-106.3779],
+  KTUL:[36.1984,-95.8881], KOKC:[35.3931,-97.6007], KTYS:[35.8110,-83.9940],
+  KMSY:[29.9934,-90.2580], TJSJ:[18.4394,-66.0018],
+  // US West
+  KONT:[34.0560,-117.6009], KLAX:[33.9425,-118.4085], KSFO:[37.6213,-122.3790],
+  KBFI:[47.5299,-122.3020], KLAS:[36.0840,-115.1537], KPHX:[33.4373,-112.0078],
+  KOAK:[37.7213,-122.2208], KSAN:[32.7336,-117.1896], KDEN:[39.8561,-104.6737],
+  KSLC:[40.7884,-111.9778], KRNO:[39.4991,-119.7681], KFAT:[36.7762,-119.7181],
+  KMHR:[38.5539,-121.2977], KGEG:[47.6199,-117.5339], KPDX:[45.5887,-122.5975],
+  KBOI:[43.5644,-116.2228], KBIL:[45.8077,-108.5428],
+  // Hawaii / Alaska
+  KHNL:[21.3245,-157.9251], PKOA:[19.7388,-156.0456], PANC:[61.1744,-149.9964],
+  // Canada
+  CYYZ:[43.6777,-79.6248], CYMX:[45.6796,-73.7408], CYVR:[49.1947,-123.1839],
+  CYEG:[53.3097,-113.5797], CYYC:[51.1139,-114.0203], CYWG:[49.9100,-97.2399],
   // Europe
-  LFPG:[49.0097,2.5479],    EHAM:[52.3086,4.7639],    LEMD:[40.4936,-3.5668],
-  LIRF:[41.8003,12.2389],   EDDM:[48.3538,11.7861],   EPWA:[52.1657,20.9671],
-  // Asia
-  RJAA:[35.7653,140.3864],  RJBB:[34.4273,135.2440],  RKSI:[37.4692,126.4505],
-  ZBAA:[40.0799,116.5850],  WSSS:[1.3592,103.9940],   VTBS:[13.6811,100.7470],
-  RPLL:[14.5086,121.0194],  WIII:[-6.1256,106.6558],
+  EDDK:[50.8659,7.1427],   EGSS:[51.8850,0.2350],    LFPG:[49.0097,2.5479],
+  EHAM:[52.3086,4.7639],   LEMD:[40.4936,-3.5668],   LIRF:[41.8003,12.2389],
+  EDDM:[48.3538,11.7861],  EPWA:[52.1657,20.9671],   EDDF:[50.0379,8.5622],
+  ELLX:[49.6233,6.2044],   EBBR:[50.9014,4.4844],    ESSA:[59.6519,17.9186],
+  EFHK:[60.3172,24.9633],  ENGM:[60.1939,11.1004],   EKCH:[55.6180,12.6561],
+  EIDW:[53.4213,-6.2701],  EINN:[52.7020,-8.9248],   EGCC:[53.3537,-2.2750],
+  EGPF:[55.8719,-4.4330],  EGPH:[55.9500,-3.3725],   EGKK:[51.1537,-0.1821],
+  EGBB:[52.4539,-1.7480],  LSZH:[47.4647,8.5492],    LOWW:[48.1102,16.5697],
+  LKPR:[50.1008,14.2600],  LHBP:[47.4369,19.2556],   LROP:[44.5711,26.0850],
+  LGAV:[37.9364,23.9445],  LTBA:[40.9769,28.8146],   LTBJ:[38.2924,27.1570],
+  LTAC:[40.1281,32.9951],  LEBL:[41.2971,2.0785],    LEVX:[39.4893,-0.4816],
+  LEZL:[37.4180,-5.8931],  LPPT:[38.7813,-9.1359],   LPPR:[41.2481,-8.6814],
+  LIMC:[45.6306,8.7281],   LIPZ:[45.5053,12.3519],   LIPE:[44.5354,11.2887],
+  EDDH:[53.6303,9.9882],   EDDB:[52.3667,13.5033],   EDDP:[51.4239,12.2166],
+  EDLW:[51.5183,7.6122],   EDDV:[52.4611,9.6850],    EDDS:[48.6899,9.2219],
+  EDDN:[49.4987,11.0669],  LIPB:[45.6739,9.7042],    EBLG:[50.6374,5.4432],
   // Middle East
-  OTHH:[25.2731,51.6080],   OERK:[24.4576,46.6988],
-  // Alaska
-  PAFA:[64.8152,-147.8561],
+  OMDB:[25.2528,55.3657],  OMDW:[24.8963,55.1614],   OMAA:[24.4330,54.6511],
+  OJAI:[25.3286,55.5136],  OTHH:[25.2731,51.6080],   OERK:[24.4576,46.6988],
+  LLBG:[32.0114,34.8867],
+  // East Asia
+  VHHH:[22.3080,113.9145], ZPBH:[22.6393,113.8107],  ZSPD:[31.1443,121.8083],
+  ZGGG:[23.3924,113.2990], ZHCC:[34.5197,113.8410],  ZBAA:[40.0799,116.5850],
+  RJAA:[35.7653,140.3864], RJBB:[34.4273,135.2440],  RJFF:[33.5833,130.4500],
+  RJOO:[35.2550,136.9239], RKSI:[37.4692,126.4505],  RCTP:[25.0777,121.2330],
+  // SE Asia
+  WSSS:[1.3592,103.9940],  WMKK:[2.7456,101.7099],   VTBS:[13.6811,100.7470],
+  RPLL:[14.5086,121.0194], RPLC:[15.1858,120.5600],  VVTS:[10.8188,106.6520],
+  VVNB:[21.2212,105.8072], WIDD:[5.2977,100.2769],
+  // South Asia
+  VIDP:[28.5665,77.1031],  VOBL:[13.1979,77.7063],
+  // Oceania
+  YSSY:[-33.9399,151.1753],YMML:[-37.6690,144.8410], YBBN:[-27.3842,153.1175],
+  YPPH:[-31.9403,115.9670],YSCB:[-35.3069,149.1950], PGUM:[13.4834,144.7958],
+  // Latin America
+  MMMX:[19.4363,-99.0721], MMGL:[20.5218,-103.3111], MMMY:[25.7785,-100.1069],
+  MRLB:[9.9939,-84.2089],  MGSJ:[14.5832,-90.5275],  MNMG:[12.1415,-86.1681],
+  MPTO:[9.0717,-79.3835],  MDSD:[18.4297,-69.6689],  SEQU:[-0.1292,-78.3575],
+  SKBO:[4.7016,-74.1469],  SCEL:[-33.3930,-70.7858], SBVT:[-23.0056,-47.1345],
 };
 function getCoords(icao){ return AIRPORT_COORDS[icao]||null; }
 
@@ -3950,7 +4185,7 @@ function updateMapTable(active, now){
           <span style="font-size:.65rem;color:var(--text-mute);white-space:nowrap">${pct}%</span>
         </div>
       </td>
-      <td style="white-space:nowrap;font-family:'Share Tech Mono',monospace;font-size:.72rem">
+      <td style="white-space:nowrap;font-family:monospace;font-size:.72rem">
         ${etaStr}<br><span style="color:var(--text-mute);font-size:.62rem">${h>0?h+'h ':''} ${m}m rem</span>
       </td>
     </tr>`;
@@ -4036,7 +4271,7 @@ function renderPireps(){
     tb.innerHTML = _pireps.slice().reverse().map(p=>`
       <tr>
         <td class="mono" style="font-size:.68rem">${p.date||'—'}</td>
-        <td style="color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem">${p.pilot||'—'}</td>
+        <td style="color:var(--text);font-family:monospace;font-size:.72rem">${p.pilot||'—'}</td>
         <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.92rem">${p.fn||'—'}</td>
         <td style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600">${p.orig||'?'} → ${p.dest||'?'}</td>
         <td class="mono" style="font-size:.68rem;white-space:nowrap">${p.ac||'—'}</td>
@@ -4150,8 +4385,262 @@ async function filePirep(){
   });
   renderPireps();
 }
+// ══════════════════════════════════════════════════════════════════════════
+//  TRIP BIDDING SYSTEM
+// ══════════════════════════════════════════════════════════════════════════
+
+function getTrips(){ return (_stateCache && _stateCache.trips) ? _stateCache.trips : []; }
+
+function saveTrips(trips){
+  const snap = _stateCache || {};
+  snap.trips = trips;
+  saveState(snap);
+}
+
+function renderTripBoard(){
+  const postBtn = document.getElementById('post-trip-btn');
+  if(postBtn) postBtn.style.display = S.isAdmin ? '' : 'none';
+  const myDiv = document.getElementById('my-assignments');
+  if(myDiv) myDiv.style.display = S.isMember ? '' : 'none';
+
+  const trips = getTrips();
+  const myName = S.currentUser
+    ? (S.currentUser.email === 'admin' ? 'admin' : (S.currentUser.user_metadata && S.currentUser.user_metadata.display_name) || S.currentUser.email.split('@')[0])
+    : '';
+
+  renderMyAssignments(trips, myName);
+
+  const tbody = document.getElementById('trips-tbody');
+  if(!tbody) return;
+  if(!trips.length){
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:1.5rem">No trips posted yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = trips.map(function(t){
+    const bt = blockTime(t.orig, t.dest);
+    const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
+    const btDisplay = btH+'h '+btM+'m';
+    const bidCount = t.bids ? t.bids.length : 0;
+    const myBid = t.bids && t.bids.indexOf(myName) > -1;
+    const isAssigned = t.status === 'assigned';
+    const acShort = t.aircraft.replace('Boeing ','B').replace('Airbus ','A').replace('McDonnell Douglas ','MD-');
+
+    var statusBadge = isAssigned
+      ? '<span class="badge b-blue">Assigned</span>'
+      : '<span class="badge b-green">Open</span>';
+    var assignedLabel = isAssigned ? ' <span style="color:var(--blue-lt);font-size:.7rem">'+t.assignedTo+'</span>' : '';
+
+    var actionCell = '';
+    if(S.isAdmin){
+      var bidRows = (t.bids && t.bids.length)
+        ? t.bids.map(function(b){
+            var ab = !isAssigned
+              ? '<button class="btn btn-ghost btn-sm" style="color:var(--green-lt);border-color:rgba(45,158,95,.3);margin-left:.3rem" onclick="assignTrip(this)" data-tid="'+t.id+'" data-name="'+b+'">Assign</button>'
+              : '';
+            return '<div style="font-size:.7rem">'+b+ab+'</div>';
+          }).join('')
+        : '<span style="color:var(--text-mute);font-size:.7rem">No bids</span>';
+      actionCell = '<div style="display:flex;flex-direction:column;gap:.2rem">'
+        + bidRows
+        + '<button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3);margin-top:.4rem" onclick="removeTrip(this)" data-tid="'+t.id+'">Remove</button>'
+        + (isAssigned ? '<button class="btn btn-ghost btn-sm" style="margin-top:.2rem" onclick="unassignTrip(this)" data-tid="'+t.id+'">Unassign</button>' : '')
+        + '</div>';
+    } else if(S.isMember){
+      if(isAssigned && t.assignedTo === myName){
+        var sbAc = SIMBRIEF_AC_MAP[t.aircraft] || 'B744';
+        var sbUser = (document.getElementById('rg-sbuser') || {}).value || '';
+        var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=UPS&fltnum='+t.fn.replace('5X','')+'&date='+(t.date||'');
+        var sbUrl = sbUser ? 'https://dispatch.simbrief.com/options/custom?'+params+'&userid='+sbUser : '#';
+        actionCell = '<a href="'+sbUrl+'" target="_blank" class="btn btn-blue btn-sm">&#9992; SimBrief OFP</a>';
+      } else if(isAssigned){
+        actionCell = '<span style="color:var(--text-mute);font-size:.72rem">'+t.assignedTo+'</span>';
+      } else if(myBid){
+        actionCell = '<button class="btn btn-ghost btn-sm" style="opacity:.6" onclick="unbidTrip(this)" data-tid="'+t.id+'">Cancel Bid</button>';
+      } else {
+        actionCell = '<button class="btn btn-primary btn-sm" onclick="bidTrip(this)" data-tid="'+t.id+'">Bid</button>';
+      }
+    }
+
+    return '<tr>'
+      + '<td style="color:var(--gold);font-weight:700;font-size:.95rem">'+t.fn+'</td>'
+      + '<td style="font-weight:600">'+t.orig+' &rarr; '+t.dest+'</td>'
+      + '<td class="mono" style="font-size:.68rem">'+acShort+'</td>'
+      + '<td class="mono" style="font-size:.68rem">'+(t.date||'&mdash;')+'</td>'
+      + '<td class="mono" style="font-size:.68rem">'+(t.dep||'&mdash;')+'Z</td>'
+      + '<td class="mono" style="font-size:.68rem">'+btDisplay+'</td>'
+      + '<td class="mono" style="font-size:.72rem;color:var(--text-dim)">'+bidCount+(bidCount===1?' bid':' bids')+'</td>'
+      + '<td>'+statusBadge+assignedLabel+'</td>'
+      + '<td>'+actionCell+'</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderMyAssignments(trips, myName){
+  var el = document.getElementById('my-assignments-body');
+  if(!el) return;
+  var mine = trips.filter(function(t){ return t.status==='assigned' && t.assignedTo===myName; });
+  if(!mine.length){
+    el.innerHTML = '<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No trips assigned yet. Bid on a trip below.</div>';
+    return;
+  }
+  var sbUser = (document.getElementById('rg-sbuser')||{}).value||'';
+  el.innerHTML = mine.map(function(t){
+    var bt = blockTime(t.orig, t.dest);
+    var btDisplay = Math.floor(bt)+'h '+Math.round((bt%1)*60)+'m';
+    var sbAc = SIMBRIEF_AC_MAP[t.aircraft]||'B744';
+    var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=UPS&fltnum='+t.fn.replace('5X','')+'&date='+(t.date||'');
+    var sbUrl = sbUser ? 'https://dispatch.simbrief.com/options/custom?'+params+'&userid='+sbUser : '#';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--border)">'
+      + '<div>'
+      + '<span style="color:var(--gold);font-weight:700;font-size:1rem;margin-right:.75rem">'+t.fn+'</span>'
+      + '<span style="font-weight:600">'+t.orig+' &rarr; '+t.dest+'</span>'
+      + '<span style="color:var(--text-mute);font-size:.72rem;font-family:monospace;margin-left:.75rem">'+t.aircraft+' &middot; '+btDisplay+(t.date?' &middot; '+t.date:'')+(t.dep?' &middot; '+t.dep+'Z':'')+'</span>'
+      + (t.notes?'<div style="color:var(--text-dim);font-size:.7rem;margin-top:.2rem">'+t.notes+'</div>':'')
+      + '</div>'
+      + (sbUser
+          ? '<a href="'+sbUrl+'" target="_blank" class="btn btn-blue btn-sm">&#9992; OFP</a>'
+          : '<span style="font-size:.68rem;color:var(--text-mute)">Add SimBrief username</span>')
+      + '</div>';
+  }).join('');
+}
+
+function postTrip(){
+  var fn   = (document.getElementById('pt-fn').value||'').trim().toUpperCase();
+  var date = document.getElementById('pt-date').value;
+  var orig = (document.getElementById('pt-orig').value||'').trim().toUpperCase();
+  var dest = (document.getElementById('pt-dest').value||'').trim().toUpperCase();
+  var ac   = document.getElementById('pt-aircraft').value;
+  var dep  = (document.getElementById('pt-dep').value||'').trim();
+  var notes= (document.getElementById('pt-notes').value||'').trim();
+  if(!fn||!orig||!dest){ alert('Enter flight number, origin and destination.'); return; }
+  var trips = getTrips();
+  trips.push({ id:Date.now().toString(), fn, date, orig, dest, aircraft:ac, dep, notes, status:'open', bids:[], assignedTo:null });
+  saveTrips(trips);
+  closeModal('modal-post-trip');
+  ['pt-fn','pt-date','pt-orig','pt-dest','pt-dep','pt-notes'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  renderTripBoard();
+}
+
+function bidTrip(el){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-tid');
+  if(!S.isMember){ alert('Sign in to bid on trips.'); return; }
+  var myName = S.currentUser
+    ? (S.currentUser.email==='admin' ? 'admin' : (S.currentUser.user_metadata&&S.currentUser.user_metadata.display_name)||S.currentUser.email.split('@')[0])
+    : 'Unknown';
+  var trips = getTrips();
+  var trip = trips.find(function(t){ return t.id===id; });
+  if(!trip||trip.status!=='open') return;
+  if(!trip.bids) trip.bids=[];
+  if(trip.bids.indexOf(myName)>-1){ alert('You already bid on this trip.'); return; }
+  trip.bids.push(myName);
+  saveTrips(trips);
+  renderTripBoard();
+}
+
+function unbidTrip(el){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-tid');
+  var myName = S.currentUser
+    ? (S.currentUser.email==='admin' ? 'admin' : (S.currentUser.user_metadata&&S.currentUser.user_metadata.display_name)||S.currentUser.email.split('@')[0])
+    : '';
+  var trips = getTrips();
+  var trip = trips.find(function(t){ return t.id===id; });
+  if(!trip) return;
+  trip.bids=(trip.bids||[]).filter(function(b){ return b!==myName; });
+  saveTrips(trips);
+  renderTripBoard();
+}
+
+function assignTrip(el, nameOverride){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-tid');
+  var name = nameOverride !== undefined ? nameOverride : el.getAttribute('data-name');
+  var trips = getTrips();
+  var trip = trips.find(function(t){ return t.id===id; });
+  if(!trip) return;
+  trip.status='assigned'; trip.assignedTo=name;
+  saveTrips(trips);
+  renderTripBoard();
+}
+
+function unassignTrip(el){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-tid');
+  var trips = getTrips();
+  var trip = trips.find(function(t){ return t.id===id; });
+  if(!trip) return;
+  trip.status='open'; trip.assignedTo=null;
+  saveTrips(trips);
+  renderTripBoard();
+}
+
+function removeTrip(el){
+  var id = typeof el === 'string' ? el : el.getAttribute('data-tid');
+  if(!confirm('Remove this trip?')) return;
+  saveTrips(getTrips().filter(function(t){ return t.id!==id; }));
+  renderTripBoard();
+}
+
 
 </script>
+
+<!-- Post Trip Modal -->
+<div id="modal-post-trip" class="modal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-head">
+      <div class="modal-title">+ Post Trip</div>
+      <button class="modal-close" onclick="closeModal('modal-post-trip')">&#x2715;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Flight Number</label>
+        <input class="form-input" id="pt-fn" placeholder="5X301" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="pt-date" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Origin</label>
+        <input class="form-input" id="pt-orig" placeholder="KSDF" style="text-transform:uppercase" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Destination</label>
+        <input class="form-input" id="pt-dest" placeholder="EDDK" style="text-transform:uppercase" maxlength="4">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Aircraft</label>
+        <select class="form-select" id="pt-aircraft">
+          <option>Boeing 747-8F</option>
+          <option>Boeing 747-400F</option>
+          <option>Boeing 767-300F</option>
+          <option>Boeing 757-200F</option>
+          <option>Airbus A300-600F</option>
+          <option>McDonnell Douglas MD-11F</option>
+          <option>Boeing 727-200F</option>
+          <option>Boeing 727-100F</option>
+          <option>Douglas DC-8F</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dep Time (Z)</label>
+        <input class="form-input" id="pt-dep" placeholder="0600" maxlength="4">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="pt-notes" placeholder="e.g. Night freight run, expect FL350">
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-post-trip')">Cancel</button>
+      <button class="btn btn-primary" onclick="postTrip()">Post Trip</button>
+    </div>
+  </div>
+</div>
 
 <!-- PIREP Detail Modal -->
 <div id="modal-pirep-detail" class="modal">
@@ -4163,14 +4652,14 @@ async function filePirep(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
       <div><div class="form-label">Pilot</div><div id="pd-pilot" style="font-weight:600;font-size:.9rem"></div></div>
       <div><div class="form-label">Flight #</div><div id="pd-fn" style="color:var(--gold);font-weight:700;font-size:1.1rem"></div></div>
-      <div><div class="form-label">Date</div><div id="pd-date" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Date</div><div id="pd-date" style="font-family:monospace;font-size:.8rem"></div></div>
       <div><div class="form-label">Route</div><div id="pd-route" style="font-weight:600;font-size:.9rem"></div></div>
-      <div><div class="form-label">Aircraft</div><div id="pd-ac" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
-      <div><div class="form-label">Block Time</div><div id="pd-bt" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
-      <div><div class="form-label">Payload</div><div id="pd-payload" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
-      <div><div class="form-label">Landing Rate</div><div id="pd-ldg" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
-      <div><div class="form-label">Dep Fuel</div><div id="pd-fuel-dep" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
-      <div><div class="form-label">Arr Fuel</div><div id="pd-fuel-arr" style="font-family:'Share Tech Mono',monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Aircraft</div><div id="pd-ac" style="font-family:monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Block Time</div><div id="pd-bt" style="font-family:monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Payload</div><div id="pd-payload" style="font-family:monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Landing Rate</div><div id="pd-ldg" style="font-family:monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Dep Fuel</div><div id="pd-fuel-dep" style="font-family:monospace;font-size:.8rem"></div></div>
+      <div><div class="form-label">Arr Fuel</div><div id="pd-fuel-arr" style="font-family:monospace;font-size:.8rem"></div></div>
     </div>
     <div class="form-label">Remarks</div>
     <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
