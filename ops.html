@@ -2917,7 +2917,7 @@ function addAI(){
   const raw=document.getElementById('ai-name').value.trim();
   if(!raw){alert('Enter a callsign.');return}
   const name=raw.startsWith('AI ')?raw:'AI '+raw;
-  S.pilots.push({id:S.nextId++,type:'ai',name,rank:document.getElementById('ai-rank').value,base:document.getElementById('ai-base').value,route:document.getElementById('ai-route').value,freq:parseInt(document.getElementById('ai-freq').value),hours:0,flights:0,ontime:100,earned:0,xp:0});
+  // AI pilots disabled
   document.getElementById('ai-name').value='';
   closeModal('modal-add-ai');
   updateCrewCounts();renderAdmin();saveState();
@@ -2937,7 +2937,7 @@ function editHours(id){
 }
 
 function updateCrewCounts(){
-  document.getElementById('s-crew-count').textContent=S.pilots.filter(p=>p.type==='ai').length;
+  document.getElementById('s-crew-count').textContent=S.pilots.filter(p=>p.type!=='ai').length;
   document.getElementById('s-human-count').textContent=S.pilots.filter(p=>p.type==='human').length;
 }
 
@@ -3412,7 +3412,7 @@ function applySnap(snap){
   if(snap.totalFlights      !== undefined) S.totalFlights      = snap.totalFlights;
   if(snap.totalFreight      !== undefined) S.totalFreight      = snap.totalFreight;
   if(snap.nextId            !== undefined) S.nextId            = snap.nextId;
-  if(snap.pilots            && snap.pilots.length)          S.pilots          = snap.pilots;
+  if(snap.pilots            && snap.pilots.length)          S.pilots          = snap.pilots.filter(p=>p.type!=='ai');
   if(snap.hubs              && snap.hubs.length)            S.hubs            = snap.hubs;
   if(snap.executives        && snap.executives.length)      S.executives      = snap.executives;
   if(snap.news              && snap.news.length)            S.news            = snap.news;
