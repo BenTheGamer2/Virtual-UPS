@@ -2618,6 +2618,21 @@ const AC_CAPABILITY = {
   'McDonnell Douglas MD-11F':  [1.0, 14.0],
 };
 
+// Cruise speeds in km/h (true airspeed at cruise) + taxi/climb overhead factor
+const AC_CRUISE_SPEED = {
+  'Boeing 727-100F':          820,   // Mach 0.82 slow jet
+  'Boeing 727-200F':          840,
+  'Douglas DC-8F':            860,
+  'Airbus A300-600F':         870,
+  'Boeing 757-200F':          890,
+  'Boeing 767-300F':          900,
+  'Boeing 747-100F':          895,
+  'Boeing 747-200F':          895,
+  'Boeing 747-400F':          910,
+  'Boeing 747-8F':            920,   // Mach 0.855
+  'McDonnell Douglas MD-11F': 905,
+};
+
 // Why this destination was chosen — shown in preview
 const DEST_REASONS = {
   feeder:   'Short feeder route — high-frequency, small regional package volume.',
@@ -2655,18 +2670,30 @@ function updateDepAirports(){
 
 function updateLengthOptions(){
   const region = document.getElementById('rg-dep-region').value;
+  const aircraft = document.getElementById('rg-aircraft').value;
   const US_REGIONS = ['US_MIDWEST','US_EAST','US_SOUTH','US_WEST','HAWAII','ALASKA'];
   const isUS = US_REGIONS.includes(region);
+  const cap = AC_CAPABILITY[aircraft] || [0.3, 18];
+  const maxRange = cap[1];
+
   const feederOpt = document.querySelector('#rg-length option[value="feeder"]');
+  const domesticOpt = document.querySelector('#rg-length option[value="domestic"]');
+  const longHaulOpt = document.querySelector('#rg-length option[value="longhaul"]');
+
   if(feederOpt){
     feederOpt.disabled = !isUS;
     feederOpt.textContent = isUS ? '🟢 Short / Feeder (<2h)' : '🟢 Short / Feeder (US only)';
   }
-  // If feeder is selected but origin is not US, switch to domestic
-  const lengthSel = document.getElementById('rg-length');
-  if(!isUS && lengthSel && lengthSel.value === 'feeder'){
-    lengthSel.value = 'domestic';
+  if(longHaulOpt){
+    const canLongHaul = maxRange >= 7.5;
+    longHaulOpt.disabled = !canLongHaul;
+    longHaulOpt.textContent = canLongHaul ? '🟡 Long Haul (7.5h+)' : '🟡 Long Haul (aircraft too short-range)';
   }
+
+  const lengthSel = document.getElementById('rg-length');
+  if(!lengthSel) return;
+  if(!isUS && lengthSel.value === 'feeder') lengthSel.value = 'domestic';
+  if(maxRange < 7.5 && lengthSel.value === 'longhaul') lengthSel.value = 'domestic';
 }
 
 function updateArrAirports(){} // no-op, kept for compatibility
@@ -2727,7 +2754,7 @@ function generateRoute(){
     })
     .map(a => {
       const known = blockTimeMap[orig+'-'+a.icao] || blockTimeMap[a.icao+'-'+orig];
-      const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao);
+      const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao, aircraft);
       return { ...a, bt };
     })
     .filter(a => a.bt >= minH && a.bt <= effectiveMax);
@@ -2773,18 +2800,20 @@ function generateRoute(){
   document.getElementById('rg-simbrief-btn').style.display='';
 }
 
-function calcBlockTime(orig, dest){
+function calcBlockTime(orig, dest, aircraft){
   const c1=AIRPORT_COORDS[orig], c2=AIRPORT_COORDS[dest];
   if(!c1||!c2) return 3.0;
-  // Check lookup table first
+  // Check lookup table first (aircraft-agnostic reference times)
   const lookup = blockTimeMap[orig+'-'+dest] || blockTimeMap[dest+'-'+orig];
   if(lookup) return lookup;
-  // Otherwise compute from distance
+  // Compute from distance using aircraft-specific cruise speed
+  const speed = (aircraft && AC_CRUISE_SPEED[aircraft]) ? AC_CRUISE_SPEED[aircraft] : 880;
   const R=6371, toR=Math.PI/180;
   const dlat=(c2[0]-c1[0])*toR, dlon=(c2[1]-c1[1])*toR;
   const a=Math.sin(dlat/2)**2+Math.cos(c1[0]*toR)*Math.cos(c2[0]*toR)*Math.sin(dlon/2)**2;
   const dist=2*R*Math.asin(Math.sqrt(a));
-  return Math.max(0.4, dist/850+0.5);
+  // Block time = flight time + 0.4h overhead (taxi, climb, descent)
+  return Math.max(0.4, dist/speed + 0.4);
 }
 
 function getFreightRange(aircraft){
