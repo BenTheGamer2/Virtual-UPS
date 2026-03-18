@@ -3242,39 +3242,7 @@ const UPS_SCHEDULE = [
 
 // Which scheduled flights should currently be airborne?
 function getActiveScheduledFlights(){
-  const now = Date.now();
-  const utcH = new Date().getUTCHours();
-  const active = [];
-  UPS_SCHEDULE.forEach(sched => {
-    const bt = blockTime(sched.orig, sched.dest);
-    const depMs = sched.dep * 3600000;
-    const dayMs = 86400000;
-    // Check today's and yesterday's departure
-    [-1, 0].forEach(dayOffset => {
-      const midnight = new Date();
-      midnight.setUTCHours(0,0,0,0);
-      const startTime = midnight.getTime() + dayOffset*dayMs + depMs;
-      const eta = startTime + bt*3600000;
-      // Is this flight currently airborne? (departed but not arrived, within +2h window)
-      if(now >= startTime && now < eta + 7200000){
-        active.push({
-          fn: sched.fn,
-          origin: sched.orig,
-          dest: sched.dest,
-          ac: sched.ac,
-          pilot: 'AI — ' + sched.fn,
-          startTime,
-          blockHours: bt,
-          freight: Math.floor(Math.random()*50000+50000),
-          revenue: 0,
-          scheduled: true,
-        });
-      }
-    });
-  });
-  // deduplicate by fn
-  const seen = new Set();
-  return active.filter(f=>{ if(seen.has(f.fn)) return false; seen.add(f.fn); return true; });
+  return []; // Scheduled auto-flights disabled — crew dispatch their own routes
 }
 
 // routeMap kept for legacy AI trigger compatibility
@@ -3418,10 +3386,8 @@ function applySnap(snap){
   if(snap.news              && snap.news.length)            S.news            = snap.news;
   if(snap.ownedFleet)       S.ownedFleet      = snap.ownedFleet;
   if(snap.dispatcherRoutes) S.dispatcherRoutes = snap.dispatcherRoutes;
-  if(snap.liveFlightsSnap){
-    liveFlights.length = 0;
-    snap.liveFlightsSnap.forEach(f => liveFlights.push(f));
-  }
+  // liveFlightsSnap disabled — only crew-dispatched flights show
+  // if(snap.liveFlightsSnap){ liveFlights.length = 0; snap.liveFlightsSnap.forEach(f => liveFlights.push(f)); }
   if(snap.pireps && Array.isArray(snap.pireps)){
     _pireps.length = 0;
     _pireps.push(...snap.pireps);
