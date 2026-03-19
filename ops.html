@@ -1827,6 +1827,13 @@ async function doLogin(){
 }
 
 function guestAccess(){
+  // Clear any active session so we truly land as guest
+  S.isAdmin = false;
+  S.isMember = false;
+  S.currentUser = null;
+  try{ localStorage.removeItem('vups_admin_session'); }catch(e){}
+  try{ localStorage.removeItem('vups_crew_creds'); }catch(e){}
+  _sb.auth.signOut().catch(()=>{});
   document.getElementById('login-screen').classList.add('hidden');
   applyRoleUI();
   loadData();
@@ -2912,7 +2919,7 @@ function goNav(btn,page){
 // ════════════════════════════════════════════════
 //  MODALS
 // ════════════════════════════════════════════════
-function openModal(id){document.getElementById(id).classList.add('open')}
+function openModal(id){ document.querySelectorAll('.modal.open,.modal-overlay.open').forEach(m=>{ if(m.id!==id) m.classList.remove('open'); }); document.getElementById(id).classList.add('open'); }
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(o=>{
   o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});
@@ -4534,7 +4541,7 @@ function renderMyAssignments(trips, myName){
   }).join('');
 }
 
-function postTrip(){
+function postTrip(){ if(!S.isAdmin){ alert('Admin only.'); return; }
   var fn   = (document.getElementById('pt-fn').value||'').trim().toUpperCase();
   var date = document.getElementById('pt-date').value;
   var orig = (document.getElementById('pt-orig').value||'').trim().toUpperCase();
@@ -4614,7 +4621,7 @@ function removeTrip(el){
 </script>
 
 <!-- Post Trip Modal -->
-<div id="modal-post-trip" class="modal">
+<div class="modal-overlay" id="modal-post-trip"><div class="modal">
   <div class="modal-box" style="max-width:480px">
     <div class="modal-head">
       <div class="modal-title">+ Post Trip</div>
@@ -4669,10 +4676,10 @@ function removeTrip(el){
       <button class="btn btn-primary" onclick="postTrip()">Post Trip</button>
     </div>
   </div>
-</div>
+</div></div>
 
 <!-- PIREP Detail Modal -->
-<div id="modal-pirep-detail" class="modal">
+<div class="modal-overlay" id="modal-pirep-detail"><div class="modal">
   <div class="modal-box" style="max-width:480px">
     <div class="modal-head">
       <div class="modal-title">&#x2714; PIREP Detail</div>
@@ -4693,7 +4700,7 @@ function removeTrip(el){
     <div class="form-label">Remarks</div>
     <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
   </div>
-</div>
+</div></div>
 
 </body>
 </html>
