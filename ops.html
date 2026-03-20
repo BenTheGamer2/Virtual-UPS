@@ -848,7 +848,7 @@ tr:last-child td{border-bottom:none}
   <!-- ── ROUTE GENERATOR ── -->
   <div class="card" style="margin-bottom:1.25rem;border-color:rgba(200,146,10,.3)">
     <div class="card-title" style="color:var(--gold-lt);font-size:1rem">✦ Route Generator</div>
-    <div style="color:var(--text-dim);font-size:.75rem;margin-bottom:1rem">Pick a departure airport, aircraft type, and route length — the system picks a matching real destination automatically.</div>
+    <div style="color:var(--text-dim);font-size:.75rem;margin-bottom:1rem">Pick your departure, aircraft, and route type — we handle the rest.</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
       <div class="form-group" style="margin:0">
@@ -875,7 +875,7 @@ tr:last-child td{border-bottom:none}
         <select class="form-select" id="rg-dep-airport"></select>
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">Aircraft Type</label>
+        <label class="form-label">Aircraft</label>
         <select class="form-select" id="rg-aircraft" onchange="updateLengthOptions()">
           <option value="Airbus A300-600F">Airbus A300-600F</option>
           <option value="Boeing 727-100F">Boeing 727-100F</option>
@@ -891,32 +891,23 @@ tr:last-child td{border-bottom:none}
         </select>
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">Route Length</label>
+        <label class="form-label">Route Type</label>
         <select class="form-select" id="rg-length">
           <option value="feeder">🟢 Short / Feeder (&lt;2h)</option>
-          <option value="domestic" selected>🔵 Medium / Domestic (2–8h)</option>
+          <option value="domestic" selected>🔵 Domestic (2–8h)</option>
           <option value="longhaul">🟡 Long Haul (8h+)</option>
         </select>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem">
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Cruise Altitude</label>
-        <select class="form-select" id="rg-alt">
-          <option value="FL280">FL280</option><option value="FL310">FL310</option>
-          <option value="FL330">FL330</option><option value="FL350" selected>FL350</option>
-          <option value="FL370">FL370</option><option value="FL390">FL390</option><option value="FL410">FL410</option>
-        </select>
-      </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
       <div class="form-group" style="margin:0">
         <label class="form-label">Cost Index</label>
         <select class="form-select" id="rg-ci">
           <option value="0">0 — Max Range</option>
-          <option value="20">20 — Economy</option>
-          <option value="52" selected>52 — UPS Standard</option>
+          <option value="20" selected>20 — Recommended</option>
+          <option value="52">52 — UPS Standard (aggressive)</option>
           <option value="80">80 — Time Priority</option>
-          <option value="100">100 — Max Speed</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
@@ -924,6 +915,8 @@ tr:last-child td{border-bottom:none}
         <input class="form-input" id="rg-sbuser" placeholder="Your SimBrief username" oninput="saveSBUser(this.value)">
       </div>
     </div>
+
+    <input type="hidden" id="rg-alt" value="FL350">
 
     <div id="rg-preview" style="display:none;background:rgba(200,146,10,.06);border:1px solid rgba(200,146,10,.2);border-radius:4px;padding:.85rem 1rem;margin-bottom:.85rem">
       <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:.5rem">
@@ -947,9 +940,34 @@ tr:last-child td{border-bottom:none}
   <input type="hidden" id="cb-ci" value="52"><input type="hidden" id="cb-sbuser" value="">
 
     <!-- Pre-made routes -->
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem">
-    Pre-Made Routes
-    <span id="dispatcher-admin-route-btn" style="display:none;margin-left:.75rem"></span>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.65rem">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)">
+      Pre-Made Routes
+      <span id="dispatcher-admin-route-btn" style="display:none;margin-left:.75rem"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+      <select class="form-select" id="disp-filter-ac" onchange="renderDispatcher()" style="font-size:.72rem;padding:.25rem .5rem;height:auto;width:auto;min-width:160px">
+        <option value="">All Aircraft</option>
+        <option>Boeing 747-8F</option>
+        <option>Boeing 747-400F</option>
+        <option>Boeing 747-200F</option>
+        <option>Boeing 747-100F</option>
+        <option>Boeing 767-300F</option>
+        <option>Boeing 757-200F</option>
+        <option>Airbus A300-600F</option>
+        <option>McDonnell Douglas MD-11F</option>
+        <option>Boeing 727-200F</option>
+        <option>Boeing 727-100F</option>
+        <option>Douglas DC-8F</option>
+      </select>
+      <select class="form-select" id="disp-filter-length" onchange="renderDispatcher()" style="font-size:.72rem;padding:.25rem .5rem;height:auto;width:auto;min-width:130px">
+        <option value="">All Lengths</option>
+        <option value="feeder">Short / Feeder</option>
+        <option value="domestic">Domestic</option>
+        <option value="longhaul">Long Haul</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('disp-filter-ac').value='';document.getElementById('disp-filter-length').value='';renderDispatcher()">Clear</button>
+    </div>
   </div>
   <div id="dispatcher-route-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem;margin-bottom:1.25rem"></div>
 
@@ -1088,6 +1106,19 @@ tr:last-child td{border-bottom:none}
             <thead><tr><th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block</th><th>Payload</th><th>Actions</th></tr></thead>
             <tbody id="admin-pirep-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:1.25rem;font-family:monospace;font-size:.73rem">No PIREPs filed yet.</td></tr></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- FREIGHT LEADERBOARD -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        🏆 Top Freight Haulers
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-mute);font-weight:400">Based on filed PIREPs</span>
+      </div>
+      <div class="card">
+        <div id="freight-leaderboard-body">
+          <div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No PIREPs filed yet.</div>
         </div>
       </div>
     </div>
@@ -1267,11 +1298,11 @@ tr:last-child td{border-bottom:none}
             <option value="Boeing 757-200F">Boeing 757-200F</option>
             <option value="Boeing 757-300F">Boeing 757-300F</option>
             <option value="Boeing 767-300F">Boeing 767-300F</option>
-            <option value="Boeing 767-300ERF">Boeing 767-300ERF</option>
-            <option value="Airbus A300-600RF">Airbus A300-600RF</option>
+            <option value="Boeing 767-300F">Boeing 767-300F</option>
+            <option value="Airbus A300-600F">Airbus A300-600F</option>
             <option value="Boeing 747-400F">Boeing 747-400F</option>
             <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
-            <option value="McDonnell MD-11F">McDonnell MD-11F</option>
+            <option value="McDonnell Douglas MD-11F">McDonnell Douglas MD-11F</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">Category</label>
@@ -1536,8 +1567,8 @@ const S = {
     { id:4,  origin:'EDDK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Cologne → Louisville',           category:'longhaul' },
     { id:5,  origin:'KSDF', dest:'ZPBH', aircraft:'Boeing 747-8F', label:'Louisville → Shenzhen',          category:'longhaul' },
     { id:6,  origin:'ZPBH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Shenzhen → Louisville',          category:'longhaul' },
-    { id:7,  origin:'KSDF', dest:'ZSPD', aircraft:'McDonnell MD-11F',    label:'Louisville → Shanghai',          category:'longhaul' },
-    { id:8,  origin:'ZSPD', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Shanghai → Louisville',          category:'longhaul' },
+    { id:7,  origin:'KSDF', dest:'ZSPD', aircraft:'McDonnell Douglas MD-11F',    label:'Louisville → Shanghai',          category:'longhaul' },
+    { id:8,  origin:'ZSPD', dest:'KSDF', aircraft:'McDonnell Douglas MD-11F',    label:'Shanghai → Louisville',          category:'longhaul' },
     { id:9,  origin:'KSDF', dest:'OMDB', aircraft:'Boeing 747-8F', label:'Louisville → Dubai',             category:'longhaul' },
     { id:10, origin:'OMDB', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Dubai → Louisville',             category:'longhaul' },
     { id:11, origin:'KSDF', dest:'PANC', aircraft:'Boeing 747-8F', label:'Louisville → Anchorage (relay)', category:'longhaul' },
@@ -1559,8 +1590,8 @@ const S = {
     { id:26, origin:'KSDF', dest:'KDFW', aircraft:'Boeing 757-200F', label:'Louisville → Dallas/Fort Worth',  category:'domestic' },
     { id:27, origin:'KSDF', dest:'KSEA', aircraft:'Boeing 767-300F', label:'Louisville → Seattle',           category:'domestic' },
     { id:28, origin:'KSDF', dest:'KATL', aircraft:'Boeing 757-200F', label:'Louisville → Atlanta',           category:'domestic' },
-    { id:29, origin:'KSDF', dest:'KPIT', aircraft:'McDonnell MD-11F',    label:'Louisville → Pittsburgh',        category:'domestic' },
-    { id:30, origin:'KPIT', dest:'KSDF', aircraft:'McDonnell MD-11F',    label:'Pittsburgh → Louisville',        category:'domestic' },
+    { id:29, origin:'KSDF', dest:'KPIT', aircraft:'McDonnell Douglas MD-11F',    label:'Louisville → Pittsburgh',        category:'domestic' },
+    { id:30, origin:'KPIT', dest:'KSDF', aircraft:'McDonnell Douglas MD-11F',    label:'Pittsburgh → Louisville',        category:'domestic' },
     { id:31, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Philadelphia → Louisville',      category:'domestic' },
     { id:32, origin:'KSDF', dest:'PANC', aircraft:'Boeing 767-300F', label:'Louisville → Anchorage',         category:'domestic' },
     // ── Feeder / Regional ──
@@ -1951,6 +1982,43 @@ async function deleteUser(id, email){
   refreshApprovals();
 }
 
+function renderFreightLeaderboard(){
+  const el = document.getElementById('freight-leaderboard-body');
+  if(!el) return;
+  if(!_pireps.length){
+    el.innerHTML = '<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No PIREPs filed yet.</div>';
+    return;
+  }
+  // Tally freight per pilot
+  const totals = {};
+  const flights = {};
+  _pireps.forEach(p => {
+    const name = p.pilot || 'Unknown';
+    totals[name] = (totals[name] || 0) + (Number(p.payload) || 0);
+    flights[name] = (flights[name] || 0) + 1;
+  });
+  const ranked = Object.entries(totals)
+    .map(([name, lbs]) => ({ name, lbs, flights: flights[name] }))
+    .sort((a,b) => b.lbs - a.lbs)
+    .slice(0, 10);
+
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = ranked.map((p,i) => {
+    const pct = Math.round((p.lbs / ranked[0].lbs) * 100);
+    return '<div style="display:flex;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--border)">'
+      + '<div style="font-size:1rem;width:1.5rem;text-align:center;flex-shrink:0">' + (medals[i] ? medals[i] : ('<span style="font-family:monospace;color:var(--text-mute)">#'+(i+1)+'</span>')) + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-weight:600;font-size:.88rem">' + p.name + '</div>'
+      + '<div style="background:var(--border);border-radius:2px;height:4px;margin-top:.3rem;overflow:hidden"><div style="background:var(--gold);height:100%;width:'+pct+'%;transition:width .5s"></div></div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0">'
+      + '<div style="font-family:monospace;font-size:.78rem;color:var(--gold-lt)">' + (p.lbs >= 1e6 ? (p.lbs/1e6).toFixed(1)+'M' : p.lbs.toLocaleString()) + ' lbs</div>'
+      + '<div style="font-size:.65rem;color:var(--text-mute)">' + p.flights + ' flight' + (p.flights !== 1 ? 's' : '') + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 function adminRenderPireps(){
   const tb = document.getElementById('admin-pirep-tbody');
   if(!tb) return;
@@ -2008,6 +2076,7 @@ function adminDeletePirep(idx){
   saveState();
   adminRenderPireps();
   renderPireps();
+  renderFreightLeaderboard();
 }
 
 function adminClearPireps(){
@@ -2016,6 +2085,7 @@ function adminClearPireps(){
   saveState();
   adminRenderPireps();
   renderPireps();
+  renderFreightLeaderboard();
 }
 
 // Redirect guests away from member-only pages
@@ -2267,6 +2337,8 @@ const categoryMeta = {
 };
 
 function renderDispatcher(){
+  const filterAC     = (document.getElementById('disp-filter-ac')     || {}).value || '';
+  const filterLength = (document.getElementById('disp-filter-length') || {}).value || '';
   const grid = document.getElementById('dispatcher-route-grid');
   const adminActions = document.getElementById('dispatcher-admin-actions');
   if(adminActions){
@@ -2280,7 +2352,15 @@ function renderDispatcher(){
     grid.innerHTML = '<div class="empty-state"><div class="icon">\u{1F5FA}</div><p>No routes configured yet.</p></div>';
     return;
   }
-  grid.innerHTML = S.dispatcherRoutes.map(route => {
+  const filteredRoutes = S.dispatcherRoutes.filter(route => {
+    if(filterAC && route.aircraft !== filterAC) return false;
+    if(filterLength && route.category !== filterLength) return false;
+    return true;
+  });
+  if(!filteredRoutes.length){
+    grid.innerHTML = '<div style="color:var(--text-mute);font-size:.75rem;padding:1rem 0">No routes match the selected filters.</div>';
+  } else
+  grid.innerHTML = filteredRoutes.map(route => {
     const bt = blockTime(route.origin, route.dest);
     const btStr = bt >= 1 ? bt + 'h block' : Math.round(bt*60) + 'min block';
     const cat = categoryMeta[route.category] || categoryMeta.domestic;
@@ -2384,23 +2464,18 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
 // ── Route Generator ─────────────────────────────────────────────────────────
 
 const SIMBRIEF_AC_MAP = {
-  'Airbus A300-600F':          'A306',
-  'Boeing 727-100F':           'B721',
-  'Boeing 727-200F':           'B722',
-  'Boeing 747-100F':           'B741',
-  'Boeing 747-200F':           'B742',
-  'Boeing 747-400F':           'B744',
   'Boeing 747-8F':             'B748',
-  'Boeing 757-200F':           'B752',
-  'Boeing 757-300F':           'B753',
-  'Boeing 767-300F':           'B763',
-  'Boeing 767-300ERF':         'B763',
-  'Airbus A300-600RF':         'A306',
-  'Douglas DC-8F':             'DC86',
+  'Boeing 747-400F':           'B744',
+  'Boeing 747-200F':           'B742',
+  'Boeing 747-100F':           'B741',
   'McDonnell Douglas MD-11F':  'MD11',
-  'McDonnell MD-11F':          'MD11',
+  'Boeing 767-300F':           'B763',
+  'Airbus A300-600F':          'A306',
+  'Boeing 757-200F':           'B752',
+  'Boeing 727-200F':           'B722',
+  'Boeing 727-100F':           'B721',
+  'Douglas DC-8F':             'DC86',
 };
-
 // All UPS-served airports, tagged by region and type
 // type: feeder=<2h, domestic=2-8h, longhaul=8h+
 const ALL_AIRPORTS = [
@@ -2618,11 +2693,11 @@ const AC_CAPABILITY = {
   'Airbus A300-600F':          [0.5, 9.0],
   'Boeing 757-200F':           [0.5, 8.0],
   'Boeing 767-300F':           [1.0, 11.0],
-  'Boeing 747-100F':           [1.0, 12.0],
-  'Boeing 747-200F':           [1.0, 13.0],
-  'Boeing 747-400F':           [1.0, 16.0],
+  'Boeing 747-100F':           [1.0, 9.0],
+  'Boeing 747-200F':           [1.0, 11.0],
+  'Boeing 747-400F':           [1.0, 13.0],
   'Boeing 747-8F':             [1.0, 18.0],
-  'McDonnell Douglas MD-11F':  [1.0, 14.0],
+  'McDonnell Douglas MD-11F':  [1.0, 12.0],
 };
 
 // Cruise speeds in km/h (true airspeed at cruise) + taxi/climb overhead factor
@@ -2738,103 +2813,104 @@ function generateRoute(){
 
   if(!orig){ alert('Select a departure airport first.'); return; }
 
-  const cap = AC_CAPABILITY[aircraft] || [0.3, 18];
+  const cap = AC_CAPABILITY[aircraft] || [0.3, 9.0];
   const lengthRange = { feeder:[0.3,2.0], domestic:[2.0,7.5], longhaul:[7.5,99] };
   const [minH, maxH] = lengthRange[length] || [0,99];
+  // Hard cap: never exceed aircraft max range
   const effectiveMax = Math.min(maxH, cap[1]);
 
-  // Build candidates — filter by block time AND airport type compatibility
   const US_REGIONS = ['US_MIDWEST','US_EAST','US_SOUTH','US_WEST','HAWAII','ALASKA'];
   const origAirport = ALL_AIRPORTS.find(a=>a.icao===orig);
   const origIsUS = origAirport && US_REGIONS.includes(origAirport.region);
 
-  let candidates = ALL_AIRPORTS
-    .filter(a => {
-      if(a.icao === orig) return false;
-      if(!a.types.includes(length)) return false;
-      // Feeder only within US — no feeder from/to international airports
-      if(length === 'feeder'){
-        const destIsUS = US_REGIONS.includes(a.region);
-        if(!origIsUS || !destIsUS) return false;
-      }
-      return true;
-    })
-    .map(a => {
-      const known = blockTimeMap[orig+'-'+a.icao] || blockTimeMap[a.icao+'-'+orig];
-      const bt = (known !== undefined) ? known : calcBlockTime(orig, a.icao, aircraft);
-      return { ...a, bt };
-    })
-    .filter(a => a.bt >= minH && a.bt <= effectiveMax);
+  // Build valid candidates
+  const candidates = [];
+  for(const a of ALL_AIRPORTS){
+    if(a.icao === orig) continue;
+    if(!a.types.includes(length)) continue;
+    // Feeder: US only
+    if(length === 'feeder' && (!origIsUS || !US_REGIONS.includes(a.region))) continue;
 
-  const heavyAC = ['Boeing 747-8F','Boeing 747-400F','Boeing 747-200F','Boeing 747-100F','McDonnell Douglas MD-11F','Boeing 767-300F'];
-  const isHeavy = heavyAC.includes(aircraft);
-  const isNarrow = ['Boeing 727-100F','Boeing 727-200F','Douglas DC-8F','Boeing 757-200F','Airbus A300-600F'].includes(aircraft);
+    // Compute block time using this specific aircraft
+    const bt = calcBlockTime(orig, a.icao, aircraft);
+    if(bt === null || bt === undefined) continue;
 
-  // Strictly enforce type + block time — no fallback that ignores filters
-  let pool = candidates.sort(()=>Math.random()-0.5);
+    // Strict range check — must fit within both length bracket AND aircraft cap
+    if(bt < minH || bt > effectiveMax) continue;
 
-  if(!pool.length){
-    alert('No valid route found for ' + length + ' from ' + orig + ' with ' + aircraft + '. Try a different length or aircraft.');
+    candidates.push({ ...a, bt });
+  }
+
+  if(!candidates.length){
+    alert('No valid routes found from ' + orig + ' with ' + aircraft + ' for ' + length + ' range.\nTry a different aircraft, origin, or route length.');
     return;
   }
 
-  const dest = pool[0];
+  // Pick random from valid candidates
+  const dest = candidates[Math.floor(Math.random() * candidates.length)];
   const bt = dest.bt;
-  const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
-  const btDisplay = btH>0 ? btH+'h '+btM+'m' : btM+'m';
-  const fn = UPS_FN_POOL[Math.floor(Math.random()*UPS_FN_POOL.length)];
+  const btH = Math.floor(bt), btM = Math.round((bt % 1) * 60);
+  const btDisplay = btH > 0 ? btH + 'h ' + btM + 'm' : btM + 'm';
+
+  const fn = UPS_FN_POOL[Math.floor(Math.random() * UPS_FN_POOL.length)];
   const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
   const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
   const fRange = getFreightRange(aircraft);
-  const freight = Math.floor(Math.random()*(fRange[1]-fRange[0])+fRange[0]);
-  const revenuePerLb = bt>=8?0.70:bt>=3?0.55:0.45;
-  const revenue = Math.round(freight*revenuePerLb/1000)*1000;
+  // Scale payload to route length — longer flights carry less due to fuel weight
+  const payloadFactor = bt >= 10 ? 0.65 : bt >= 7 ? 0.80 : bt >= 4 ? 0.90 : 1.0;
+  const payloadMax = Math.floor(fRange[1] * payloadFactor);
+  const freight = Math.floor(Math.random() * (payloadMax - fRange[0]) + fRange[0]);
+  const revenuePerLb = bt >= 8 ? 0.70 : bt >= 3 ? 0.55 : 0.45;
+  const revenue = Math.round(freight * revenuePerLb / 1000) * 1000;
 
-  _generatedRoute = {fn,orig,dest:dest.icao,destName:dest.name,aircraft,alt:cruiseAlt,ci,bt,freight,revenue,sbAc,length};
+  _generatedRoute = { fn, orig, dest:dest.icao, destName:dest.name, aircraft, alt:cruiseAlt, ci, bt, freight, revenue, sbAc, length };
 
   document.getElementById('rg-preview-fn').textContent = fn;
-  document.getElementById('rg-preview-route').textContent = orig+' → '+dest.icao+'  ('+dest.name+')';
+  document.getElementById('rg-preview-route').textContent = orig + ' → ' + dest.icao + '  (' + dest.name + ')';
   document.getElementById('rg-preview-body').innerHTML = [
-    '<div><span style="color:var(--text-mute)">Aircraft</span><br>'+aircraft+'</div>',
-    '<div><span style="color:var(--text-mute)">Block Time</span><br>'+btDisplay+'</div>',
-    '<div><span style="color:var(--text-mute)">Cruise Alt</span><br>'+cruiseAlt+' · CI '+ci+'</div>',
-    '<div><span style="color:var(--text-mute)">Payload</span><br>'+freight.toLocaleString()+' lbs</div>',
-    '<div><span style="color:var(--text-mute)">Est. Revenue</span><br>$'+revenue.toLocaleString()+'</div>',
+    '<div><span style="color:var(--text-mute)">Aircraft</span><br>' + aircraft + '</div>',
+    '<div><span style="color:var(--text-mute)">Block Time</span><br>' + btDisplay + '</div>',
+    '<div><span style="color:var(--text-mute)">Cruise Alt</span><br>' + cruiseAlt + ' · CI ' + ci + '</div>',
+    '<div><span style="color:var(--text-mute)">Payload</span><br>' + freight.toLocaleString() + ' lbs</div>',
+    '<div><span style="color:var(--text-mute)">Est. Revenue</span><br>$' + revenue.toLocaleString() + '</div>',
   ].join('');
-  document.getElementById('rg-dest-reason').textContent = '↳ '+DEST_REASONS[length];
-  document.getElementById('rg-preview').style.display='';
-  document.getElementById('rg-dispatch-btn').style.display='';
-  document.getElementById('rg-simbrief-btn').style.display='';
+  document.getElementById('rg-dest-reason').textContent = '↳ ' + DEST_REASONS[length];
+  document.getElementById('rg-preview').style.display = '';
+  document.getElementById('rg-dispatch-btn').style.display = '';
+  document.getElementById('rg-simbrief-btn').style.display = '';
 }
+
 
 function calcBlockTime(orig, dest, aircraft){
   const c1=AIRPORT_COORDS[orig], c2=AIRPORT_COORDS[dest];
-  if(!c1||!c2) return 3.0;
-  // Check lookup table first (aircraft-agnostic reference times)
+  if(!c1||!c2) return null; // unknown airport — skip it
+  // Check lookup table first
   const lookup = blockTimeMap[orig+'-'+dest] || blockTimeMap[dest+'-'+orig];
   if(lookup) return lookup;
-  // Compute from distance using aircraft-specific cruise speed
+  // Use aircraft-specific cruise speed for accurate block time
   const speed = (aircraft && AC_CRUISE_SPEED[aircraft]) ? AC_CRUISE_SPEED[aircraft] : 880;
   const R=6371, toR=Math.PI/180;
   const dlat=(c2[0]-c1[0])*toR, dlon=(c2[1]-c1[1])*toR;
   const a=Math.sin(dlat/2)**2+Math.cos(c1[0]*toR)*Math.cos(c2[0]*toR)*Math.sin(dlon/2)**2;
   const dist=2*R*Math.asin(Math.sqrt(a));
-  // Block time = flight time + 0.4h overhead (taxi, climb, descent)
   return Math.max(0.4, dist/speed + 0.4);
 }
 
 function getFreightRange(aircraft){
   const fm=freightMap[aircraft];
   if(fm) return fm;
-  if(aircraft.includes('747-8')) return [150000,295000];
-  if(aircraft.includes('747')) return [90000,248000];
-  if(aircraft.includes('MD-11')) return [90000,200000];
-  if(aircraft.includes('767')) return [65000,116000];
-  if(aircraft.includes('757')) return [50000,116000];
-  if(aircraft.includes('727')) return [20000,60000];
-  if(aircraft.includes('DC-8')) return [35000,95000];
-  if(aircraft.includes('A300')) return [80000,140000];
-  return [40000,100000];
+  // Fallbacks using real-world values
+  if(aircraft.includes('747-8'))  return [120000,295000];
+  if(aircraft.includes('747-4'))  return [100000,248000];
+  if(aircraft.includes('747'))    return [80000,220000];
+  if(aircraft.includes('MD-11'))  return [80000,200000];
+  if(aircraft.includes('767'))    return [50000,116000];
+  if(aircraft.includes('757'))    return [30000,87000];
+  if(aircraft.includes('727-2'))  return [15000,58000];
+  if(aircraft.includes('727'))    return [10000,43000];
+  if(aircraft.includes('DC-8'))   return [20000,87000];
+  if(aircraft.includes('A300'))   return [40000,87000];
+  return [30000,87000];
 }
 
 function dispatchGeneratedRoute(){
@@ -2899,7 +2975,7 @@ function addDispatchRoute(){
 function goNav(btn,page){
   if(!guardPage(page)) return;
   if(page==='pirep') setTimeout(renderPireps,50);
-  if(page==='admin') setTimeout(()=>{ refreshApprovals(); adminRenderPireps(); },100);
+  if(page==='admin') setTimeout(()=>{ refreshApprovals(); adminRenderPireps(); renderFreightLeaderboard(); },100);
   if(page==='admin'&&!S.isAdmin) return;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -3355,7 +3431,7 @@ setInterval(()=>{
 
 function updateLoadBar(ac,freight){
   S.loadBars[ac]=(S.loadBars[ac]||0)+freight;
-  const maxMap={'Boeing 747-400F':228000,'McDonnell MD-11F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
+  const maxMap={'Boeing 747-400F':228000,'McDonnell Douglas MD-11F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
   const max=maxMap[ac]||200000;
   const pct=Math.min(99,Math.round(S.loadBars[ac]/max*100));
   const key=ac.replace(/[^a-z0-9]/gi,'');
@@ -3471,8 +3547,11 @@ const blockTimeMap = {
   'KJFK-EGSS':7.0, 'EGSS-KJFK':7.0, 'KJFK-LFPG':7.5, 'LFPG-KJFK':7.5,
   'KBOS-EGSS':7.0, 'EGSS-KBOS':7.0,
 };
-function blockTime(o,d){
-  return blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o] || 3.0;
+function blockTime(o,d,ac){
+  const lookup = blockTimeMap[o+'-'+d] || blockTimeMap[d+'-'+o];
+  if(lookup) return lookup;
+  const bt = calcBlockTime(o,d,ac);
+  return bt !== null ? bt : 3.0;
 }
 
 // ── Real UPS scheduled flights (UTC departure hour, flight number, route, aircraft) ──
@@ -3485,8 +3564,8 @@ const UPS_SCHEDULE = [
   { fn:'5X8',   dep:2,  orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 02Z arr ~18:30Z
   { fn:'5X17',  dep:10, orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },       // dep 10Z arr ~02Z
   { fn:'5X18',  dep:16, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 16Z arr ~08Z
-  { fn:'5X15',  dep:13, orig:'KSDF', dest:'ZSPD', ac:'McDonnell MD-11F' },    // dep 13Z arr ~04:30Z
-  { fn:'5X16',  dep:20, orig:'ZSPD', dest:'KSDF', ac:'McDonnell MD-11F' },    // dep 20Z arr ~11:30Z
+  { fn:'5X15',  dep:13, orig:'KSDF', dest:'ZSPD', ac:'McDonnell Douglas MD-11F' },    // dep 13Z arr ~04:30Z
+  { fn:'5X16',  dep:20, orig:'ZSPD', dest:'KSDF', ac:'McDonnell Douglas MD-11F' },    // dep 20Z arr ~11:30Z
   { fn:'5X37',  dep:3,  orig:'KSDF', dest:'PANC', ac:'Boeing 767-300F' },     // dep 03Z arr ~11Z
   { fn:'5X38',  dep:15, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 15Z arr ~00Z
   { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },       // dep 05Z arr ~19:30Z
@@ -3570,7 +3649,23 @@ const routeMap={
   feeder:[['KSDF','KLEX','B757-200F'],['KSDF','KHSV','ATR-72F'],['KSDF','KBNA','B757-200F']],
   any:[['KSDF','EDDK','B747-400F'],['KSDF','KPHL','B767-300F'],['KSDF','KLEX','B757-200F']]
 };
-const freightMap={'Boeing 747-8F':[150000,295000],'Boeing 747-400F':[120000,248000],'Boeing 747-200F':[100000,230000],'Boeing 747-100F':[90000,220000],'McDonnell Douglas MD-11F':[90000,200000],'McDonnell MD-11F':[90000,200000],'Boeing 767-300F':[65000,116000],'Boeing 767-300ERF':[65000,116000],'Airbus A300-600F':[80000,140000],'Airbus A300-600RF':[80000,140000],'Boeing 757-200F':[50000,116000],'Boeing 757-300F':[60000,124000],'Boeing 727-200F':[30000,60000],'Boeing 727-100F':[20000,44000],'Douglas DC-8F':[35000,95000],'B747-400F':[120000,248000],'MD-11F':[90000,200000],'B767-300F':[65000,116000],'B757-200F':[50000,116000]};
+const freightMap={
+  // Real UPS payload ranges (lbs) — min typical load, max structural payload
+  'Boeing 747-8F':             [120000, 295000],  // Max 295,000 lbs
+  'Boeing 747-400F':           [100000, 248000],  // Max 248,000 lbs
+  'Boeing 747-200F':           [90000,  230000],  // Max 230,000 lbs
+  'Boeing 747-100F':           [70000,  200000],  // Max 200,000 lbs
+  'McDonnell Douglas MD-11F':  [80000,  200000],  // Max 200,000 lbs
+  'Boeing 767-300F':           [50000,  116000],  // Max 116,000 lbs
+  'Airbus A300-600F':          [40000,   87000],  // Max 87,000 lbs (not 140k!)
+  'Boeing 757-200F':           [30000,   87000],  // Max 87,000 lbs
+  'Boeing 727-200F':           [15000,   58000],  // Max 58,000 lbs
+  'Boeing 727-100F':           [10000,   43000],  // Max 43,000 lbs
+  'Douglas DC-8F':             [20000,   87000],  // Max 87,000 lbs
+  // Legacy aliases
+  'B747-400F':[100000,248000], 'MD-11F':[80000,200000],
+  'B767-300F':[50000,116000],  'B757-200F':[30000,87000],
+};
 
 // Active live flights: { fn, origin, dest, ac, pilot, startTime, blockHours, freight, revenue }
 const liveFlights = [];
@@ -3732,6 +3827,7 @@ function refreshAllUI(){
   // Always keep admin PIREP table up to date
   adminRenderPireps();
   renderPireps();
+  renderFreightLeaderboard();
   renderTripBoard();
   // Re-render whichever page is active
   const active = document.querySelector('.page.active');
@@ -3743,7 +3839,7 @@ function refreshAllUI(){
     if(id==='fleet')      renderFleet();
     if(id==='economy')    renderEconomy();
     if(id==='hubs')       renderHubs();
-    if(id==='admin')      { renderAdmin(); refreshApprovals(); adminRenderPireps(); }
+    if(id==='admin')      { renderAdmin(); refreshApprovals(); adminRenderPireps(); renderFreightLeaderboard(); }
     if(id==='dispatcher') renderDispatcher();
     if(id==='livemap')    onMapPageOpen();
     if(id==='pirep')      renderPireps();
