@@ -3707,8 +3707,13 @@ function applySnap(snap){
   // liveFlightsSnap disabled — only crew-dispatched flights show
   // if(snap.liveFlightsSnap){ liveFlights.length = 0; snap.liveFlightsSnap.forEach(f => liveFlights.push(f)); }
   if(snap.pireps && Array.isArray(snap.pireps)){
+    // Merge incoming PIREPs — keep any locally filed ones not in the incoming set
+    const incomingFns = new Set(snap.pireps.map(p=>p.fn+p.filed));
+    const localOnly = _pireps.filter(p=>!incomingFns.has(p.fn+p.filed));
     _pireps.length = 0;
-    _pireps.push(...snap.pireps);
+    _pireps.push(...snap.pireps, ...localOnly);
+    // Sort by filed time
+    _pireps.sort((a,b)=>(a.filed||0)-(b.filed||0));
   }
   if(snap.trips && Array.isArray(snap.trips)){
     if(!_stateCache) _stateCache = {};
@@ -4408,12 +4413,16 @@ async function filePirep(){
   const fuelArr = getFuelLbs('pr-fuel-arr');
   const pirep = { fn, date, orig, dest, ac, bt:parseFloat(bt).toFixed(1), payload:pl, fuelDep, fuelArr, ldgrate:parseFloat(ldg)||0, remarks:rmk, pilot, filed: Date.now() };
   _pireps.push(pirep);
-  // Persist to Supabase state
+  // Save immediately — don't use debounced saveState for PIREPs
   try {
-    const snap = (_stateCache||{});
+    const snap = buildSnap();
     snap.pireps = _pireps;
-    await saveState(snap);
-  } catch(e){ console.warn('PIREP save error',e); }
+    await _supa.from('state').upsert(
+      { key: 'main', value: snap, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(snap)); } catch(e2){}
+  } catch(e){ console.warn('PIREP save error', e); saveState(); }
   closeModal('modal-file-pirep');
   // Clear form
   ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-fuel-dep','pr-fuel-arr','pr-ldgrate','pr-remarks'].forEach(id=>{
