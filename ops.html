@@ -1034,6 +1034,10 @@ tr:last-child td{border-bottom:none}
         Crew Applications
         <span id="pending-count-badge" style="background:rgba(192,57,43,.15);color:var(--red-lt);border:1px solid rgba(192,57,43,.3);border-radius:2px;font-size:.62rem;padding:.1rem .45rem;font-family:monospace;display:none"></span>
       </div>
+      <div style="margin-bottom:.65rem">
+        <button class="btn btn-ghost btn-sm" onclick="syncApprovedToRoster()" style="color:var(--blue-lt);border-color:rgba(36,113,163,.3)">↻ Sync Approved → Crew Roster</button>
+        <span style="font-size:.65rem;color:var(--text-mute);margin-left:.5rem">Adds any approved members not yet in the roster</span>
+      </div>
       <div class="card">
         <div class="tbl-wrap">
           <table>
@@ -1968,9 +1972,64 @@ async function refreshApprovals(){
 }
 
 async function approveUser(id, email){
+  // Get the profile to grab display_name
+  const { data: profile } = await _sb.from('profiles').select('*').eq('id', id).single();
   await _sb.from('profiles').update({ status:'approved', role:'member' }).eq('id', id);
+
+  // Auto-add to human crew roster if not already there
+  const displayName = (profile && profile.display_name) ? profile.display_name : (email ? email.split('@')[0] : 'Crew Member');
+  const nameParts = displayName.trim().split(' ');
+  const first = nameParts[0] || displayName;
+  const last  = nameParts.slice(1).join(' ') || '';
+
+  const alreadyInRoster = S.pilots.some(p => p.type === 'human' && p.email === email);
+  if(!alreadyInRoster){
+    S.pilots.push({
+      id: S.nextId++,
+      type: 'human',
+      email: email,
+      first, last,
+      rank: 'Feeder Pilot',
+      base: 'KSDF',
+      hours: 0,
+      flights: 0,
+      ontime: 100,
+      earned: 0,
+      xp: 0
+    });
+    saveState();
+  }
+
   refreshApprovals();
+  renderAdmin();
 }
+async function syncApprovedToRoster(){
+  const { data: profiles } = await _sb.from('profiles').select('*').eq('status','approved');
+  if(!profiles || !profiles.length){ alert('No approved members found.'); return; }
+  let added = 0;
+  profiles.forEach(profile => {
+    const email = profile.email;
+    const alreadyInRoster = S.pilots.some(p => p.type === 'human' && (p.email === email || (p.first+' '+p.last).toLowerCase() === (profile.display_name||'').toLowerCase()));
+    if(!alreadyInRoster){
+      const displayName = profile.display_name || (email ? email.split('@')[0] : 'Crew Member');
+      const nameParts = displayName.trim().split(' ');
+      S.pilots.push({
+        id: S.nextId++,
+        type: 'human',
+        email: email,
+        first: nameParts[0] || displayName,
+        last:  nameParts.slice(1).join(' ') || '',
+        rank: 'Feeder Pilot',
+        base: 'KSDF',
+        hours: 0, flights: 0, ontime: 100, earned: 0, xp: 0
+      });
+      added++;
+    }
+  });
+  if(added > 0){ saveState(); renderAdmin(); alert(added + ' crew member' + (added!==1?'s':'') + ' added to roster.'); }
+  else { alert('All approved members are already in the roster.'); }
+}
+
 async function rejectUser(id){
   await _sb.from('profiles').update({ status:'rejected' }).eq('id', id);
   refreshApprovals();
