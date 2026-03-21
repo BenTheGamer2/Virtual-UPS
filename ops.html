@@ -1168,7 +1168,7 @@ tr:last-child td{border-bottom:none}
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Payload</th><th>Status</th>
+          <th>Date</th><th>Pilot</th><th>Flight</th><th>Route</th><th>Aircraft</th><th>Block Time</th><th>Payload</th><th>Action</th>
         </tr></thead>
         <tbody id="pirep-tbody">
           <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>
@@ -4402,20 +4402,32 @@ function renderPireps(){
   const guestMsg = document.getElementById('pirep-guest-msg');
   if(guestMsg) guestMsg.style.display = S.isMember ? 'none' : '';
 
+  const myName = S.currentUser
+    ? (S.currentUser.email === 'admin' ? 'admin' : (S.currentUser.user_metadata && S.currentUser.user_metadata.display_name) || S.currentUser.email.split('@')[0])
+    : '';
+
   if(!_pireps.length){
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-mute);font-family:\'Share Tech Mono\',monospace;font-size:.73rem">No PIREPs filed yet.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text-mute)">No PIREPs filed yet.</td></tr>';
   } else {
-    tb.innerHTML = _pireps.slice().reverse().map(p=>`
-      <tr>
-        <td class="mono" style="font-size:.68rem">${p.date||'—'}</td>
-        <td style="color:var(--text);font-family:monospace;font-size:.72rem">${p.pilot||'—'}</td>
-        <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.92rem">${p.fn||'—'}</td>
-        <td style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600">${p.orig||'?'} → ${p.dest||'?'}</td>
-        <td class="mono" style="font-size:.68rem;white-space:nowrap">${p.ac||'—'}</td>
-        <td class="mono">${p.bt?p.bt+'h':'—'}</td>
-        <td class="mono">${p.payload?Number(p.payload).toLocaleString()+' lbs':'—'}</td>
-        <td><span class="badge b-green">&#x2714; Filed</span></td>
-      </tr>`).join('');
+    const reversed = _pireps.slice().reverse();
+    tb.innerHTML = reversed.map((p, i) => {
+      const origIdx = _pireps.length - 1 - i;
+      const isOwn = myName && (p.pilot||'').toLowerCase() === myName.toLowerCase();
+      const canDelete = S.isAdmin || isOwn;
+      const deleteBtn = canDelete
+        ? '<button class="btn btn-ghost btn-sm" style="color:var(--red-lt);border-color:rgba(192,57,43,.3)" onclick="deleteMemberPirep(' + origIdx + ')">Delete</button>'
+        : '<span class="badge b-green">&#x2714; Filed</span>';
+      return '<tr>'
+        + '<td class="mono" style="font-size:.68rem">' + (p.date||'—') + '</td>'
+        + '<td style="color:var(--text);font-family:monospace;font-size:.72rem">' + (p.pilot||'—') + '</td>'
+        + '<td style="color:var(--gold);font-weight:700;font-size:.92rem">' + (p.fn||'—') + '</td>'
+        + '<td style="font-weight:600">' + (p.orig||'?') + ' → ' + (p.dest||'?') + '</td>'
+        + '<td class="mono" style="font-size:.68rem;white-space:nowrap">' + (p.ac||'—') + '</td>'
+        + '<td class="mono">' + (p.bt ? p.bt+'h' : '—') + '</td>'
+        + '<td class="mono">' + (p.payload ? Number(p.payload).toLocaleString()+' lbs' : '—') + '</td>'
+        + '<td>' + deleteBtn + '</td>'
+        + '</tr>';
+    }).join('');
   }
 
   // Stats
@@ -4430,6 +4442,21 @@ function renderPireps(){
       ['Total Freight', freq>=1e6?(freq/1e6).toFixed(1)+'M lbs':freq.toLocaleString()+' lbs'],
     ].map(([l,v])=>`<div class="stat" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:.7rem 1rem"><div class="stat-val" style="font-size:1.4rem">${v}</div><div class="stat-lbl">${l}</div></div>`).join('');
   }
+}
+
+function deleteMemberPirep(idx){
+  const p = _pireps[idx];
+  if(!p) return;
+  const myName = S.currentUser
+    ? (S.currentUser.email === 'admin' ? 'admin' : (S.currentUser.user_metadata && S.currentUser.user_metadata.display_name) || S.currentUser.email.split('@')[0])
+    : '';
+  const isOwn = myName && (p.pilot||'').toLowerCase() === myName.toLowerCase();
+  if(!S.isAdmin && !isOwn){ alert('You can only delete your own PIREPs.'); return; }
+  if(!confirm('Delete this PIREP?')) return;
+  _pireps.splice(idx, 1);
+  saveState();
+  renderPireps();
+  adminRenderPireps();
 }
 
 // ── Payload unit converter ───────────────────────────────────────────────────
