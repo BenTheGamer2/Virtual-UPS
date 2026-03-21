@@ -3290,7 +3290,7 @@ function renderAdmin(){
       <td><span class="badge ${p.rank==='Global Captain'?'b-gold':p.rank==='Regional F/O'?'b-blue':'b-green'}">${p.rank}</span></td>
       <td>${p.base}</td><td>${p.hours}</td>
       <td style="display:flex;gap:.35rem">
-        <button class="btn btn-ghost btn-sm" onclick="editHours(${p.id})">Edit Hrs</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEditCrew(${p.id})">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="removePilot(${p.id})">Remove</button>
       </td></tr>`).join('')
     :`<tr><td colspan="5" style="text-align:center;color:var(--text-mute);padding:1.25rem">No human crew yet.</td></tr>`;
@@ -3348,6 +3348,31 @@ function removePilot(id){
   if(!confirm('Remove this crew member?')) return;
   S.pilots=S.pilots.filter(p=>p.id!==id);
   updateCrewCounts();renderAdmin();saveState();
+}
+
+function openEditCrew(id){
+  const p = S.pilots.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('ec-id').value    = id;
+  document.getElementById('ec-first').value = p.first || '';
+  document.getElementById('ec-last').value  = p.last  || '';
+  document.getElementById('ec-rank').value  = p.rank  || 'Feeder Pilot';
+  document.getElementById('ec-base').value  = p.base  || 'KSDF';
+  document.getElementById('ec-hours').value = p.hours || 0;
+  openModal('modal-edit-crew');
+}
+
+function saveEditCrew(){
+  const id    = parseInt(document.getElementById('ec-id').value);
+  const p     = S.pilots.find(x=>x.id===id);
+  if(!p) return;
+  p.first  = document.getElementById('ec-first').value.trim();
+  p.last   = document.getElementById('ec-last').value.trim();
+  p.rank   = document.getElementById('ec-rank').value;
+  p.base   = document.getElementById('ec-base').value;
+  p.hours  = parseInt(document.getElementById('ec-hours').value) || 0;
+  closeModal('modal-edit-crew');
+  updateCrewCounts(); renderAdmin(); saveState();
 }
 
 function editHours(id){
@@ -4868,6 +4893,54 @@ function removeTrip(el){
     </div>
   </div>
 </div></div>
+
+<!-- Edit Crew Modal -->
+<div class="modal-overlay" id="modal-edit-crew">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">Edit Crew Member</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-crew')">&#x2715;</button>
+    </div>
+    <input type="hidden" id="ec-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" id="ec-first" placeholder="First">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" id="ec-last" placeholder="Last">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Rank</label>
+        <select class="form-select" id="ec-rank">
+          <option>Feeder Pilot</option>
+          <option>Regional F/O</option>
+          <option>Global Captain</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Home Base</label>
+        <select class="form-select" id="ec-base">
+          <option>KSDF</option><option>EDDK</option><option>VHHH</option>
+          <option>KPHL</option><option>KONT</option><option>KMIA</option>
+          <option>PANC</option><option>EGSS</option><option>KSEA</option>
+          <option>KLAX</option><option>KORD</option><option>KJFK</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Flight Hours</label>
+      <input class="form-input" type="number" id="ec-hours" placeholder="0">
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-crew')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditCrew()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- PIREP Detail Modal -->
 <div class="modal-overlay" id="modal-pirep-detail"><div class="modal">
