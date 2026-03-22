@@ -875,6 +875,13 @@ tr:last-child td{border-bottom:none}
         <select class="form-select" id="rg-dep-airport"></select>
       </div>
       <div class="form-group" style="margin:0">
+        <label class="form-label">Arrival Airport <span style="font-size:.6rem;color:var(--text-mute)">(optional)</span></label>
+        <input class="form-input" id="rg-arr-airport" placeholder="e.g. EDDK — leave blank for random" style="text-transform:uppercase" maxlength="4">
+      </div>
+      <div class="form-group" style="margin:0" style="visibility:hidden">
+        <!-- spacer -->
+      </div>
+      <div class="form-group" style="margin:0">
         <label class="form-label">Aircraft</label>
         <select class="form-select" id="rg-aircraft" onchange="updateLengthOptions()">
           <option value="Airbus A300-600F">Airbus A300-600F</option>
@@ -2523,15 +2530,15 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
 // ── Route Generator ─────────────────────────────────────────────────────────
 
 const SIMBRIEF_AC_MAP = {
-  'Boeing 747-8F':             'B748',
-  'Boeing 747-400F':           'B744',
-  'Boeing 747-200F':           'B742',
-  'Boeing 747-100F':           'B741',
-  'McDonnell Douglas MD-11F':  'MD11',
-  'Boeing 767-300F':           'B763',
-  'Airbus A300-600F':          'A306',
-  'Boeing 757-200F':           'B752',
-  'Boeing 727-200F':           'B722',
+  'Boeing 747-8F':             'B748F',   // 747-8 Freighter
+  'Boeing 747-400F':           'B744F',   // 747-400 Freighter
+  'Boeing 747-200F':           'B742F',   // 747-200 Freighter
+  'Boeing 747-100F':           'B741',    // no dedicated F variant in SimBrief
+  'McDonnell Douglas MD-11F':  'MD11F',   // MD-11 Freighter
+  'Boeing 767-300F':           'B763F',   // 767-300 Freighter
+  'Airbus A300-600F':          'A30F',    // A300-600 Freighter (SimBrief code)
+  'Boeing 757-200F':           'B752F',   // 757-200 Freighter
+  'Boeing 727-200F':           'B722',    // no F variant in SimBrief
   'Boeing 727-100F':           'B721',
   'Douglas DC-8F':             'DC86',
 };
@@ -2872,31 +2879,68 @@ function generateRoute(){
 
   if(!orig){ alert('Select a departure airport first.'); return; }
 
+  const arrInput = (document.getElementById('rg-arr-airport') || {}).value || '';
+  const arrIcao  = arrInput.trim().toUpperCase();
+
   const cap = AC_CAPABILITY[aircraft] || [0.3, 9.0];
   const lengthRange = { feeder:[0.3,2.0], domestic:[2.0,7.5], longhaul:[7.5,99] };
   const [minH, maxH] = lengthRange[length] || [0,99];
-  // Hard cap: never exceed aircraft max range
   const effectiveMax = Math.min(maxH, cap[1]);
 
   const US_REGIONS = ['US_MIDWEST','US_EAST','US_SOUTH','US_WEST','HAWAII','ALASKA'];
   const origAirport = ALL_AIRPORTS.find(a=>a.icao===orig);
   const origIsUS = origAirport && US_REGIONS.includes(origAirport.region);
 
-  // Build valid candidates
+  // If specific arrival requested, validate and use it directly
+  if(arrIcao){
+    const arrAirport = ALL_AIRPORTS.find(a=>a.icao===arrIcao);
+    if(!arrAirport){
+      alert(arrIcao + ' is not in the vUPS network. Leave arrival blank for a random destination.');
+      return;
+    }
+    const bt = calcBlockTime(orig, arrIcao, aircraft);
+    if(!bt){ alert('Could not calculate block time for ' + orig + ' → ' + arrIcao); return; }
+    if(bt > effectiveMax){
+      alert(orig + ' → ' + arrIcao + ' is ' + bt.toFixed(1) + 'h — exceeds ' + aircraft + ' max range of ' + effectiveMax + 'h.');
+      return;
+    }
+    const dest = { ...arrAirport, bt };
+    const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
+    const btDisplay = btH > 0 ? btH+'h '+btM+'m' : btM+'m';
+    const fn = UPS_FN_POOL[Math.floor(Math.random()*UPS_FN_POOL.length)];
+    const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
+    const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
+    const fRange = getFreightRange(aircraft);
+    const payloadFactor = bt>=10?0.65:bt>=7?0.80:bt>=4?0.90:1.0;
+    const payloadMax = Math.floor(fRange[1]*payloadFactor);
+    const freight = Math.floor(Math.random()*(payloadMax-fRange[0])+fRange[0]);
+    const revenue = Math.round(freight*(bt>=8?0.70:bt>=3?0.55:0.45)/1000)*1000;
+    _generatedRoute = {fn,orig,dest:dest.icao,destName:dest.name,aircraft,alt:cruiseAlt,ci,bt,freight,revenue,sbAc,length};
+    document.getElementById('rg-preview-fn').textContent = fn;
+    document.getElementById('rg-preview-route').textContent = orig+' → '+dest.icao+'  ('+dest.name+')';
+    document.getElementById('rg-preview-body').innerHTML = [
+      '<div><span style="color:var(--text-mute)">Aircraft</span><br>'+aircraft+'</div>',
+      '<div><span style="color:var(--text-mute)">Block Time</span><br>'+btDisplay+'</div>',
+      '<div><span style="color:var(--text-mute)">Cruise Alt</span><br>'+cruiseAlt+' · CI '+ci+'</div>',
+      '<div><span style="color:var(--text-mute)">Payload</span><br>'+freight.toLocaleString()+' lbs</div>',
+      '<div><span style="color:var(--text-mute)">Est. Revenue</span><br>$'+revenue.toLocaleString()+'</div>',
+    ].join('');
+    document.getElementById('rg-dest-reason').textContent = '↳ Custom arrival — ' + arrIcao;
+    document.getElementById('rg-preview').style.display='';
+    document.getElementById('rg-dispatch-btn').style.display='';
+    document.getElementById('rg-simbrief-btn').style.display='';
+    return;
+  }
+
+  // Build valid candidates (random arrival)
   const candidates = [];
   for(const a of ALL_AIRPORTS){
     if(a.icao === orig) continue;
     if(!a.types.includes(length)) continue;
-    // Feeder: US only
     if(length === 'feeder' && (!origIsUS || !US_REGIONS.includes(a.region))) continue;
-
-    // Compute block time using this specific aircraft
     const bt = calcBlockTime(orig, a.icao, aircraft);
     if(bt === null || bt === undefined) continue;
-
-    // Strict range check — must fit within both length bracket AND aircraft cap
     if(bt < minH || bt > effectiveMax) continue;
-
     candidates.push({ ...a, bt });
   }
 
@@ -2905,7 +2949,6 @@ function generateRoute(){
     return;
   }
 
-  // Pick random from valid candidates
   const dest = candidates[Math.floor(Math.random() * candidates.length)];
   const bt = dest.bt;
   const btH = Math.floor(bt), btM = Math.round((bt % 1) * 60);
@@ -3865,7 +3908,8 @@ function buildSnap(){
     ownedFleet:      S.ownedFleet,
     dispatcherRoutes:S.dispatcherRoutes,
     liveFlightsSnap: liveFlights.map(f=>({...f})),
-      pireps: _pireps,
+    pireps:          _pireps,
+    trips:           (_stateCache && Array.isArray(_stateCache.trips)) ? _stateCache.trips : [],
   };
 }
 
@@ -3894,11 +3938,8 @@ function applySnap(snap){
     // Sort by filed time
     _pireps.sort((a,b)=>(a.filed||0)-(b.filed||0));
   }
-  if(snap.trips && Array.isArray(snap.trips)){
-    if(!_stateCache) _stateCache = {};
-    _stateCache.trips = snap.trips;
-  }
   _stateCache = snap;
+  // trips stored directly in stateCache — already set above via _stateCache = snap
 }
 
 function refreshAllUI(){
@@ -4620,16 +4661,26 @@ async function filePirep(){
   const fuelArr = getFuelLbs('pr-fuel-arr');
   const pirep = { fn, date, orig, dest, ac, bt:parseFloat(bt).toFixed(1), payload:pl, fuelDep, fuelArr, ldgrate:parseFloat(ldg)||0, remarks:rmk, pilot, filed: Date.now() };
   _pireps.push(pirep);
-  // Save immediately — don't use debounced saveState for PIREPs
+  // Fresh read → merge → write to avoid race condition with bot or other tabs
   try {
-    const snap = buildSnap();
-    snap.pireps = _pireps;
+    const { data: fresh } = await _supa.from('state').select('value').eq('key','main').single();
+    const freshSnap = (fresh && fresh.value) ? fresh.value : buildSnap();
+    // Merge: keep all existing PIREPs from server, add new one if not duplicate
+    const existing = freshSnap.pireps || [];
+    const alreadyThere = existing.some(p => p.fn === pirep.fn && p.filed === pirep.filed);
+    if (!alreadyThere) existing.push(pirep);
+    freshSnap.pireps = existing;
+    // Keep trips intact
+    if (_stateCache && Array.isArray(_stateCache.trips)) freshSnap.trips = _stateCache.trips;
+    // Update local state
+    _pireps.length = 0; _pireps.push(...existing.sort((a,b)=>(a.filed||0)-(b.filed||0)));
+    if (_stateCache) _stateCache.pireps = _pireps;
     await _supa.from('state').upsert(
-      { key: 'main', value: snap, updated_at: new Date().toISOString() },
+      { key: 'main', value: freshSnap, updated_at: new Date().toISOString() },
       { onConflict: 'key' }
     );
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify(snap)); } catch(e2){}
-  } catch(e){ console.warn('PIREP save error', e); saveState(); }
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(freshSnap)); } catch(e2){}
+  } catch(e){ console.warn('PIREP save error', e); _pireps.push(pirep); saveState(); }
   closeModal('modal-file-pirep');
   // Clear form
   ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-fuel-dep','pr-fuel-arr','pr-ldgrate','pr-remarks'].forEach(id=>{
@@ -4641,12 +4692,12 @@ async function filePirep(){
 //  TRIP BIDDING SYSTEM
 // ══════════════════════════════════════════════════════════════════════════
 
-function getTrips(){ return (_stateCache && _stateCache.trips) ? _stateCache.trips : []; }
+function getTrips(){ return (_stateCache && Array.isArray(_stateCache.trips)) ? _stateCache.trips : []; }
 
 function saveTrips(trips){
-  const snap = _stateCache || {};
-  snap.trips = trips;
-  saveState(snap);
+  if(!_stateCache) _stateCache = {};
+  _stateCache.trips = trips;
+  saveState();
 }
 
 function renderTripBoard(){
