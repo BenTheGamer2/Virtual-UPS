@@ -2534,7 +2534,7 @@ const SIMBRIEF_AC_MAP = {
   'Boeing 747-400F':           'B744F',   // 747-400 Freighter
   'Boeing 747-200F':           'B742F',   // 747-200 Freighter
   'Boeing 747-100F':           'B741',    // no dedicated F variant in SimBrief
-  'McDonnell Douglas MD-11F':  'MD11',   // MD-11 Freighter
+  'McDonnell Douglas MD-11F':  'MD11F',   // MD-11 Freighter
   'Boeing 767-300F':           'B763F',   // 767-300 Freighter
   'Airbus A300-600F':          'A30F',    // A300-600 Freighter (SimBrief code)
   'Boeing 757-200F':           'B752F',   // 757-200 Freighter
@@ -2746,7 +2746,7 @@ const ALL_AIRPORTS = [
   {icao:'MNMG', name:'Managua, Nicaragua',       region:'LATAM', types:['domestic']},
   {icao:'MPTO', name:'Panama City, Panama',      region:'LATAM', types:['domestic']},
   {icao:'MDSD', name:'Santo Domingo, Dom. Rep.', region:'LATAM', types:['domestic']},
-  {icao:'SEQM', name:'Quito, Ecuador',           region:'LATAM', types:['domestic']},
+  {icao:'SEQU', name:'Quito, Ecuador',           region:'LATAM', types:['domestic']},
   {icao:'SKBO', name:'Bogota, Colombia',         region:'LATAM', types:['domestic','longhaul']},
   {icao:'SCEL', name:'Santiago, Chile',          region:'LATAM', types:['domestic','longhaul']},
   {icao:'SBVT', name:'Sao Paulo, Brazil',        region:'LATAM', types:['domestic','longhaul']},
@@ -2763,7 +2763,7 @@ const AC_CAPABILITY = {
   'Boeing 747-200F':           [1.0, 11.0],
   'Boeing 747-400F':           [1.0, 13.0],
   'Boeing 747-8F':             [1.0, 18.0],
-  'McDonnell Douglas MD-11F':  [1.0, 18.0],
+  'McDonnell Douglas MD-11F':  [1.0, 12.0],
 };
 
 // Cruise speeds in km/h (true airspeed at cruise) + taxi/climb overhead factor
@@ -5021,45 +5021,6 @@ function removeTrip(el){
     <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
   </div>
 </div></div>
-  // 1. Initialize Supabase (Use your project's specific URL and Key)
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-async function fetchLatestPireps() {
-    const { data, error } = await _supabase
-        .from('pireps')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10); // Shows the 10 most recent flights
-
-    if (error) {
-        console.error('Error fetching PIREPs:', error);
-        return;
-    }
-
-    const tableBody = document.getElementById('pirep-table-body');
-    if (!tableBody) return;
-
-    // Clear loading state
-    tableBody.innerHTML = '';
-
-    // 2. Map the data to your table rows
-    data.forEach(p => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${p.pilot || 'Unknown'}</td>
-            <td><span class="badge b-gray">${p.ac || '—'}</span></td>
-            <td>${p.orig} ✈️ ${p.dest}</td>
-            <td>${Number(p.payload).toLocaleString()} lbs</td>
-            <td><span class="badge b-green">Landed</span></td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
-
-// Run on page load
-document.addEventListener('DOMContentLoaded', fetchLatestPireps);
 
 </body>
 </html>
