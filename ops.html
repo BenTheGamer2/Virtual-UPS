@@ -5021,6 +5021,45 @@ function removeTrip(el){
     <div id="pd-remarks" style="font-size:.8rem;color:var(--text-dim);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.6rem .75rem;min-height:2.5rem"></div>
   </div>
 </div></div>
+  // 1. Initialize Supabase (Use your project's specific URL and Key)
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function fetchLatestPireps() {
+    const { data, error } = await _supabase
+        .from('pireps')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10); // Shows the 10 most recent flights
+
+    if (error) {
+        console.error('Error fetching PIREPs:', error);
+        return;
+    }
+
+    const tableBody = document.getElementById('pirep-table-body');
+    if (!tableBody) return;
+
+    // Clear loading state
+    tableBody.innerHTML = '';
+
+    // 2. Map the data to your table rows
+    data.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${p.pilot || 'Unknown'}</td>
+            <td><span class="badge b-gray">${p.ac || '—'}</span></td>
+            <td>${p.orig} ✈️ ${p.dest}</td>
+            <td>${Number(p.payload).toLocaleString()} lbs</td>
+            <td><span class="badge b-green">Landed</span></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', fetchLatestPireps);
 
 </body>
 </html>
