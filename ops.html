@@ -4030,8 +4030,18 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'state', filter: 'key=eq.main' },
       (payload) => {
         if(!payload.new || !payload.new.value) return;
-        applySnap(payload.new.value);
-        try { localStorage.setItem(SAVE_KEY, JSON.stringify(payload.new.value)); } catch(e){}
+        const incoming = payload.new.value;
+        // Merge PIREPs — never let a real-time event delete locally filed ones
+        if(incoming.pireps && Array.isArray(incoming.pireps) && _pireps.length > 0){
+          const incomingKeys = new Set(incoming.pireps.map(p => p.fn + p.filed));
+          const localOnly = _pireps.filter(p => !incomingKeys.has(p.fn + p.filed));
+          if(localOnly.length > 0){
+            incoming.pireps = [...incoming.pireps, ...localOnly]
+              .sort((a,b) => (a.filed||0) - (b.filed||0));
+          }
+        }
+        applySnap(incoming);
+        try { localStorage.setItem(SAVE_KEY, JSON.stringify(incoming)); } catch(e){}
         refreshAllUI();
         setSyncStatus(true, 'Live · updated ' + new Date().toLocaleTimeString());
       }
