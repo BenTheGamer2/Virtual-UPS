@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virtual UPS Airlines — Operations</title>
+<title>Virtual FedEx — Operations</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,12 +13,12 @@
 :root{
   --bg:#0e0b09;--surface:#161109;--card:#1c1510;
   --border:#2e1f12;--border2:#3d2b1a;
-  --gold:#c8920a;--gold-lt:#e8a800;--gold-dim:#7a5500;
+  --gold:#6600cc;--gold-lt:#7a00e6;--gold-dim:#4a0099;
   --text:#d4c4a8;--text-dim:#7a6a52;--text-mute:#4a3a28;
   --green:#2d9e5f;--green-lt:#35c270;
   --red:#c0392b;--red-lt:#e74c3c;
   --blue:#2471a3;--blue-lt:#3498db;
-  --orange:#c0610a;--orange-lt:#e67e22;
+  --orange:#c0610a;--orange-lt:#ff6600;
   --purple:#7d3c98;--purple-lt:#a569bd;
 }
 html{font-size:14px}
@@ -30,7 +30,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 #auth-loader{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center}
 #auth-loader.hidden{display:none}
 .login-box{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:2.5rem 2rem;width:340px;text-align:center}
-.login-logo{width:48px;height:48px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:#1a0e06;margin:0 auto 1.25rem}
+.login-logo{width:48px;height:48px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:#ffffff;margin:0 auto 1.25rem}
 .login-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.25rem}
 .login-sub{font-size:.72rem;color:var(--text-mute);margin-bottom:1.5rem;letter-spacing:.05em}
 .login-err{font-size:.72rem;color:var(--red-lt);margin-bottom:.75rem;min-height:1rem}
@@ -52,7 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 /* HEADER */
 header{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem;position:sticky;top:0;z-index:200}
 .logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
-.logo-mark{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:#1a0e06;flex-shrink:0}
+.logo-mark{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:#ffffff;flex-shrink:0}
 .logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
 .logo-name span{color:var(--gold)}
 nav{display:flex;gap:.1rem;margin-left:.5rem}
@@ -82,7 +82,7 @@ main{padding:1.25rem;max-width:1600px;margin:0 auto}
 
 /* BUTTONS */
 .btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .9rem;border-radius:3px;cursor:pointer;transition:all .15s;border:1px solid transparent}
-.btn-primary{background:var(--gold);color:#1a0e06;border-color:var(--gold)}.btn-primary:hover{background:var(--gold-lt)}
+.btn-primary{background:#ff6600;color:#ffffff;border-color:var(--gold)}.btn-primary:hover{background:var(--gold-lt)}
 .btn-ghost{background:none;color:var(--text-dim);border-color:var(--border2)}.btn-ghost:hover{color:var(--text);border-color:var(--text-dim)}
 .btn-danger{background:none;color:var(--red-lt);border-color:rgba(192,57,43,.4)}.btn-danger:hover{background:rgba(192,57,43,.1)}
 .btn-purple{background:rgba(125,60,152,.2);color:var(--purple-lt);border-color:rgba(125,60,152,.4)}.btn-purple:hover{background:rgba(125,60,152,.35)}
@@ -330,18 +330,22 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
+<div style="background:linear-gradient(90deg,#6600cc,#ff6600);color:#fff;text-align:center;padding:.5rem;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.1em;position:fixed;top:0;left:0;right:0;z-index:9999">
+  🟣 VIRTUAL FEDEX EXPRESS — OPERATIONS PORTAL 🟠 &nbsp;|&nbsp; APRIL FOOLS 😂 &nbsp;|&nbsp; <span style="opacity:.7">We acquired UPS overnight. All crews report to Memphis.</span>
+</div>
+<div style="height:2rem"></div>
 
 <!-- LOGIN -->
 <div id="auth-loader"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.2em;color:var(--gold);opacity:.6">LOADING...</div></div>
 <div id="login-screen" class="hidden">
   <div class="login-box" style="width:360px">
-    <div class="login-logo">UPS</div>
+    <div class="login-logo">FedEx</div>
     <div class="login-title">Operations Portal</div>
-    <div class="login-sub">Virtual UPS Airlines</div>
+    <div class="login-sub">Virtual FedEx</div>
 
     <!-- Tab switcher: Sign In | Apply -->
     <div style="display:flex;gap:0;margin-bottom:1.25rem;border:1px solid var(--border2);border-radius:3px;overflow:hidden">
-      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:var(--gold);color:#1a0e06;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Sign In</button>
+      <button id="tab-signin-btn" onclick="showSignin()" style="flex:1;background:var(--gold);color:#ffffff;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Sign In</button>
       <button id="tab-signup-btn" onclick="showSignup()" style="flex:1;background:none;color:var(--text-dim);border:none;border-left:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.4rem;cursor:pointer">Apply</button>
     </div>
 
@@ -417,8 +421,8 @@ tr:last-child td{border-bottom:none}
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner" id="ops-ticker-inner">
-    <span>KSDF <span class="t-hi">LOADING METAR...</span></span>
-    <span>vUPS OPERATIONS &nbsp;·&nbsp; <span class="t-hi">ICAO: 5X</span></span>
+    <span>KMEM <span class="t-hi">LOADING METAR...</span></span>
+    <span>vFDX OPERATIONS &nbsp;·&nbsp; <span class="t-hi">ICAO: FX</span></span>
     <span>EDDK <span class="t-hi">LOADING METAR...</span></span>
     <span>VHHH <span class="t-hi">LOADING METAR...</span></span>
     <span>PANC <span class="t-hi">LOADING METAR...</span></span>
@@ -429,13 +433,13 @@ tr:last-child td{border-bottom:none}
 <!-- STOCK BAR -->
 <div class="stock-bar">
   <div class="stock-item">
-    <span class="stock-sym">VUPS</span>
+    <span class="stock-sym">VFedEx</span>
     <span class="stock-price" id="stk-vups">$—</span>
     <span class="stock-chg" id="stk-vups-chg">—</span>
   </div>
   <span class="stock-divider">|</span>
   <div class="stock-item">
-    <span class="stock-sym">UPS</span>
+    <span class="stock-sym">FedEx</span>
     <span class="stock-price" id="stk-ups">$—</span>
     <span class="stock-chg" id="stk-ups-chg">—</span>
   </div>
@@ -460,8 +464,8 @@ tr:last-child td{border-bottom:none}
 <!-- HEADER -->
 <header>
   <a class="logo" href="#">
-    <div class="logo-mark">UPS</div>
-    <div class="logo-name">Virtual <span>UPS</span> Airlines</div>
+    <div class="logo-mark">FedEx</div>
+    <div class="logo-name">Virtual <span>FedEx</span> Airlines</div>
   </a>
   <nav>
     <button class="nav-btn active"     onclick="goNav(this,'dispatch')">Dispatch</button>
@@ -507,8 +511,8 @@ tr:last-child td{border-bottom:none}
   <div class="dispatch-layout">
     <div class="dcol">
       <div class="card">
-        <div class="card-title">KSDF — Worldport WX</div>
-        <div class="metar-raw" id="metar-text">KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180</div>
+        <div class="card-title">KMEM — World Hub WX</div>
+        <div class="metar-raw" id="metar-text">KMEM 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180</div>
         <div class="wx-grid">
           <div class="wx-cell"><div class="wx-val">CLR</div><div class="wx-lbl">Ceiling</div></div>
           <div class="wx-cell"><div class="wx-val pos">VFR</div><div class="wx-lbl">Flt Cat</div></div>
@@ -526,7 +530,7 @@ tr:last-child td{border-bottom:none}
       <div class="card">
         <div class="card-title">Hub Network</div>
         <table style="font-size:.72rem">
-          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KSDF</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Louisville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-gold">Global</span></td></tr>
+          <tr><td style="border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KMEM</td><td style="border:none;color:var(--text-dim);padding:.3rem .5rem">Louisville</td><td style="border:none;padding:.3rem .5rem"><span class="badge b-gold">Global</span></td></tr>
           <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">EDDK</td><td style="color:var(--text-dim);padding:.3rem .5rem">Cologne</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
           <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">VHHH</td><td style="color:var(--text-dim);padding:.3rem .5rem">Hong Kong</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
           <tr><td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);padding:.3rem .5rem">KONT</td><td style="color:var(--text-dim);padding:.3rem .5rem">Ontario CA</td><td style="padding:.3rem .5rem"><span class="badge b-blue">Regional</span></td></tr>
@@ -612,7 +616,7 @@ tr:last-child td{border-bottom:none}
     <div style="font-size:1.5rem">🏆</div>
     <div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--gold-lt);letter-spacing:.05em">CEO TRANSITION ANNOUNCEMENT</div>
-      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">Founder and CEO of Virtual UPS Airlines since 2026. Leads all strategic decisions, network expansion and crew operations.</div>
+      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem;line-height:1.6">Founder and CEO of Virtual FedEx since 2026. Leads all strategic decisions, network expansion and crew operations.</div>
     </div>
   </div>
 
@@ -726,7 +730,7 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat"><div class="stat-val gld" id="eco-total">$5,900,000,000</div><div class="stat-lbl">Treasury</div><div class="stat-sub pos">Starting balance — UPS Cash on Hand</div></div>
+    <div class="stat"><div class="stat-val gld" id="eco-total">$5,900,000,000</div><div class="stat-lbl">Treasury</div><div class="stat-sub pos">Starting balance — FedEx Cash on Hand</div></div>
     <div class="stat"><div class="stat-val neg" id="eco-cost">$0</div><div class="stat-lbl">Session Costs</div><div class="stat-sub" style="color:var(--text-mute)">Fuel + fees</div></div>
     <div class="stat"><div class="stat-val pos" id="eco-net">$0</div><div class="stat-lbl">Session Revenue</div><div class="stat-sub pos">AI fleet earning</div></div>
     <div class="stat"><div class="stat-val gld" id="eco-pool">$413,000,000</div><div class="stat-lbl">Profit Share Pool</div><div class="stat-sub warn">7% of treasury</div></div>
@@ -889,12 +893,12 @@ tr:last-child td{border-bottom:none}
           <option value="Boeing 727-200F">Boeing 727-200F</option>
           <option value="Boeing 747-100F">Boeing 747-100F</option>
           <option value="Boeing 747-200F">Boeing 747-200F</option>
-          <option value="Boeing 747-400F">Boeing 747-400F</option>
-          <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
+          <option value="Boeing 767-300F">Boeing 767-300F</option>
+          <option value="Boeing 777F" selected>Boeing 777F</option>
           <option value="Boeing 757-200F">Boeing 757-200F</option>
           <option value="Boeing 767-300F">Boeing 767-300F</option>
           <option value="Douglas DC-8F">Douglas DC-8F</option>
-          <option value="McDonnell Douglas MD-11F">McDonnell Douglas MD-11F</option>
+          <option value="Airbus A300-600F">Airbus A300-600F</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
@@ -913,7 +917,7 @@ tr:last-child td{border-bottom:none}
         <select class="form-select" id="rg-ci">
           <option value="0">0 — Max Range</option>
           <option value="20" selected>20 — Recommended</option>
-          <option value="52">52 — UPS Standard (aggressive)</option>
+          <option value="52">52 — FedEx Standard (aggressive)</option>
           <option value="80">80 — Time Priority</option>
         </select>
       </div>
@@ -955,14 +959,14 @@ tr:last-child td{border-bottom:none}
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
       <select class="form-select" id="disp-filter-ac" onchange="renderDispatcher()" style="font-size:.72rem;padding:.25rem .5rem;height:auto;width:auto;min-width:160px">
         <option value="">All Aircraft</option>
-        <option>Boeing 747-8F</option>
-        <option>Boeing 747-400F</option>
+        <option>Boeing 777F</option>
+        <option>Boeing 767-300F</option>
         <option>Boeing 747-200F</option>
         <option>Boeing 747-100F</option>
         <option>Boeing 767-300F</option>
         <option>Boeing 757-200F</option>
         <option>Airbus A300-600F</option>
-        <option>McDonnell Douglas MD-11F</option>
+        <option>Airbus A300-600F</option>
         <option>Boeing 727-200F</option>
         <option>Boeing 727-100F</option>
         <option>Douglas DC-8F</option>
@@ -1200,7 +1204,7 @@ tr:last-child td{border-bottom:none}
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Flight Number</label>
-          <input class="form-input" id="pr-fn" placeholder="5X101" style="text-transform:uppercase">
+          <input class="form-input" id="pr-fn" placeholder="FX101" style="text-transform:uppercase">
         </div>
         <div class="form-group">
           <label class="form-label">Date (UTC)</label>
@@ -1210,7 +1214,7 @@ tr:last-child td{border-bottom:none}
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Origin ICAO</label>
-          <input class="form-input" id="pr-orig" placeholder="KSDF" maxlength="4" style="text-transform:uppercase">
+          <input class="form-input" id="pr-orig" placeholder="KMEM" maxlength="4" style="text-transform:uppercase">
         </div>
         <div class="form-group">
           <label class="form-label">Dest ICAO</label>
@@ -1220,9 +1224,9 @@ tr:last-child td{border-bottom:none}
       <div class="form-group">
         <label class="form-label">Aircraft</label>
         <select class="form-select" id="pr-ac">
-          <option>Boeing 747-8F</option>
-          <option>Boeing 747-400F</option>
-          <option>McDonnell Douglas MD-11F</option>
+          <option>Boeing 777F</option>
+          <option>Boeing 767-300F</option>
+          <option>Airbus A300-600F</option>
           <option>Boeing 767-300F</option>
           <option>Boeing 757-200F</option>
           <option>Airbus A300-600F</option>
@@ -1239,7 +1243,7 @@ tr:last-child td{border-bottom:none}
           <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
             Payload
             <span style="display:flex;gap:.3rem;align-items:center">
-              <button type="button" id="payload-unit-lbs" onclick="setPayloadUnit('lbs')" style="font-family:monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--gold);background:var(--gold);color:#1a0e06;cursor:pointer">LBS</button>
+              <button type="button" id="payload-unit-lbs" onclick="setPayloadUnit('lbs')" style="font-family:monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--gold);background:var(--gold);color:#ffffff;cursor:pointer">LBS</button>
               <button type="button" id="payload-unit-kg" onclick="setPayloadUnit('kg')" style="font-family:monospace;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;border:1px solid var(--border2);background:none;color:var(--text-mute);cursor:pointer">KG</button>
             </span>
           </label>
@@ -1300,7 +1304,7 @@ tr:last-child td{border-bottom:none}
     <div class="modal-head"><div class="modal-title">Create Dispatch Route</div><button class="modal-close" onclick="closeModal('modal-add-disp-route')">X</button></div>
     <div class="modal-body">
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Origin ICAO</label><input class="form-input" placeholder="KSDF" id="dr-origin" style="text-transform:uppercase" maxlength="4"></div>
+        <div class="form-group"><label class="form-label">Origin ICAO</label><input class="form-input" placeholder="KMEM" id="dr-origin" style="text-transform:uppercase" maxlength="4"></div>
         <div class="form-group"><label class="form-label">Destination ICAO</label><input class="form-input" placeholder="VHHH" id="dr-dest" style="text-transform:uppercase" maxlength="4"></div>
       </div>
       <div class="form-row">
@@ -1311,9 +1315,9 @@ tr:last-child td{border-bottom:none}
             <option value="Boeing 767-300F">Boeing 767-300F</option>
             <option value="Boeing 767-300F">Boeing 767-300F</option>
             <option value="Airbus A300-600F">Airbus A300-600F</option>
-            <option value="Boeing 747-400F">Boeing 747-400F</option>
-            <option value="Boeing 747-8F" selected>Boeing 747-8F</option>
-            <option value="McDonnell Douglas MD-11F">McDonnell Douglas MD-11F</option>
+            <option value="Boeing 767-300F">Boeing 767-300F</option>
+            <option value="Boeing 777F" selected>Boeing 777F</option>
+            <option value="Airbus A300-600F">Airbus A300-600F</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">Category</label>
@@ -1345,7 +1349,7 @@ tr:last-child td{border-bottom:none}
       <div class="form-row">
         <div class="form-group"><label class="form-label">Rank</label><select class="form-select" id="h-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
         <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="h-base">
-<option value="KSDF">KSDF</option>
+<option value="KMEM">KMEM</option>
 <option value="KRFD">KRFD</option>
 <option value="KIND">KIND</option>
 <option value="KCVG">KCVG</option>
@@ -1417,7 +1421,7 @@ tr:last-child td{border-bottom:none}
         <div class="form-group"><label class="form-label">Starting Rank</label><select class="form-select" id="ai-rank"><option>Feeder Pilot</option><option>Regional F/O</option><option>Global Captain</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="ai-base"><option>KSDF</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
+        <div class="form-group"><label class="form-label">Home Base</label><select class="form-select" id="ai-base"><option>KMEM</option><option>EDDK</option><option>VHHH</option><option>KONT</option></select></div>
         <div class="form-group"><label class="form-label">Route Preference</label><select class="form-select" id="ai-route"><option value="longhaul">Long Haul</option><option value="domestic">Domestic</option><option value="feeder">Feeder</option><option value="any">Any</option></select></div>
       </div>
       <div class="form-group"><label class="form-label">Flights Per Cycle</label><select class="form-select" id="ai-freq"><option value="1">1 per cycle</option><option value="2" selected>2 per cycle</option><option value="3">3 per cycle</option></select></div>
@@ -1455,7 +1459,7 @@ tr:last-child td{border-bottom:none}
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Post Announcement</div><button class="modal-close" onclick="closeModal('modal-add-news')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Headline</label><input class="form-input" placeholder="Virtual UPS Expands to Tokyo" id="nw-headline"></div>
+      <div class="form-group"><label class="form-label">Headline</label><input class="form-input" placeholder="Virtual FedEx Expands to Tokyo" id="nw-headline"></div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="nw-cat"><option value="breaking">Breaking News</option><option value="retirement">CEO Transition</option><option value="financial">Financial</option><option value="operational">Operational</option></select></div>
         <div class="form-group"><label class="form-label">Author</label><input class="form-input" placeholder="Office of the CEO" id="nw-author"></div>
@@ -1525,23 +1529,23 @@ const S = {
   ],
 
   hubs: [
-    // ── Real UPS Hub Network ──────────────────────────────────────────────────
-    { icao:'KSDF', name:'Louisville Intl — Worldport',       type:'Global',    aircraft:'Boeing 747-8F, MD-11F, B767-300F, A300-600RF', ramp:115, active:24 },
-    { icao:'EDDK', name:'Cologne/Bonn — UPS Europe Hub',     type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, B747-8F',          ramp:62,  active:10 },
-    { icao:'VHHH', name:'Hong Kong Intl — UPS Asia Hub',     type:'Regional',  aircraft:'Boeing 747-8F, MD-11F',                        ramp:70,  active:8  },
+    // ── Real FedEx Hub Network ──────────────────────────────────────────────────
+    { icao:'KMEM', name:'Memphis Intl — FedEx World Hub',       type:'Global',    aircraft:'Boeing 777F, MD-11F, B767-300F, A300-600RF', ramp:115, active:24 },
+    { icao:'EDDK', name:'Cologne/Bonn — FedEx Europe Hub',     type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, B747-8F',          ramp:62,  active:10 },
+    { icao:'VHHH', name:'Hong Kong Intl — FedEx Asia Hub',     type:'Regional',  aircraft:'Boeing 777F, MD-11F',                        ramp:70,  active:8  },
     { icao:'KPHL', name:'Philadelphia Intl — East Hub',      type:'Regional',  aircraft:'Boeing 767-300F, B757-200F, A300-600RF',        ramp:55,  active:9  },
     { icao:'KONT', name:'Ontario Intl — West Coast Hub',     type:'Regional',  aircraft:'Boeing 757-200F, B767-300F, A300-600RF',        ramp:48,  active:7  },
     { icao:'KRFD', name:'Chicago Rockford — Midwest Hub',    type:'Regional',  aircraft:'Boeing 757-200F, A300-600RF',                  ramp:40,  active:6  },
     { icao:'KMIA', name:'Miami Intl — Latin America Hub',    type:'Regional',  aircraft:'Boeing 767-300F, B757-200F',                   ramp:38,  active:5  },
-    { icao:'PANC', name:'Ted Stevens Anchorage — Pacific Relay', type:'Relay', aircraft:'Boeing 747-8F, MD-11F',                        ramp:30,  active:4  },
+    { icao:'PANC', name:'Ted Stevens Anchorage — Pacific Relay', type:'Relay', aircraft:'Boeing 777F, MD-11F',                        ramp:30,  active:4  },
     { icao:'EGSS', name:'London Stansted — UK Gateway',      type:'Gateway',   aircraft:'Boeing 767-300F, B757-200F',                   ramp:25,  active:3  },
-    { icao:'ZPBH', name:'Shenzhen Baoan — China Hub',      type:'Regional',  aircraft:'Boeing 747-8F',                                ramp:30,  active:4  },
-    { icao:'OMDB', name:'Dubai Intl — Middle East Gateway',  type:'Gateway',   aircraft:'Boeing 747-8F, MD-11F',                        ramp:22,  active:3  },
+    { icao:'ZPBH', name:'Shenzhen Baoan — China Hub',      type:'Regional',  aircraft:'Boeing 777F',                                ramp:30,  active:4  },
+    { icao:'OMDB', name:'Dubai Intl — Middle East Gateway',  type:'Gateway',   aircraft:'Boeing 777F, MD-11F',                        ramp:22,  active:3  },
   ],
 
   executives: [
 
-    { id:2, name:'Ben Hoffman', initials:'BH', title:'Chief Executive Officer', type:'csuite', tenure:'2026', color:'exec-av-gold', bio:'Founder and CEO of Virtual UPS Airlines. Built the airline from the ground up into a global cargo operation spanning 3 continents, 11 aircraft types and over 60 routes. Leads all strategic decisions, network expansion and crew operations.', status:'active' },
+    { id:2, name:'Ben Hoffman', initials:'BH', title:'Chief Executive Officer', type:'csuite', tenure:'2026', color:'exec-av-gold', bio:'Founder and CEO of Virtual FedEx. Built the airline from the ground up into a global cargo operation spanning 3 continents, 11 aircraft types and over 60 routes. Leads all strategic decisions, network expansion and crew operations.', status:'active' },
     { id:3, name:'Brian Newman',   initials:'BN', title:'Chief Financial Officer',   type:'csuite', tenure:'2018', color:'exec-av-blue',   bio:'Oversees all financial operations, treasury management, profit share distribution, and quarterly earnings reporting.', status:'active' },
     { id:4, name:'Kate Gutmann',   initials:'KG', title:'Chief Commercial Officer',  type:'csuite', tenure:'2019', color:'exec-av-green',  bio:'Leads network expansion, route strategy, and hub development. Architected the VHHH and EDDK regional hub buildout.', status:'active' },
     { id:5, name:'Juan Perez',     initials:'JP', title:'Chief Operations Officer',  type:'csuite', tenure:'2017', color:'exec-av-blue',   bio:'Responsible for day-to-day dispatch operations, fleet scheduling, and crew management.', status:'active' },
@@ -1554,14 +1558,14 @@ const S = {
     {
       id:3, category:'financial', date:'December 15, 2024',
       headline:'Q3 2024 Earnings: Revenue Up 10.3%, Margin Reaches Record 62%',
-      body:`Virtual UPS Airlines reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The long-haul network continued to be the primary revenue driver, completing 344 flights across international routes.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "Our cost structure remains lean and our margins are among the best in the industry."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
+      body:`Virtual FedEx reported another strong quarter, with Q3 2024 net revenue reaching $152,400 — a 10.3% increase over Q2. The long-haul network continued to be the primary revenue driver, completing 344 flights across international routes.\n\nCFO Brian Newman noted that the airline's 62% profit margin now exceeds the industry average by more than 20 percentage points. "Our cost structure is extremely lean," Newman said. "Our cost structure remains lean and our margins are among the best in the industry."\n\nThe Board approved a Q3 profit share distribution of $10,668 to enrolled human crew members.`,
       author:'Brian Newman — Chief Financial Officer'
     },
 
     {
       id:5, category:'breaking', date:'December 5, 2024',
-      headline:'VUPS Stock Reaches All-Time High of $84.20 — Up 142% Since Launch',
-      body:`Shares of Virtual UPS Airlines (ticker: VUPS) closed at $142.80 on Friday, matching the real UPS share price — a symbolic milestone for the virtual airline as it mirrors its real-world counterpart. Analysts cited the consistent profitability of the AI fleet, the upcoming CEO transition, and the planned international expansion as key drivers.\n\n"The market is pricing in a lot of good news here," noted one analyst. "The fundamentals are strong — revenue growth is consistent, margins are elite, and the leadership transition appears orderly."\n\nThe stock has now outperformed both real-world UPS (NYSE: UPS) and FedEx (NYSE: FDX) over the trailing 12 months.`,
+      headline:'VFedEx Stock Reaches All-Time High of $84.20 — Up 142% Since Launch',
+      body:`Shares of Virtual FedEx (ticker: VFedEx) closed at $142.80 on Friday, matching the real FedEx share price — a symbolic milestone for the virtual airline as it mirrors its real-world counterpart. Analysts cited the consistent profitability of the AI fleet, the upcoming CEO transition, and the planned international expansion as key drivers.\n\n"The market is pricing in a lot of good news here," noted one analyst. "The fundamentals are strong — revenue growth is consistent, margins are elite, and the leadership transition appears orderly."\n\nThe stock has now outperformed both real-world FedEx (NYSE: FedEx) and FedEx (NYSE: FDX) over the trailing 12 months.`,
       author:'Corporate Communications'
     },
   ],
@@ -1572,62 +1576,62 @@ const S = {
   activeFlights: 0,
   dispatcherRoutes: [
     // ── International Long Haul ──
-    { id:1,  origin:'KSDF', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Louisville → Hong Kong',         category:'longhaul' },
-    { id:2,  origin:'VHHH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Hong Kong → Louisville',         category:'longhaul' },
-    { id:3,  origin:'KSDF', dest:'EDDK', aircraft:'Boeing 747-8F', label:'Louisville → Cologne',           category:'longhaul' },
-    { id:4,  origin:'EDDK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Cologne → Louisville',           category:'longhaul' },
-    { id:5,  origin:'KSDF', dest:'ZPBH', aircraft:'Boeing 747-8F', label:'Louisville → Shenzhen',          category:'longhaul' },
-    { id:6,  origin:'ZPBH', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Shenzhen → Louisville',          category:'longhaul' },
-    { id:7,  origin:'KSDF', dest:'ZSPD', aircraft:'McDonnell Douglas MD-11F',    label:'Louisville → Shanghai',          category:'longhaul' },
-    { id:8,  origin:'ZSPD', dest:'KSDF', aircraft:'McDonnell Douglas MD-11F',    label:'Shanghai → Louisville',          category:'longhaul' },
-    { id:9,  origin:'KSDF', dest:'OMDB', aircraft:'Boeing 747-8F', label:'Louisville → Dubai',             category:'longhaul' },
-    { id:10, origin:'OMDB', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Dubai → Louisville',             category:'longhaul' },
-    { id:11, origin:'KSDF', dest:'PANC', aircraft:'Boeing 747-8F', label:'Louisville → Anchorage (relay)', category:'longhaul' },
-    { id:12, origin:'PANC', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Anchorage → Hong Kong',          category:'longhaul' },
+    { id:1,  origin:'KMEM', dest:'VHHH', aircraft:'Boeing 777F', label:'Louisville → Hong Kong',         category:'longhaul' },
+    { id:2,  origin:'VHHH', dest:'KMEM', aircraft:'Boeing 777F', label:'Hong Kong → Louisville',         category:'longhaul' },
+    { id:3,  origin:'KMEM', dest:'EDDK', aircraft:'Boeing 777F', label:'Louisville → Cologne',           category:'longhaul' },
+    { id:4,  origin:'EDDK', dest:'KMEM', aircraft:'Boeing 777F', label:'Cologne → Louisville',           category:'longhaul' },
+    { id:5,  origin:'KMEM', dest:'ZPBH', aircraft:'Boeing 777F', label:'Louisville → Shenzhen',          category:'longhaul' },
+    { id:6,  origin:'ZPBH', dest:'KMEM', aircraft:'Boeing 777F', label:'Shenzhen → Louisville',          category:'longhaul' },
+    { id:7,  origin:'KMEM', dest:'ZSPD', aircraft:'Airbus A300-600F',    label:'Louisville → Shanghai',          category:'longhaul' },
+    { id:8,  origin:'ZSPD', dest:'KMEM', aircraft:'Airbus A300-600F',    label:'Shanghai → Louisville',          category:'longhaul' },
+    { id:9,  origin:'KMEM', dest:'OMDB', aircraft:'Boeing 777F', label:'Louisville → Dubai',             category:'longhaul' },
+    { id:10, origin:'OMDB', dest:'KMEM', aircraft:'Boeing 777F', label:'Dubai → Louisville',             category:'longhaul' },
+    { id:11, origin:'KMEM', dest:'PANC', aircraft:'Boeing 777F', label:'Louisville → Anchorage (relay)', category:'longhaul' },
+    { id:12, origin:'PANC', dest:'VHHH', aircraft:'Boeing 777F', label:'Anchorage → Hong Kong',          category:'longhaul' },
     { id:13, origin:'KPHL', dest:'EDDK', aircraft:'Boeing 767-300F', label:'Philadelphia → Cologne',         category:'longhaul' },
     { id:14, origin:'KPHL', dest:'EGSS', aircraft:'Boeing 767-300F', label:'Philadelphia → London Stansted', category:'longhaul' },
-    { id:15, origin:'EDDK', dest:'VHHH', aircraft:'Boeing 747-8F', label:'Cologne → Hong Kong',            category:'longhaul' },
-    { id:16, origin:'WMKK', dest:'KSDF', aircraft:'Boeing 747-8F', label:'Kuala Lumpur → Louisville',      category:'longhaul' },
+    { id:15, origin:'EDDK', dest:'VHHH', aircraft:'Boeing 777F', label:'Cologne → Hong Kong',            category:'longhaul' },
+    { id:16, origin:'WMKK', dest:'KMEM', aircraft:'Boeing 777F', label:'Kuala Lumpur → Louisville',      category:'longhaul' },
     // ── Domestic Hub Routes ──
-    { id:17, origin:'KSDF', dest:'KPHL', aircraft:'Boeing 767-300F', label:'Louisville → Philadelphia',      category:'domestic' },
-    { id:18, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Philadelphia → Louisville',      category:'domestic' },
-    { id:19, origin:'KSDF', dest:'KONT', aircraft:'Boeing 757-200F', label:'Louisville → Ontario CA',        category:'domestic' },
-    { id:20, origin:'KONT', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Ontario CA → Louisville',        category:'domestic' },
-    { id:21, origin:'KSDF', dest:'KRFD', aircraft:'Boeing 757-200F', label:'Louisville → Rockford IL',       category:'domestic' },
-    { id:22, origin:'KRFD', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Rockford → Louisville',          category:'domestic' },
-    { id:23, origin:'KSDF', dest:'KMIA', aircraft:'Boeing 767-300F', label:'Louisville → Miami',             category:'domestic' },
-    { id:24, origin:'KMIA', dest:'KSDF', aircraft:'Boeing 767-300F', label:'Miami → Louisville',             category:'domestic' },
-    { id:25, origin:'KSDF', dest:'KCLT', aircraft:'Boeing 757-200F', label:'Louisville → Charlotte',         category:'domestic' },
-    { id:26, origin:'KSDF', dest:'KDFW', aircraft:'Boeing 757-200F', label:'Louisville → Dallas/Fort Worth',  category:'domestic' },
-    { id:27, origin:'KSDF', dest:'KSEA', aircraft:'Boeing 767-300F', label:'Louisville → Seattle',           category:'domestic' },
-    { id:28, origin:'KSDF', dest:'KATL', aircraft:'Boeing 757-200F', label:'Louisville → Atlanta',           category:'domestic' },
-    { id:29, origin:'KSDF', dest:'KPIT', aircraft:'McDonnell Douglas MD-11F',    label:'Louisville → Pittsburgh',        category:'domestic' },
-    { id:30, origin:'KPIT', dest:'KSDF', aircraft:'McDonnell Douglas MD-11F',    label:'Pittsburgh → Louisville',        category:'domestic' },
-    { id:31, origin:'KPHL', dest:'KSDF', aircraft:'Boeing 757-200F', label:'Philadelphia → Louisville',      category:'domestic' },
-    { id:32, origin:'KSDF', dest:'PANC', aircraft:'Boeing 767-300F', label:'Louisville → Anchorage',         category:'domestic' },
+    { id:17, origin:'KMEM', dest:'KPHL', aircraft:'Boeing 767-300F', label:'Louisville → Philadelphia',      category:'domestic' },
+    { id:18, origin:'KPHL', dest:'KMEM', aircraft:'Boeing 767-300F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:19, origin:'KMEM', dest:'KONT', aircraft:'Boeing 757-200F', label:'Louisville → Ontario CA',        category:'domestic' },
+    { id:20, origin:'KONT', dest:'KMEM', aircraft:'Boeing 757-200F', label:'Ontario CA → Louisville',        category:'domestic' },
+    { id:21, origin:'KMEM', dest:'KRFD', aircraft:'Boeing 757-200F', label:'Louisville → Rockford IL',       category:'domestic' },
+    { id:22, origin:'KRFD', dest:'KMEM', aircraft:'Boeing 757-200F', label:'Rockford → Louisville',          category:'domestic' },
+    { id:23, origin:'KMEM', dest:'KMIA', aircraft:'Boeing 767-300F', label:'Louisville → Miami',             category:'domestic' },
+    { id:24, origin:'KMIA', dest:'KMEM', aircraft:'Boeing 767-300F', label:'Miami → Louisville',             category:'domestic' },
+    { id:25, origin:'KMEM', dest:'KCLT', aircraft:'Boeing 757-200F', label:'Louisville → Charlotte',         category:'domestic' },
+    { id:26, origin:'KMEM', dest:'KDFW', aircraft:'Boeing 757-200F', label:'Louisville → Dallas/Fort Worth',  category:'domestic' },
+    { id:27, origin:'KMEM', dest:'KSEA', aircraft:'Boeing 767-300F', label:'Louisville → Seattle',           category:'domestic' },
+    { id:28, origin:'KMEM', dest:'KATL', aircraft:'Boeing 757-200F', label:'Louisville → Atlanta',           category:'domestic' },
+    { id:29, origin:'KMEM', dest:'KPIT', aircraft:'Airbus A300-600F',    label:'Louisville → Pittsburgh',        category:'domestic' },
+    { id:30, origin:'KPIT', dest:'KMEM', aircraft:'Airbus A300-600F',    label:'Pittsburgh → Louisville',        category:'domestic' },
+    { id:31, origin:'KPHL', dest:'KMEM', aircraft:'Boeing 757-200F', label:'Philadelphia → Louisville',      category:'domestic' },
+    { id:32, origin:'KMEM', dest:'PANC', aircraft:'Boeing 767-300F', label:'Louisville → Anchorage',         category:'domestic' },
     // ── Feeder / Regional ──
-    { id:33, origin:'KSDF', dest:'KLEX', aircraft:'Boeing 757-200F', label:'Louisville → Lexington',         category:'feeder' },
-    { id:34, origin:'KSDF', dest:'KHSV', aircraft:'Boeing 757-200F',   label:'Louisville → Huntsville',        category:'feeder' },
-    { id:35, origin:'KSDF', dest:'KBNA', aircraft:'Boeing 757-200F', label:'Louisville → Nashville',         category:'feeder' },
-    { id:36, origin:'KSDF', dest:'KIND', aircraft:'Boeing 757-200F', label:'Louisville → Indianapolis',      category:'feeder' },
-    { id:37, origin:'KSDF', dest:'KCVG', aircraft:'Boeing 757-200F', label:'Louisville → Cincinnati',        category:'feeder' },
+    { id:33, origin:'KMEM', dest:'KLEX', aircraft:'Boeing 757-200F', label:'Louisville → Lexington',         category:'feeder' },
+    { id:34, origin:'KMEM', dest:'KHSV', aircraft:'Boeing 757-200F',   label:'Louisville → Huntsville',        category:'feeder' },
+    { id:35, origin:'KMEM', dest:'KBNA', aircraft:'Boeing 757-200F', label:'Louisville → Nashville',         category:'feeder' },
+    { id:36, origin:'KMEM', dest:'KIND', aircraft:'Boeing 757-200F', label:'Louisville → Indianapolis',      category:'feeder' },
+    { id:37, origin:'KMEM', dest:'KCVG', aircraft:'Boeing 757-200F', label:'Louisville → Cincinnati',        category:'feeder' },
   ],
 };
 
 
 const AIRCRAFT_CATALOG = [
-  // ── Full UPS Airlines Fleet (historic + active) ────────────────────────────
-  { model:'Douglas DC-8F',           type:'Classic Jet Freighter',  qty:0,   price:8000000,   maxPayload:95000,  range:'3,800 nm', crew:3, icon:'✈',  note:'Historic UPS workhorse. The DC-8 built UPS air freight from the ground up.' },
-  { model:'Boeing 727-100F',         type:'Classic Trijet',         qty:0,   price:5000000,   maxPayload:44000,  range:'1,800 nm', crew:3, icon:'✈',  note:'Original UPS jet. Short-field capable, served small spoke airports.' },
-  { model:'Boeing 727-200F',         type:'Classic Trijet',         qty:0,   price:6500000,   maxPayload:60000,  range:'2,200 nm', crew:3, icon:'✈',  note:'Stretched 727. Backbone of UPS domestic network through the 1990s.' },
-  { model:'Boeing 747-100F',         type:'Classic Jumbo Freighter',qty:0,   price:18000000,  maxPayload:220000, range:'4,000 nm', crew:3, icon:'🛫', note:'First UPS 747. Opened transcontinental freight capacity.' },
+  // ── Full FedEx Express Fleet (historic + active) ────────────────────────────
+  { model:'Douglas DC-8F',           type:'Classic Jet Freighter',  qty:0,   price:8000000,   maxPayload:95000,  range:'3,800 nm', crew:3, icon:'✈',  note:'Historic FedEx workhorse. The DC-8 built FedEx air freight from the ground up.' },
+  { model:'Boeing 727-100F',         type:'Classic Trijet',         qty:0,   price:5000000,   maxPayload:44000,  range:'1,800 nm', crew:3, icon:'✈',  note:'Original FedEx jet. Short-field capable, served small spoke airports.' },
+  { model:'Boeing 727-200F',         type:'Classic Trijet',         qty:0,   price:6500000,   maxPayload:60000,  range:'2,200 nm', crew:3, icon:'✈',  note:'Stretched 727. Backbone of FedEx domestic network through the 1990s.' },
+  { model:'Boeing 747-100F',         type:'Classic Jumbo Freighter',qty:0,   price:18000000,  maxPayload:220000, range:'4,000 nm', crew:3, icon:'🛫', note:'First FedEx 747. Opened transcontinental freight capacity.' },
   { model:'Boeing 747-200F',         type:'Classic Jumbo Freighter',qty:0,   price:22000000,  maxPayload:230000, range:'4,500 nm', crew:3, icon:'🛫', note:'Extended-range 747. Served major international routes.' },
   { model:'Airbus A300-600F',        type:'Widebody Freighter',     qty:52,  price:35000000,  maxPayload:140000, range:'4,000 nm', crew:2, icon:'✈',  note:'High-capacity widebody. Major domestic hub-to-hub workhorse.' },
   { model:'Boeing 757-200F',         type:'Narrowbody Freighter',   qty:75,  price:22000000,  maxPayload:116000, range:'3,500 nm', crew:2, icon:'✈',  note:'Backbone domestic workhorse. Serves most US spoke routes.' },
   { model:'Boeing 767-300F',         type:'Widebody Freighter',     qty:84,  price:38000000,  maxPayload:116000, range:'3,255 nm', crew:2, icon:'✈',  note:'Primary widebody. Transatlantic and long domestic routes.' },
-  { model:'Boeing 747-400F',         type:'Heavy Freighter',        qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
-  { model:'Boeing 747-8F',           type:'Super Heavy Freighter',  qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
-  { model:'McDonnell Douglas MD-11F', type:'Heavy Trijet Freighter', qty:40,  price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
+  { model:'Boeing 767-300F',         type:'Heavy Freighter',        qty:13,  price:95000000,  maxPayload:248000, range:'4,950 nm', crew:3, icon:'🛫', note:'Nose-loading jumbo. Long-haul international.' },
+  { model:'Boeing 777F',           type:'Super Heavy Freighter',  qty:30,  price:148000000, maxPayload:295000, range:'8,000 nm', crew:3, icon:'🛫', note:'Worlds largest freighter. Primary transpacific workhorse. Replacing 747-400F.' },
+  { model:'Airbus A300-600F', type:'Heavy Trijet Freighter', qty:40,  price:88000000,  maxPayload:200000, range:'4,165 nm', crew:2, icon:'🛫', note:'Iconic trijet. Being phased out but kept in service. Long-haul international.' },
 ];
 
 // ════════════════════════════════════════════════
@@ -1997,7 +2001,7 @@ async function approveUser(id, email){
       email: email,
       first, last,
       rank: 'Feeder Pilot',
-      base: 'KSDF',
+      base: 'KMEM',
       hours: 0,
       flights: 0,
       ontime: 100,
@@ -2027,7 +2031,7 @@ async function syncApprovedToRoster(){
         first: nameParts[0] || displayName,
         last:  nameParts.slice(1).join(' ') || '',
         rank: 'Feeder Pilot',
-        base: 'KSDF',
+        base: 'KMEM',
         hours: 0, flights: 0, ontime: 100, earned: 0, xp: 0
       });
       added++;
@@ -2170,7 +2174,7 @@ function guardPage(page){
 // ════════════════════════════════════════════════
 
 // ── Live METARs ───────────────────────────────────────────────────────────────
-const OPS_METAR_STATIONS = ['KSDF','KORD','EDDK','VHHH','PANC'];
+const OPS_METAR_STATIONS = ['KMEM','KORD','EDDK','VHHH','PANC'];
 const OPS_METAR_API = 'https://metar.vatsim.net/metar.php?id=';
 
 async function fetchOpsMetars(){
@@ -2199,7 +2203,7 @@ async function fetchOpsMetars(){
       }
     });
     const staticSpans = [
-      '<span>vUPS OPS &nbsp;&middot;&nbsp; <span class="t-hi">ICAO: 5X</span></span>',
+      '<span>vFDX OPS &nbsp;&middot;&nbsp; <span class="t-hi">ICAO: FX</span></span>',
       '<span>METARs <span class="t-g">' + new Date().toUTCString().slice(17,22) + 'Z</span></span>',
     ];
     const all = [...metarSpans, ...staticSpans];
@@ -2386,7 +2390,7 @@ function startSimulatedStocks(){
 // Tick every 60s
 setInterval(()=>{ marketTick(); }, 60000);
 
-// Nudge VUPS on AI revenue (existing hook)
+// Nudge VFedEx on AI revenue (existing hook)
 // S.stockPrice updated via renderStockBar()
 
 
@@ -2518,7 +2522,7 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
   if(placeholder) tbody.innerHTML='';
   const tr = document.createElement('tr');
   const sbAc2 = SIMBRIEF_AC_MAP[route.aircraft]||'B744';
-  const sbParams = new URLSearchParams({orig:route.origin,dest:route.dest,type:sbAc2,airline:'UPS',fltnum:fn.replace('5Y',''),units:'LBS'});
+  const sbParams = new URLSearchParams({orig:route.origin,dest:route.dest,type:sbAc2,airline:'FedEx',fltnum:fn.replace('5Y',''),units:'LBS'});
   if(!sbUser){ alert('Enter your SimBrief username in the Dispatch form first.'); return; }
   const sbUrl = 'https://dispatch.simbrief.com/options/custom?'+sbParams.toString()+'&userid='+sbUser;
   tr.innerHTML = '<td>'+t+'</td><td>'+fn+'</td><td><strong style="color:var(--gold)">'+route.origin+'</strong>&#8594;<strong style="color:var(--gold)">'+route.dest+'</strong></td><td>'+route.aircraft+'</td><td>'+bt+'</td><td class="li-pos">$'+revenue.toLocaleString()+'</td><td>'+pilot.name.replace('AI ','')+'</td><td><a href="'+sbUrl+'" target="_blank" style="color:var(--blue-lt);font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.7rem;text-decoration:none;border:1px solid rgba(36,113,163,.4);border-radius:2px;padding:.1rem .4rem">OFP</a></td><td><span class="badge b-green"><span class="dot dot-g"></span>Enroute</span></td>';
@@ -2530,11 +2534,11 @@ function dispatchRoute(routeId, routeOverride, sbUserOverride){
 // ── Route Generator ─────────────────────────────────────────────────────────
 
 const SIMBRIEF_AC_MAP = {
-  'Boeing 747-8F':             'B748F',   // 747-8 Freighter
-  'Boeing 747-400F':           'B744F',   // 747-400 Freighter
+  'Boeing 777F':             'B748F',   // 747-8 Freighter
+  'Boeing 767-300F':           'B744F',   // 747-400 Freighter
   'Boeing 747-200F':           'B742F',   // 747-200 Freighter
   'Boeing 747-100F':           'B741',    // no dedicated F variant in SimBrief
-  'McDonnell Douglas MD-11F':  'MD11F',   // MD-11 Freighter
+  'Airbus A300-600F':  'MD11F',   // MD-11 Freighter
   'Boeing 767-300F':           'B763F',   // 767-300 Freighter
   'Airbus A300-600F':          'A30F',    // A300-600 Freighter (SimBrief code)
   'Boeing 757-200F':           'B752F',   // 757-200 Freighter
@@ -2542,11 +2546,11 @@ const SIMBRIEF_AC_MAP = {
   'Boeing 727-100F':           'B721',
   'Douglas DC-8F':             'DC86',
 };
-// All UPS-served airports, tagged by region and type
+// All FedEx-served airports, tagged by region and type
 // type: feeder=<2h, domestic=2-8h, longhaul=8h+
 const ALL_AIRPORTS = [
   // ── US Midwest ──────────────────────────────────────────────────────────────
-  {icao:'KSDF', name:'Louisville, KY',          region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
+  {icao:'KMEM', name:'Louisville, KY',          region:'US_MIDWEST', types:['feeder','domestic','longhaul']},
   {icao:'KIND', name:'Indianapolis, IN',         region:'US_MIDWEST', types:['feeder','domestic']},
   {icao:'KCVG', name:'Cincinnati, OH',           region:'US_MIDWEST', types:['feeder','domestic']},
   {icao:'KORD', name:'Chicago, IL',              region:'US_MIDWEST', types:['feeder','domestic']},
@@ -2761,9 +2765,9 @@ const AC_CAPABILITY = {
   'Boeing 767-300F':           [1.0, 11.0],
   'Boeing 747-100F':           [1.0, 9.0],
   'Boeing 747-200F':           [1.0, 11.0],
-  'Boeing 747-400F':           [1.0, 13.0],
-  'Boeing 747-8F':             [1.0, 18.0],
-  'McDonnell Douglas MD-11F':  [1.0, 12.0],
+  'Boeing 767-300F':           [1.0, 13.0],
+  'Boeing 777F':             [1.0, 18.0],
+  'Airbus A300-600F':  [1.0, 12.0],
 };
 
 // Cruise speeds in km/h (true airspeed at cruise) + taxi/climb overhead factor
@@ -2776,9 +2780,9 @@ const AC_CRUISE_SPEED = {
   'Boeing 767-300F':          900,
   'Boeing 747-100F':          895,
   'Boeing 747-200F':          895,
-  'Boeing 747-400F':          910,
-  'Boeing 747-8F':            920,   // Mach 0.855
-  'McDonnell Douglas MD-11F': 905,
+  'Boeing 767-300F':          910,
+  'Boeing 777F':            920,   // Mach 0.855
+  'Airbus A300-600F': 905,
 };
 
 // Why this destination was chosen — shown in preview
@@ -2790,14 +2794,14 @@ const DEST_REASONS = {
 
 const AC_CRUISE_ALT = {
   'Boeing 727-100F':'FL310','Boeing 727-200F':'FL330','Douglas DC-8F':'FL330',
-  'Boeing 747-100F':'FL350','Boeing 747-200F':'FL350','Boeing 747-400F':'FL350',
-  'Boeing 747-8F':'FL390','Boeing 757-200F':'FL350','Boeing 767-300F':'FL370',
-  'Airbus A300-600F':'FL330','McDonnell Douglas MD-11F':'FL370',
+  'Boeing 747-100F':'FL350','Boeing 747-200F':'FL350','Boeing 767-300F':'FL350',
+  'Boeing 777F':'FL390','Boeing 757-200F':'FL350','Boeing 767-300F':'FL370',
+  'Airbus A300-600F':'FL330','Airbus A300-600F':'FL370',
 };
 
-const UPS_FN_POOL = ['5X3','5X4','5X7','5X8','5X15','5X16','5X17','5X18','5X31','5X32',
-  '5X37','5X38','5X63','5X64','5X101','5X102','5X201','5X202','5X271','5X272',
-  '5X301','5X401','5X501','5X601','5X701','5X801','5X901','5X911'];
+const FedEx_FN_POOL = ['FX3','FX4','FX7','FX8','FX15','FX16','FX17','FX18','FX31','FX32',
+  'FX37','FX38','FX63','FX64','FX101','FX102','FX201','FX202','FX271','FX272',
+  'FX301','FX401','FX501','FX601','FX701','FX801','FX901','FX911'];
 
 let _generatedRoute = null;
 
@@ -2895,7 +2899,7 @@ function generateRoute(){
   if(arrIcao){
     const arrAirport = ALL_AIRPORTS.find(a=>a.icao===arrIcao);
     if(!arrAirport){
-      alert(arrIcao + ' is not in the vUPS network. Leave arrival blank for a random destination.');
+      alert(arrIcao + ' is not in the vFDX network. Leave arrival blank for a random destination.');
       return;
     }
     const bt = calcBlockTime(orig, arrIcao, aircraft);
@@ -2907,7 +2911,7 @@ function generateRoute(){
     const dest = { ...arrAirport, bt };
     const btH = Math.floor(bt), btM = Math.round((bt%1)*60);
     const btDisplay = btH > 0 ? btH+'h '+btM+'m' : btM+'m';
-    const fn = UPS_FN_POOL[Math.floor(Math.random()*UPS_FN_POOL.length)];
+    const fn = FedEx_FN_POOL[Math.floor(Math.random()*FedEx_FN_POOL.length)];
     const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
     const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
     const fRange = getFreightRange(aircraft);
@@ -2954,7 +2958,7 @@ function generateRoute(){
   const btH = Math.floor(bt), btM = Math.round((bt % 1) * 60);
   const btDisplay = btH > 0 ? btH + 'h ' + btM + 'm' : btM + 'm';
 
-  const fn = UPS_FN_POOL[Math.floor(Math.random() * UPS_FN_POOL.length)];
+  const fn = FedEx_FN_POOL[Math.floor(Math.random() * FedEx_FN_POOL.length)];
   const cruiseAlt = AC_CRUISE_ALT[aircraft] || alt;
   const sbAc = SIMBRIEF_AC_MAP[aircraft] || 'B744';
   const fRange = getFreightRange(aircraft);
@@ -3027,8 +3031,8 @@ function openGeneratedSimbrief(){
   if(!_generatedRoute){ alert('Generate a route first.'); return; }
   const r=_generatedRoute;
   const sbUser=document.getElementById('rg-sbuser').value||'';
-  const params=new URLSearchParams({orig:r.orig,dest:r.dest,type:r.sbAc,airline:'UPS',
-    fltnum:r.fn.replace('5X',''),cruisealt:r.alt.replace('FL','')+'00',ci:r.ci,units:'LBS'});
+  const params=new URLSearchParams({orig:r.orig,dest:r.dest,type:r.sbAc,airline:'FedEx',
+    fltnum:r.fn.replace('FX',''),cruisealt:r.alt.replace('FL','')+'00',ci:r.ci,units:'LBS'});
   const url='https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser;
   const note=document.getElementById('cb-simbrief-note');
   if(note){note.style.display='';note.textContent='Opening SimBrief for '+r.fn+' '+r.orig+'→'+r.dest+' ...';}
@@ -3039,16 +3043,16 @@ function openGeneratedSimbrief(){
 function openSimbrief(fnOverride,originOverride,destOverride,acOverride){
   const sbUser=(document.getElementById('rg-sbuser')||{value:''}).value||'';
   const origin=originOverride||''; const dest=destOverride||'';
-  const aircraft=acOverride||'Boeing 747-8F';
-  const fn=fnOverride||('5X'+(Math.floor(Math.random()*900)+100));
+  const aircraft=acOverride||'Boeing 777F';
+  const fn=fnOverride||('FX'+(Math.floor(Math.random()*900)+100));
   const sbAc=SIMBRIEF_AC_MAP[aircraft]||'B744';
   if(!origin||!dest){alert('No origin/destination.');return;}
-  const params=new URLSearchParams({orig:origin,dest:dest,type:sbAc,airline:'UPS',fltnum:fn.replace(/5[XY]/,''),units:'LBS'});
+  const params=new URLSearchParams({orig:origin,dest:dest,type:sbAc,airline:'FedEx',fltnum:fn.replace(/5[XY]/,''),units:'LBS'});
   window.open('https://dispatch.simbrief.com/options/custom?'+params.toString()+'&userid='+sbUser,'_blank');
 }
 
 function getCustomFields(){
-  return {origin:'',dest:'',aircraft:'Boeing 747-8F',alt:'FL350',ci:52,sbUser:''};
+  return {origin:'',dest:'',aircraft:'Boeing 777F',alt:'FL350',ci:52,sbUser:''};
 }
 function dispatchCustomFlight(){ dispatchGeneratedRoute(); }
 
@@ -3139,7 +3143,7 @@ function renderCrew(){
 
   // Jumpseat
   const jsb=document.getElementById('jumpseat-board');
-  const routes=[['KSDF','EDDK'],['KSDF','VHHH'],['KONT','KSDF']];
+  const routes=[['KMEM','EDDK'],['KMEM','VHHH'],['KONT','KMEM']];
   const flying=[];
   jsb.innerHTML=flying.length
 ?'<div style="color:var(--text-mute);font-size:.75rem;padding:.5rem 0">No active flights.</div>'
@@ -3227,7 +3231,7 @@ function renderFleet(){
         </div>
         <div style="text-align:right">
           ${owned>0?`<span class="badge b-green">×${owned} Owned</span>`:''}
-          <div style="font-family:monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">UPS Fleet: ${ac.qty||'—'}</div>
+          <div style="font-family:monospace;font-size:.6rem;color:var(--text-mute);margin-top:.2rem">FedEx Fleet: ${ac.qty||'—'}</div>
         </div>
       </div>
       ${ac.note?`<div style="font-size:.67rem;color:var(--text-dim);margin-bottom:.5rem;line-height:1.4;font-style:italic">${ac.note}</div>`:''}
@@ -3400,7 +3404,7 @@ function openEditCrew(id){
   document.getElementById('ec-first').value = p.first || '';
   document.getElementById('ec-last').value  = p.last  || '';
   document.getElementById('ec-rank').value  = p.rank  || 'Feeder Pilot';
-  document.getElementById('ec-base').value  = p.base  || 'KSDF';
+  document.getElementById('ec-base').value  = p.base  || 'KMEM';
   document.getElementById('ec-hours').value = p.hours || 0;
   openModal('modal-edit-crew');
 }
@@ -3558,7 +3562,7 @@ setInterval(()=>{
 
 function updateLoadBar(ac,freight){
   S.loadBars[ac]=(S.loadBars[ac]||0)+freight;
-  const maxMap={'Boeing 747-400F':228000,'McDonnell Douglas MD-11F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
+  const maxMap={'Boeing 767-300F':228000,'Airbus A300-600F':197000,'Boeing 767-300F':97000,'Boeing 757-200F':115600,'Cessna C208B':3200,'ATR-72F':15000,'B747-400F':228000,'MD-11F':197000,'B767-300F':97000,'B757-200F':115600,'C208B Caravan':3200};
   const max=maxMap[ac]||200000;
   const pct=Math.min(99,Math.round(S.loadBars[ac]/max*100));
   const key=ac.replace(/[^a-z0-9]/gi,'');
@@ -3581,66 +3585,66 @@ function updateLoadBar(ac,freight){
 //  AI FLIGHT ENGINE — REAL BLOCK TIMES
 // ════════════════════════════════════════════════
 
-// ── Real UPS block times (hours) ──────────────────────────────────────────────
+// ── Real FedEx block times (hours) ──────────────────────────────────────────────
 const blockTimeMap = {
   // International — Transatlantic
-  'KSDF-EDDK':9.5,  'EDDK-KSDF':9.5,
+  'KMEM-EDDK':9.5,  'EDDK-KMEM':9.5,
   'KPHL-EDDK':8.5,  'EDDK-KPHL':8.5,
   'KPHL-EGSS':7.5,  'EGSS-KPHL':7.5,
-  'KSDF-OMDB':14.5, 'OMDB-KSDF':14.5,
+  'KMEM-OMDB':14.5, 'OMDB-KMEM':14.5,
   // International — Transpacific
-  'KSDF-VHHH':16.5, 'VHHH-KSDF':16.5,
-  'KSDF-ZPBH':16.0, 'ZPBH-KSDF':16.0,
-  'KSDF-ZSPD':15.5, 'ZSPD-KSDF':15.5,
-  'KSDF-WMKK':18.5, 'WMKK-KSDF':18.5,
+  'KMEM-VHHH':16.5, 'VHHH-KMEM':16.5,
+  'KMEM-ZPBH':16.0, 'ZPBH-KMEM':16.0,
+  'KMEM-ZSPD':15.5, 'ZSPD-KMEM':15.5,
+  'KMEM-WMKK':18.5, 'WMKK-KMEM':18.5,
   'EDDK-VHHH':11.5, 'VHHH-EDDK':11.5,
   // Via Anchorage relay
-  'KSDF-PANC':8.0,  'PANC-KSDF':8.5,
+  'KMEM-PANC':8.0,  'PANC-KMEM':8.5,
   'PANC-VHHH':9.0,  'VHHH-PANC':9.5,
   'PANC-ZPBH':8.5,  'ZPBH-PANC':9.0,
   // Domestic hub routes
-  'KSDF-KPHL':1.5,  'KPHL-KSDF':1.5,
-  'KSDF-KONT':4.5,  'KONT-KSDF':4.5,
-  'KSDF-KRFD':1.25, 'KRFD-KSDF':1.25,
-  'KSDF-KMIA':2.5,  'KMIA-KSDF':2.5,
-  'KSDF-KCLT':1.5,  'KCLT-KSDF':1.5,
-  'KSDF-KDFW':2.5,  'KDFW-KSDF':2.5,
-  'KSDF-KSEA':5.0,  'KSEA-KSDF':5.0,
-  'KSDF-KATL':1.5,  'KATL-KSDF':1.5,
-  'KSDF-KPIT':1.25, 'KPIT-KSDF':1.25,
-  'KSDF-PANC':8.0,
-  'KPHL-KSDF':1.5,
+  'KMEM-KPHL':1.5,  'KPHL-KMEM':1.5,
+  'KMEM-KONT':4.5,  'KONT-KMEM':4.5,
+  'KMEM-KRFD':1.25, 'KRFD-KMEM':1.25,
+  'KMEM-KMIA':2.5,  'KMIA-KMEM':2.5,
+  'KMEM-KCLT':1.5,  'KCLT-KMEM':1.5,
+  'KMEM-KDFW':2.5,  'KDFW-KMEM':2.5,
+  'KMEM-KSEA':5.0,  'KSEA-KMEM':5.0,
+  'KMEM-KATL':1.5,  'KATL-KMEM':1.5,
+  'KMEM-KPIT':1.25, 'KPIT-KMEM':1.25,
+  'KMEM-PANC':8.0,
+  'KPHL-KMEM':1.5,
   // Feeder / regional
-  'KSDF-KLEX':0.75, 'KLEX-KSDF':0.75,
-  'KSDF-KHSV':1.25, 'KHSV-KSDF':1.25,
-  'KSDF-KBNA':0.75, 'KBNA-KSDF':0.75,
-  'KSDF-KIND':0.75, 'KIND-KSDF':0.75,
-  'KSDF-KCVG':0.5,  'KCVG-KSDF':0.5,
+  'KMEM-KLEX':0.75, 'KLEX-KMEM':0.75,
+  'KMEM-KHSV':1.25, 'KHSV-KMEM':1.25,
+  'KMEM-KBNA':0.75, 'KBNA-KMEM':0.75,
+  'KMEM-KIND':0.75, 'KIND-KMEM':0.75,
+  'KMEM-KCVG':0.5,  'KCVG-KMEM':0.5,
   // Additional international
-  'KSDF-OTHH':14.5, 'OTHH-KSDF':14.5,
-  'KSDF-OERK':14.0, 'OERK-KSDF':14.0,
-  'KSDF-WSSS':18.5, 'WSSS-KSDF':18.5,
-  'KSDF-VTBS':17.5, 'VTBS-KSDF':17.5,
-  'KSDF-RPLL':17.0, 'RPLL-KSDF':17.0,
-  'KSDF-RJAA':13.5, 'RJAA-KSDF':13.5,
-  'KSDF-RKSI':13.0, 'RKSI-KSDF':13.0,
-  'KSDF-ZBAA':13.5, 'ZBAA-KSDF':13.5,
+  'KMEM-OTHH':14.5, 'OTHH-KMEM':14.5,
+  'KMEM-OERK':14.0, 'OERK-KMEM':14.0,
+  'KMEM-WSSS':18.5, 'WSSS-KMEM':18.5,
+  'KMEM-VTBS':17.5, 'VTBS-KMEM':17.5,
+  'KMEM-RPLL':17.0, 'RPLL-KMEM':17.0,
+  'KMEM-RJAA':13.5, 'RJAA-KMEM':13.5,
+  'KMEM-RKSI':13.0, 'RKSI-KMEM':13.0,
+  'KMEM-ZBAA':13.5, 'ZBAA-KMEM':13.5,
   'EDDK-OTHH':6.5,  'OTHH-EDDK':6.5,
   'EDDK-WSSS':12.5, 'WSSS-EDDK':12.5,
   'EDDK-RJAA':12.0, 'RJAA-EDDK':12.0,
   // Additional domestic
-  'KSDF-KBOS':2.5,  'KBOS-KSDF':2.5,
-  'KSDF-KIAD':1.5,  'KIAD-KSDF':1.5,
-  'KSDF-KBWI':1.5,  'KBWI-KSDF':1.5,
-  'KSDF-KSFO':5.5,  'KSFO-KSDF':5.5,
-  'KSDF-KLAX':4.5,  'KLAX-KSDF':4.5,
-  'KSDF-KLAS':4.0,  'KLAS-KSDF':4.0,
-  'KSDF-KJFK':2.0,  'KJFK-KSDF':2.0,
-  'KSDF-KEWR':2.0,  'KEWR-KSDF':2.0,
-  'KSDF-KSTL':1.0,  'KSTL-KSDF':1.0,
-  'KSDF-KMEM':0.75, 'KMEM-KSDF':0.75,
-  'KSDF-KPHX':3.5,  'KPHX-KSDF':3.5,
-  'KSDF-KORD':1.25, 'KORD-KSDF':1.25,
+  'KMEM-KBOS':2.5,  'KBOS-KMEM':2.5,
+  'KMEM-KIAD':1.5,  'KIAD-KMEM':1.5,
+  'KMEM-KBWI':1.5,  'KBWI-KMEM':1.5,
+  'KMEM-KSFO':5.5,  'KSFO-KMEM':5.5,
+  'KMEM-KLAX':4.5,  'KLAX-KMEM':4.5,
+  'KMEM-KLAS':4.0,  'KLAS-KMEM':4.0,
+  'KMEM-KJFK':2.0,  'KJFK-KMEM':2.0,
+  'KMEM-KEWR':2.0,  'KEWR-KMEM':2.0,
+  'KMEM-KSTL':1.0,  'KSTL-KMEM':1.0,
+  'KMEM-KMEM':0.75, 'KMEM-KMEM':0.75,
+  'KMEM-KPHX':3.5,  'KPHX-KMEM':3.5,
+  'KMEM-KORD':1.25, 'KORD-KMEM':1.25,
   // Intra-Asia domestic
   'VHHH-ZPBH':0.5, 'ZPBH-VHHH':0.5, 'VHHH-ZSPD':2.0, 'ZSPD-VHHH':2.0,
   'VHHH-RJAA':4.0, 'RJAA-VHHH':4.0, 'VHHH-RKSI':3.0, 'RKSI-VHHH':3.0,
@@ -3681,87 +3685,87 @@ function blockTime(o,d,ac){
   return bt !== null ? bt : 3.0;
 }
 
-// ── Real UPS scheduled flights (UTC departure hour, flight number, route, aircraft) ──
-// Based on actual UPS Airlines published operations. Times in UTC.
-const UPS_SCHEDULE = [
+// ── Real FedEx scheduled flights (UTC departure hour, flight number, route, aircraft) ──
+// Based on actual FedEx Express published operations. Times in UTC.
+const FedEx_SCHEDULE = [
   // ── Long-haul international — spread across all 24h ──
-  { fn:'5X3',   dep:6,  orig:'KSDF', dest:'EDDK', ac:'Boeing 747-8F' },       // dep 06Z arr ~15:30Z
-  { fn:'5X4',   dep:19, orig:'EDDK', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 19Z arr ~04:30Z
-  { fn:'5X7',   dep:7,  orig:'KSDF', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 07Z arr ~23:30Z
-  { fn:'5X8',   dep:2,  orig:'VHHH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 02Z arr ~18:30Z
-  { fn:'5X17',  dep:10, orig:'KSDF', dest:'ZPBH', ac:'Boeing 747-8F' },       // dep 10Z arr ~02Z
-  { fn:'5X18',  dep:16, orig:'ZPBH', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 16Z arr ~08Z
-  { fn:'5X15',  dep:13, orig:'KSDF', dest:'ZSPD', ac:'McDonnell Douglas MD-11F' },    // dep 13Z arr ~04:30Z
-  { fn:'5X16',  dep:20, orig:'ZSPD', dest:'KSDF', ac:'McDonnell Douglas MD-11F' },    // dep 20Z arr ~11:30Z
-  { fn:'5X37',  dep:3,  orig:'KSDF', dest:'PANC', ac:'Boeing 767-300F' },     // dep 03Z arr ~11Z
-  { fn:'5X38',  dep:15, orig:'PANC', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 15Z arr ~00Z
-  { fn:'5X747', dep:5,  orig:'KSDF', dest:'OMDB', ac:'Boeing 747-8F' },       // dep 05Z arr ~19:30Z
-  { fn:'5X748', dep:22, orig:'OMDB', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 22Z arr ~12:30Z
-  { fn:'5X271', dep:1,  orig:'EDDK', dest:'VHHH', ac:'Boeing 747-8F' },       // dep 01Z arr ~12:30Z
-  { fn:'5X272', dep:14, orig:'VHHH', dest:'EDDK', ac:'Boeing 747-8F' },       // dep 14Z arr ~01:30Z
-  { fn:'5X21',  dep:9,  orig:'KSDF', dest:'WMKK', ac:'Boeing 747-8F' },       // dep 09Z arr ~03:30Z
-  { fn:'5X22',  dep:18, orig:'WMKK', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 18Z arr ~12:30Z
-  { fn:'5X25',  dep:16, orig:'KSDF', dest:'RJAA', ac:'Boeing 747-8F' },       // dep 16Z arr ~07:30Z
-  { fn:'5X26',  dep:0,  orig:'RJAA', dest:'KSDF', ac:'Boeing 747-8F' },       // dep 00Z arr ~17Z
+  { fn:'FX3',   dep:6,  orig:'KMEM', dest:'EDDK', ac:'Boeing 777F' },       // dep 06Z arr ~15:30Z
+  { fn:'FX4',   dep:19, orig:'EDDK', dest:'KMEM', ac:'Boeing 777F' },       // dep 19Z arr ~04:30Z
+  { fn:'FX7',   dep:7,  orig:'KMEM', dest:'VHHH', ac:'Boeing 777F' },       // dep 07Z arr ~23:30Z
+  { fn:'FX8',   dep:2,  orig:'VHHH', dest:'KMEM', ac:'Boeing 777F' },       // dep 02Z arr ~18:30Z
+  { fn:'FX17',  dep:10, orig:'KMEM', dest:'ZPBH', ac:'Boeing 777F' },       // dep 10Z arr ~02Z
+  { fn:'FX18',  dep:16, orig:'ZPBH', dest:'KMEM', ac:'Boeing 777F' },       // dep 16Z arr ~08Z
+  { fn:'FX15',  dep:13, orig:'KMEM', dest:'ZSPD', ac:'Airbus A300-600F' },    // dep 13Z arr ~04:30Z
+  { fn:'FX16',  dep:20, orig:'ZSPD', dest:'KMEM', ac:'Airbus A300-600F' },    // dep 20Z arr ~11:30Z
+  { fn:'FX37',  dep:3,  orig:'KMEM', dest:'PANC', ac:'Boeing 767-300F' },     // dep 03Z arr ~11Z
+  { fn:'FX38',  dep:15, orig:'PANC', dest:'VHHH', ac:'Boeing 777F' },       // dep 15Z arr ~00Z
+  { fn:'FX747', dep:5,  orig:'KMEM', dest:'OMDB', ac:'Boeing 777F' },       // dep 05Z arr ~19:30Z
+  { fn:'FX748', dep:22, orig:'OMDB', dest:'KMEM', ac:'Boeing 777F' },       // dep 22Z arr ~12:30Z
+  { fn:'FX271', dep:1,  orig:'EDDK', dest:'VHHH', ac:'Boeing 777F' },       // dep 01Z arr ~12:30Z
+  { fn:'FX272', dep:14, orig:'VHHH', dest:'EDDK', ac:'Boeing 777F' },       // dep 14Z arr ~01:30Z
+  { fn:'FX21',  dep:9,  orig:'KMEM', dest:'WMKK', ac:'Boeing 777F' },       // dep 09Z arr ~03:30Z
+  { fn:'FX22',  dep:18, orig:'WMKK', dest:'KMEM', ac:'Boeing 777F' },       // dep 18Z arr ~12:30Z
+  { fn:'FX25',  dep:16, orig:'KMEM', dest:'RJAA', ac:'Boeing 777F' },       // dep 16Z arr ~07:30Z
+  { fn:'FX26',  dep:0,  orig:'RJAA', dest:'KMEM', ac:'Boeing 777F' },       // dep 00Z arr ~17Z
   // ── Transatlantic / Europe ──
-  { fn:'5X63',  dep:11, orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 11Z arr ~19:30Z
-  { fn:'5X64',  dep:22, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 22Z arr ~06:30Z
-  { fn:'5X31',  dep:2,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },     // dep 02Z arr ~09:30Z
-  { fn:'5X32',  dep:14, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 14Z arr ~21:30Z
-  { fn:'5X51',  dep:18, orig:'KMIA', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 18Z arr ~02:30Z
-  { fn:'5X52',  dep:8,  orig:'EDDK', dest:'KMIA', ac:'Boeing 767-300F' },     // dep 08Z arr ~15:30Z
+  { fn:'FX63',  dep:11, orig:'KPHL', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 11Z arr ~19:30Z
+  { fn:'FX64',  dep:22, orig:'EDDK', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 22Z arr ~06:30Z
+  { fn:'FX31',  dep:2,  orig:'KPHL', dest:'EGSS', ac:'Boeing 767-300F' },     // dep 02Z arr ~09:30Z
+  { fn:'FX32',  dep:14, orig:'EGSS', dest:'KPHL', ac:'Boeing 767-300F' },     // dep 14Z arr ~21:30Z
+  { fn:'FX51',  dep:18, orig:'KMIA', dest:'EDDK', ac:'Boeing 767-300F' },     // dep 18Z arr ~02:30Z
+  { fn:'FX52',  dep:8,  orig:'EDDK', dest:'KMIA', ac:'Boeing 767-300F' },     // dep 08Z arr ~15:30Z
   // ── Domestic trunk — spread through day and night ──
-  { fn:'5X101', dep:4,  orig:'KSDF', dest:'KPHL', ac:'Boeing 767-300F' },
-  { fn:'5X102', dep:8,  orig:'KPHL', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X103', dep:14, orig:'KSDF', dest:'KPHL', ac:'Boeing 757-200F' },
-  { fn:'5X104', dep:18, orig:'KPHL', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X201', dep:3,  orig:'KSDF', dest:'KONT', ac:'Boeing 757-200F' },
-  { fn:'5X202', dep:9,  orig:'KONT', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X203', dep:15, orig:'KSDF', dest:'KONT', ac:'Airbus A300-600F' },
-  { fn:'5X204', dep:21, orig:'KONT', dest:'KSDF', ac:'Airbus A300-600F' },
-  { fn:'5X301', dep:5,  orig:'KSDF', dest:'KRFD', ac:'Boeing 757-200F' },
-  { fn:'5X302', dep:7,  orig:'KRFD', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X401', dep:2,  orig:'KSDF', dest:'KMIA', ac:'Boeing 767-300F' },
-  { fn:'5X402', dep:7,  orig:'KMIA', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X403', dep:16, orig:'KSDF', dest:'KMIA', ac:'Boeing 757-200F' },
-  { fn:'5X501', dep:4,  orig:'KSDF', dest:'KDFW', ac:'Boeing 757-200F' },
-  { fn:'5X502', dep:8,  orig:'KDFW', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X503', dep:20, orig:'KSDF', dest:'KDFW', ac:'Airbus A300-600F' },
-  { fn:'5X601', dep:1,  orig:'KSDF', dest:'KSEA', ac:'Boeing 767-300F' },
-  { fn:'5X602', dep:10, orig:'KSEA', dest:'KSDF', ac:'Boeing 767-300F' },
-  { fn:'5X603', dep:18, orig:'KSDF', dest:'KSEA', ac:'Boeing 757-200F' },
-  { fn:'5X701', dep:4,  orig:'KSDF', dest:'KATL', ac:'Boeing 757-200F' },
-  { fn:'5X702', dep:7,  orig:'KATL', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X703', dep:13, orig:'KSDF', dest:'KATL', ac:'Airbus A300-600F' },
-  { fn:'5X704', dep:17, orig:'KATL', dest:'KSDF', ac:'Airbus A300-600F' },
-  { fn:'5X801', dep:6,  orig:'KSDF', dest:'KPIT', ac:'Boeing 757-200F' },
-  { fn:'5X802', dep:9,  orig:'KPIT', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X803', dep:21, orig:'KSDF', dest:'KPIT', ac:'Boeing 757-200F' },
-  { fn:'5X805', dep:3,  orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
-  { fn:'5X806', dep:6,  orig:'KCLT', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X807', dep:19, orig:'KSDF', dest:'KCLT', ac:'Boeing 757-200F' },
-  { fn:'5X811', dep:11, orig:'KSDF', dest:'KORD', ac:'Airbus A300-600F' },
-  { fn:'5X812', dep:14, orig:'KORD', dest:'KSDF', ac:'Airbus A300-600F' },
-  { fn:'5X821', dep:23, orig:'KSDF', dest:'KHOU', ac:'Boeing 757-200F' },
-  { fn:'5X822', dep:4,  orig:'KHOU', dest:'KSDF', ac:'Boeing 757-200F' },
+  { fn:'FX101', dep:4,  orig:'KMEM', dest:'KPHL', ac:'Boeing 767-300F' },
+  { fn:'FX102', dep:8,  orig:'KPHL', dest:'KMEM', ac:'Boeing 767-300F' },
+  { fn:'FX103', dep:14, orig:'KMEM', dest:'KPHL', ac:'Boeing 757-200F' },
+  { fn:'FX104', dep:18, orig:'KPHL', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX201', dep:3,  orig:'KMEM', dest:'KONT', ac:'Boeing 757-200F' },
+  { fn:'FX202', dep:9,  orig:'KONT', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX203', dep:15, orig:'KMEM', dest:'KONT', ac:'Airbus A300-600F' },
+  { fn:'FX204', dep:21, orig:'KONT', dest:'KMEM', ac:'Airbus A300-600F' },
+  { fn:'FX301', dep:5,  orig:'KMEM', dest:'KRFD', ac:'Boeing 757-200F' },
+  { fn:'FX302', dep:7,  orig:'KRFD', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX401', dep:2,  orig:'KMEM', dest:'KMIA', ac:'Boeing 767-300F' },
+  { fn:'FX402', dep:7,  orig:'KMIA', dest:'KMEM', ac:'Boeing 767-300F' },
+  { fn:'FX403', dep:16, orig:'KMEM', dest:'KMIA', ac:'Boeing 757-200F' },
+  { fn:'FX501', dep:4,  orig:'KMEM', dest:'KDFW', ac:'Boeing 757-200F' },
+  { fn:'FX502', dep:8,  orig:'KDFW', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX503', dep:20, orig:'KMEM', dest:'KDFW', ac:'Airbus A300-600F' },
+  { fn:'FX601', dep:1,  orig:'KMEM', dest:'KSEA', ac:'Boeing 767-300F' },
+  { fn:'FX602', dep:10, orig:'KSEA', dest:'KMEM', ac:'Boeing 767-300F' },
+  { fn:'FX603', dep:18, orig:'KMEM', dest:'KSEA', ac:'Boeing 757-200F' },
+  { fn:'FX701', dep:4,  orig:'KMEM', dest:'KATL', ac:'Boeing 757-200F' },
+  { fn:'FX702', dep:7,  orig:'KATL', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX703', dep:13, orig:'KMEM', dest:'KATL', ac:'Airbus A300-600F' },
+  { fn:'FX704', dep:17, orig:'KATL', dest:'KMEM', ac:'Airbus A300-600F' },
+  { fn:'FX801', dep:6,  orig:'KMEM', dest:'KPIT', ac:'Boeing 757-200F' },
+  { fn:'FX802', dep:9,  orig:'KPIT', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX803', dep:21, orig:'KMEM', dest:'KPIT', ac:'Boeing 757-200F' },
+  { fn:'FX805', dep:3,  orig:'KMEM', dest:'KCLT', ac:'Boeing 757-200F' },
+  { fn:'FX806', dep:6,  orig:'KCLT', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX807', dep:19, orig:'KMEM', dest:'KCLT', ac:'Boeing 757-200F' },
+  { fn:'FX811', dep:11, orig:'KMEM', dest:'KORD', ac:'Airbus A300-600F' },
+  { fn:'FX812', dep:14, orig:'KORD', dest:'KMEM', ac:'Airbus A300-600F' },
+  { fn:'FX821', dep:23, orig:'KMEM', dest:'KHOU', ac:'Boeing 757-200F' },
+  { fn:'FX822', dep:4,  orig:'KHOU', dest:'KMEM', ac:'Boeing 757-200F' },
   // ── East Coast feeder — spread across multiple banks ──
-  { fn:'5X901', dep:4,  orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
-  { fn:'5X902', dep:5,  orig:'KLEX', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X903', dep:16, orig:'KSDF', dest:'KLEX', ac:'Boeing 757-200F' },
-  { fn:'5X911', dep:5,  orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F' },
-  { fn:'5X912', dep:6,  orig:'KHSV', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X913', dep:17, orig:'KSDF', dest:'KHSV', ac:'Boeing 757-200F' },
-  { fn:'5X921', dep:3,  orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
-  { fn:'5X922', dep:5,  orig:'KBNA', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X923', dep:15, orig:'KSDF', dest:'KBNA', ac:'Boeing 757-200F' },
-  { fn:'5X931', dep:4,  orig:'KSDF', dest:'KIND', ac:'Boeing 757-200F' },
-  { fn:'5X932', dep:6,  orig:'KIND', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X941', dep:3,  orig:'KSDF', dest:'KCVG', ac:'Boeing 757-200F' },
-  { fn:'5X942', dep:4,  orig:'KCVG', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X951', dep:22, orig:'KSDF', dest:'KMEM', ac:'Boeing 757-200F' },
-  { fn:'5X952', dep:1,  orig:'KMEM', dest:'KSDF', ac:'Boeing 757-200F' },
-  { fn:'5X961', dep:12, orig:'KSDF', dest:'KIND', ac:'Airbus A300-600F' },
-  { fn:'5X962', dep:14, orig:'KIND', dest:'KSDF', ac:'Airbus A300-600F' },
+  { fn:'FX901', dep:4,  orig:'KMEM', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'FX902', dep:5,  orig:'KLEX', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX903', dep:16, orig:'KMEM', dest:'KLEX', ac:'Boeing 757-200F' },
+  { fn:'FX911', dep:5,  orig:'KMEM', dest:'KHSV', ac:'Boeing 757-200F' },
+  { fn:'FX912', dep:6,  orig:'KHSV', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX913', dep:17, orig:'KMEM', dest:'KHSV', ac:'Boeing 757-200F' },
+  { fn:'FX921', dep:3,  orig:'KMEM', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'FX922', dep:5,  orig:'KBNA', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX923', dep:15, orig:'KMEM', dest:'KBNA', ac:'Boeing 757-200F' },
+  { fn:'FX931', dep:4,  orig:'KMEM', dest:'KIND', ac:'Boeing 757-200F' },
+  { fn:'FX932', dep:6,  orig:'KIND', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX941', dep:3,  orig:'KMEM', dest:'KCVG', ac:'Boeing 757-200F' },
+  { fn:'FX942', dep:4,  orig:'KCVG', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX951', dep:22, orig:'KMEM', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX952', dep:1,  orig:'KMEM', dest:'KMEM', ac:'Boeing 757-200F' },
+  { fn:'FX961', dep:12, orig:'KMEM', dest:'KIND', ac:'Airbus A300-600F' },
+  { fn:'FX962', dep:14, orig:'KIND', dest:'KMEM', ac:'Airbus A300-600F' },
 ];
 
 // Which scheduled flights should currently be airborne?
@@ -3771,18 +3775,18 @@ function getActiveScheduledFlights(){
 
 // routeMap kept for legacy AI trigger compatibility
 const routeMap={
-  longhaul:[['KSDF','EDDK','B747-400F'],['KSDF','VHHH','B747-400F'],['KSDF','OMDB','B747-400F'],['KPHL','EDDK','B767-300F']],
-  domestic:[['KSDF','KPHL','B767-300F'],['KSDF','KONT','B757-200F'],['KSDF','KPIT','MD-11F'],['KSDF','KMIA','B767-300F']],
-  feeder:[['KSDF','KLEX','B757-200F'],['KSDF','KHSV','ATR-72F'],['KSDF','KBNA','B757-200F']],
-  any:[['KSDF','EDDK','B747-400F'],['KSDF','KPHL','B767-300F'],['KSDF','KLEX','B757-200F']]
+  longhaul:[['KMEM','EDDK','B747-400F'],['KMEM','VHHH','B747-400F'],['KMEM','OMDB','B747-400F'],['KPHL','EDDK','B767-300F']],
+  domestic:[['KMEM','KPHL','B767-300F'],['KMEM','KONT','B757-200F'],['KMEM','KPIT','MD-11F'],['KMEM','KMIA','B767-300F']],
+  feeder:[['KMEM','KLEX','B757-200F'],['KMEM','KHSV','ATR-72F'],['KMEM','KBNA','B757-200F']],
+  any:[['KMEM','EDDK','B747-400F'],['KMEM','KPHL','B767-300F'],['KMEM','KLEX','B757-200F']]
 };
 const freightMap={
-  // Real UPS payload ranges (lbs) — min typical load, max structural payload
-  'Boeing 747-8F':             [120000, 295000],  // Max 295,000 lbs
-  'Boeing 747-400F':           [100000, 248000],  // Max 248,000 lbs
+  // Real FedEx payload ranges (lbs) — min typical load, max structural payload
+  'Boeing 777F':             [120000, 295000],  // Max 295,000 lbs
+  'Boeing 767-300F':           [100000, 248000],  // Max 248,000 lbs
   'Boeing 747-200F':           [90000,  230000],  // Max 230,000 lbs
   'Boeing 747-100F':           [70000,  200000],  // Max 200,000 lbs
-  'McDonnell Douglas MD-11F':  [80000,  200000],  // Max 200,000 lbs
+  'Airbus A300-600F':  [80000,  200000],  // Max 200,000 lbs
   'Boeing 767-300F':           [50000,  116000],  // Max 116,000 lbs
   'Airbus A300-600F':          [40000,   87000],  // Max 87,000 lbs (not 140k!)
   'Boeing 757-200F':           [30000,   87000],  // Max 87,000 lbs
@@ -3817,7 +3821,7 @@ function claimLeadership(){
   try{ localStorage.setItem(CYCLE_KEY, JSON.stringify({ts:Date.now(),id:_tabId})); }catch(e){}
 }
 
-// ── Seed live flights from UPS schedule on load ───────────────────────────────
+// ── Seed live flights from FedEx schedule on load ───────────────────────────────
 function seedScheduledFlights(){
   if(!amLeader()) return;
   const scheduled = getActiveScheduledFlights();
@@ -4030,6 +4034,7 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'state', filter: 'key=eq.main' },
       (payload) => {
         if(!payload.new || !payload.new.value) return;
+        if(_suppressRealtime) return; // skip — we just saved, avoid overwrite
         const incoming = payload.new.value;
         // Merge PIREPs — never let a real-time event delete locally filed ones
         if(incoming.pireps && Array.isArray(incoming.pireps) && _pireps.length > 0){
@@ -4112,7 +4117,7 @@ function distributeProfit(){
 // ════════════════════════════════════════════════
 //  METAR
 // ════════════════════════════════════════════════
-const metarPool=['KSDF 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180','KSDF 012054Z 22012KT 6SM FEW018 BKN040 09/06 A2985 RMK AO2','KSDF 012354Z 19015G22KT 3SM -TSRA OVC008 07/06 A2978 RMK AO2','KSDF 020054Z 21010KT 10SM SCT025 BKN060 11/05 A2990 RMK AO2'];
+const metarPool=['KMEM 011754Z 20008KT 10SM SKC 12/04 A3002 RMK AO2 SLP180','KMEM 012054Z 22012KT 6SM FEW018 BKN040 09/06 A2985 RMK AO2','KMEM 012354Z 19015G22KT 3SM -TSRA OVC008 07/06 A2978 RMK AO2','KMEM 020054Z 21010KT 10SM SCT025 BKN060 11/05 A2990 RMK AO2'];
 let metarIdx=0;
 function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getElementById('metar-text').textContent=metarPool[metarIdx];}
 
@@ -4124,7 +4129,7 @@ function refreshMetar(){metarIdx=(metarIdx+1)%metarPool.length;document.getEleme
 // Airport coordinates: [lat, lon]
 const AIRPORT_COORDS = {
   // US Midwest
-  KSDF:[38.1744,-85.7364], KIND:[39.7173,-86.2944], KCVG:[39.0489,-84.6678],
+  KMEM:[38.1744,-85.7364], KIND:[39.7173,-86.2944], KCVG:[39.0489,-84.6678],
   KORD:[41.9742,-87.9073], KSTL:[38.7487,-90.3700], KMKE:[42.9472,-87.8966],
   KMSP:[44.8820,-93.2218], KDSM:[41.5340,-93.6631], KOMA:[41.3032,-95.8941],
   KICT:[37.6499,-97.4331], KMCI:[39.2976,-94.7139], KLCK:[39.8139,-82.9279],
@@ -4266,6 +4271,12 @@ const PLANE_SVG = (color) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0
   <text x="12" y="16" text-anchor="middle" font-size="13" fill="${color}">✈</text>
 </svg>`;
 
+// Tracker aircraft — solid gold with heading rotation
+const TRACKER_SVG = (hdg, color) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" style="transform:rotate(${hdg}deg);transform-origin:center">
+  <circle cx="16" cy="16" r="15" fill="rgba(10,0,16,0.85)" stroke="${color}" stroke-width="2"/>
+  <text x="16" y="21" text-anchor="middle" font-size="16" fill="${color}">✈</text>
+</svg>`;
+
 const HUB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20">
   <polygon points="10,1 13,7 19,8 14.5,12.5 15.5,19 10,16 4.5,19 5.5,12.5 1,8 7,7" fill="#c8920a" stroke="#1a0e06" stroke-width="1"/>
 </svg>`;
@@ -4298,6 +4309,93 @@ function clearMapLayers(){
 
 function renderLiveMap(){
   onMapPageOpen();
+}
+
+// ── Tracker flights from desktop app ─────────────────────────────────────────
+let _trackerLayers = [];
+let _trackerInterval = null;
+
+async function fetchAndRenderTrackers(){
+  if(!_leafletMap) return;
+  try {
+    const { data, error } = await _supa.from('state').select('value').eq('key','main').single();
+    if(error || !data) return;
+    const flights = data.value.liveFlights || [];
+    renderTrackerFlights(flights);
+  } catch(e){}
+}
+
+function renderTrackerFlights(flights){
+  // Clear old tracker layers
+  _trackerLayers.forEach(l => { if(_leafletMap) _leafletMap.removeLayer(l); });
+  _trackerLayers = [];
+
+  if(!flights.length) return;
+
+  const now = Date.now();
+  flights.forEach(f => {
+    // Only show if updated within last 60 seconds
+    const updated = new Date(f.updated).getTime();
+    if(now - updated > 60000) return;
+
+    const lat = parseFloat(f.lat);
+    const lon = parseFloat(f.lon);
+    if(isNaN(lat) || isNaN(lon)) return;
+
+    const hdg   = parseInt(f.hdg) || 0;
+    const color = f.phase === 'airborne' ? '#00ff88' : '#ffaa00';
+    const icon  = L.divIcon({
+      html: TRACKER_SVG(hdg, color),
+      className: '',
+      iconSize: [32,32],
+      iconAnchor: [16,16],
+    });
+
+    const alt  = parseInt(f.alt) || 0;
+    const gs   = parseInt(f.gs)  || 0;
+    const vs   = parseInt(f.vs)  || 0;
+    const phase = f.phase === 'airborne' ? '✈ AIRBORNE' : '🛑 ON GROUND';
+
+    const marker = L.marker([lat, lon], {icon})
+      .bindPopup(`
+<div style="font-family:'Barlow Condensed',sans-serif;min-width:200px">
+  <div style="font-size:1.1rem;font-weight:700;color:${color};border-bottom:1px solid #2d0066;padding-bottom:.3rem;margin-bottom:.4rem">
+    ${f.fn || '—'} · ${f.pilot}
+  </div>
+  <div style="font-size:.85rem;color:#e8e8e8"><strong>${f.dep||'—'}</strong> → <strong>${f.arr||'—'}</strong></div>
+  <div style="font-size:.78rem;color:#999;margin-top:.2rem">${f.aircraft || '—'}</div>
+  <div style="margin-top:.5rem;display:grid;grid-template-columns:1fr 1fr;gap:.2rem;font-size:.72rem;color:#999">
+    <div>ALT: <span style="color:#e8e8e8">${alt.toLocaleString()} ft</span></div>
+    <div>GS: <span style="color:#e8e8e8">${gs} kts</span></div>
+    <div>HDG: <span style="color:#e8e8e8">${hdg}°</span></div>
+    <div>VS: <span style="color:${vs < -500 ? '#ff4444' : '#e8e8e8'}">${vs > 0 ? '+' : ''}${vs} fpm</span></div>
+  </div>
+  <div style="margin-top:.4rem;font-size:.7rem;color:${color}">${phase}</div>
+  <div style="font-size:.65rem;color:#555;margin-top:.2rem">Live tracker · updated ${new Date(f.updated).toLocaleTimeString()}</div>
+</div>`, {maxWidth: 240})
+      .addTo(_leafletMap);
+    _trackerLayers.push(marker);
+
+    // Pulse ring for airborne
+    if(f.phase === 'airborne'){
+      const ring = L.circleMarker([lat, lon], {
+        radius: 18, color: color, fillColor: 'transparent',
+        weight: 1, opacity: 0.4
+      }).addTo(_leafletMap);
+      _trackerLayers.push(ring);
+    }
+  });
+
+  // Update active count to include tracker flights
+  const airborne = flights.filter(f => {
+    const updated = new Date(f.updated).getTime();
+    return now - updated < 60000 && f.phase === 'airborne';
+  }).length;
+  const cntEl = document.getElementById('map-flight-count');
+  if(cntEl && airborne > 0){
+    const existing = cntEl.textContent;
+    cntEl.textContent = existing + ' + ' + airborne + ' live tracker';
+  }
 }
 
 function refreshMapFlights(){
@@ -4507,7 +4605,7 @@ renderHubs();
 initFinnhubBanner();
 updateCrewCounts();
 
-// 1b. Seed scheduled flights (real UPS operations)
+// 1b. Seed scheduled flights (real FedEx operations)
 setTimeout(seedScheduledFlights, 2000);
 
 // 2. Load from Supabase (async — will update UI when ready)
@@ -4659,6 +4757,8 @@ function convertFuelDisplay(){
   });
 }
 
+let _suppressRealtime = false;
+
 async function filePirep(){
   if(!S.isMember){ alert('Sign in to file PIREPs.'); return; }
   const fn   = document.getElementById('pr-fn').value.trim().toUpperCase();
@@ -4690,12 +4790,14 @@ async function filePirep(){
     // Update local state
     _pireps.length = 0; _pireps.push(...existing.sort((a,b)=>(a.filed||0)-(b.filed||0)));
     if (_stateCache) _stateCache.pireps = _pireps;
+    _suppressRealtime = true;
     await _supa.from('state').upsert(
       { key: 'main', value: freshSnap, updated_at: new Date().toISOString() },
       { onConflict: 'key' }
     );
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(freshSnap)); } catch(e2){}
-  } catch(e){ console.warn('PIREP save error', e); _pireps.push(pirep); saveState(); }
+    setTimeout(() => { _suppressRealtime = false; }, 3000);
+  } catch(e){ console.warn('PIREP save error', e); _pireps.push(pirep); saveState(); _suppressRealtime = false; }
   closeModal('modal-file-pirep');
   // Clear form
   ['pr-fn','pr-date','pr-orig','pr-dest','pr-bt','pr-payload','pr-fuel-dep','pr-fuel-arr','pr-ldgrate','pr-remarks'].forEach(id=>{
@@ -4768,7 +4870,7 @@ function renderTripBoard(){
       if(isAssigned && t.assignedTo === myName){
         var sbAc = SIMBRIEF_AC_MAP[t.aircraft] || 'B744';
         var sbUser = (document.getElementById('rg-sbuser') || {}).value || '';
-        var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=UPS&fltnum='+t.fn.replace('5X','')+'&date='+(t.date||'');
+        var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=FedEx&fltnum='+t.fn.replace('FX','')+'&date='+(t.date||'');
         var sbUrl = sbUser ? 'https://dispatch.simbrief.com/options/custom?'+params+'&userid='+sbUser : '#';
         actionCell = '<a href="'+sbUrl+'" target="_blank" class="btn btn-blue btn-sm">&#9992; SimBrief OFP</a>';
       } else if(isAssigned){
@@ -4807,7 +4909,7 @@ function renderMyAssignments(trips, myName){
     var bt = blockTime(t.orig, t.dest);
     var btDisplay = Math.floor(bt)+'h '+Math.round((bt%1)*60)+'m';
     var sbAc = SIMBRIEF_AC_MAP[t.aircraft]||'B744';
-    var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=UPS&fltnum='+t.fn.replace('5X','')+'&date='+(t.date||'');
+    var params = 'orig='+t.orig+'&dest='+t.dest+'&type='+sbAc+'&airline=FedEx&fltnum='+t.fn.replace('FX','')+'&date='+(t.date||'');
     var sbUrl = sbUser ? 'https://dispatch.simbrief.com/options/custom?'+params+'&userid='+sbUser : '#';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--border)">'
       + '<div>'
@@ -4912,7 +5014,7 @@ function removeTrip(el){
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Flight Number</label>
-        <input class="form-input" id="pt-fn" placeholder="5X301" style="text-transform:uppercase">
+        <input class="form-input" id="pt-fn" placeholder="FX301" style="text-transform:uppercase">
       </div>
       <div class="form-group">
         <label class="form-label">Date</label>
@@ -4922,7 +5024,7 @@ function removeTrip(el){
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Origin</label>
-        <input class="form-input" id="pt-orig" placeholder="KSDF" style="text-transform:uppercase" maxlength="4">
+        <input class="form-input" id="pt-orig" placeholder="KMEM" style="text-transform:uppercase" maxlength="4">
       </div>
       <div class="form-group">
         <label class="form-label">Destination</label>
@@ -4933,12 +5035,12 @@ function removeTrip(el){
       <div class="form-group">
         <label class="form-label">Aircraft</label>
         <select class="form-select" id="pt-aircraft">
-          <option>Boeing 747-8F</option>
-          <option>Boeing 747-400F</option>
+          <option>Boeing 777F</option>
+          <option>Boeing 767-300F</option>
           <option>Boeing 767-300F</option>
           <option>Boeing 757-200F</option>
           <option>Airbus A300-600F</option>
-          <option>McDonnell Douglas MD-11F</option>
+          <option>Airbus A300-600F</option>
           <option>Boeing 727-200F</option>
           <option>Boeing 727-100F</option>
           <option>Douglas DC-8F</option>
@@ -4990,7 +5092,7 @@ function removeTrip(el){
       <div class="form-group">
         <label class="form-label">Home Base</label>
         <select class="form-select" id="ec-base">
-          <option>KSDF</option><option>EDDK</option><option>VHHH</option>
+          <option>KMEM</option><option>EDDK</option><option>VHHH</option>
           <option>KPHL</option><option>KONT</option><option>KMIA</option>
           <option>PANC</option><option>EGSS</option><option>KSEA</option>
           <option>KLAX</option><option>KORD</option><option>KJFK</option>
