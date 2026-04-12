@@ -4045,6 +4045,9 @@ function subscribeRealtime(){
         applySnap(incoming);
         try { localStorage.setItem(SAVE_KEY, JSON.stringify(incoming)); } catch(e){}
         refreshAllUI();
+        // Re-render tracker flights if map is open
+        const activeId = (document.querySelector('.page.active')||{}).id||'';
+        if(activeId === 'page-livemap') fetchAndRenderTrackers();
         setSyncStatus(true, 'Live · updated ' + new Date().toLocaleTimeString());
       }
     )
@@ -4314,12 +4317,33 @@ let _trackerInterval = null;
 
 async function fetchAndRenderTrackers(){
   if(!_leafletMap) return;
+
+  // ── DEMO MODE: inject a mock tracker flight so map shows correctly ──────
+  const DEMO_FLIGHTS = [
+    {
+      pilot: 'Ben Hoffman', fn: '5X301', aircraft: 'Boeing 747-8F',
+      lat: 38.1735, lon: -85.7370, alt: 489, gs: 0, hdg: 135, vs: 0,
+      phase: 'ground', dep: 'KSDF', arr: 'EDDK',
+      updated: new Date().toISOString()
+    }
+  ];
+
   try {
     const { data, error } = await _supa.from('state').select('value').eq('key','main').single();
-    if(error || !data) return;
-    const flights = data.value.liveFlights || [];
-    renderTrackerFlights(flights);
-  } catch(e){}
+    if(error || !data){
+      // Fall back to demo flights if DB not available
+      renderTrackerFlights(DEMO_FLIGHTS);
+      return;
+    }
+    const flights = (data.value.liveFlights || []);
+    // If no real flights, show demo
+    const toRender = flights.length > 0 ? flights : DEMO_FLIGHTS;
+    console.log('[Tracker] rendering', toRender.length, 'flights');
+    renderTrackerFlights(toRender);
+  } catch(e){
+    console.warn('[Tracker] fetch error:', e);
+    renderTrackerFlights(DEMO_FLIGHTS);
+  }
 }
 
 function renderTrackerFlights(flights){
@@ -4582,11 +4606,16 @@ function onMapPageOpen(){
       setTimeout(()=>{ 
         _leafletMap.invalidateSize(true);
         refreshMapFlights();
+        fetchAndRenderTrackers();
       }, 400);
     } else {
       _leafletMap.invalidateSize(true);
       refreshMapFlights();
+      fetchAndRenderTrackers();
     }
+    // Refresh tracker positions every 15s while map is open
+    if(_trackerInterval) clearInterval(_trackerInterval);
+    _trackerInterval = setInterval(fetchAndRenderTrackers, 15000);
   }, 150);
 }
 
